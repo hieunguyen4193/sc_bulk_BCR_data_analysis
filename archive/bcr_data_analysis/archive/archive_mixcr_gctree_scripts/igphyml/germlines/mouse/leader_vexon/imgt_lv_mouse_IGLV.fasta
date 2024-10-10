@@ -1,0 +1,785 @@
+>J00590|IGLV1*01|Mus_musculus_BALB/c|F|L-PART1+V-EXON|93..138+232..536|351 nt|1| | | | |351+0=351| | |
+atggcctggatttcacttatactctctctcctggctctcagctcaggggccatttcccag
+gctgttgtgactcaggaatctgcactcaccacatcacctggtgaaacagtcacactcact
+tgtcgctcaagtactggggctgttacaactagtaactatgccaactgggtccaagaaaaa
+ccagatcatttattcactggtctaataggtggtaccaacaaccgagctccaggtgttcct
+gccagattctcaggctccctgattggagacaaggctgccctcaccatcacaggggcacag
+actgaggatgaggcaatatatttctgtgctctatggtacagcaaccatttc
+>X58417|IGLV1*02|Mus_musculus_BALB/c|F|L-PART1+V-EXON|264..309+403..707|351 nt|1| | | | |351+0=351| | |
+atggcctggatttcacttatactctctctcctggctctcagctcaggggccatttcccag
+gctgttgtgactcaggaatctgcactcaccacatcacctggtgaaacagtcacactcact
+tgtcgctcaagtactggggctgctacaacaagtaactatgccaactgggtccaagaaaaa
+ccagatcatttattcactggtctaataggtggtaccaacaaccgagctccaggtgttcct
+gccagattctcaggctccctgattggagacaaggctgccctcaccatcacaggggcacag
+actgaggatgaggcaatatatttctgtgctctatggtacagcaaccatttc
+>J00599|IGLV2*01|Mus_musculus|F|L-PART1+V-EXON|82..127+221..525|351 nt|1| | | | |351+0=351| | |
+atggcctggacttcacttatactctctctcctggctctctgctcaggagccagttcccag
+gctgttgtgactcaggaatctgcactcaccacatcacctggtggaacagtcatactcact
+tgtcgctcaagtactggggctgttacaactagtaactatgccaactgggttcaagaaaaa
+ccagatcatttattcactggtctaataggtggtaccagcaaccgagctccaggtgttcct
+gtcagattctcaggctccctgattggagacaaggctgccctcaccatcacaggggcacag
+actgaggatgatgcaatgtatttctgtgctctatggtacagcacccatttc
+>X58412|IGLV2*02|Mus_musculus_BALB/c|F|L-PART1+V-EXON|148..193+287..591|351 nt|1| | | | |351+0=351| | |
+atggcctggacttcacttatactctctctcctggctctctgctcaggagccagttcccag
+gctgttgtgactcaggaatctgcactcaccacatcacctggtggaacagtcatactcact
+tgtcgctcaagtactggggctgttacaactagtaactatgccaactgggtccaagaaaaa
+ccagatcatttattcactggtctaataggtggtaccagcaaccgagctccaggtgttcct
+gtcagattctcaggctccctgattggagacaaggctgccctcaccatcacaggggcacag
+actgaggatgatgcaatgtatttctgtgctctatggtacagcacccatttc
+>M34597|IGLV3*01|Mus_musculus_BALB/c|F|L-PART1+V-EXON|59..104+209..532|370 nt|1| | | | |370+0=370| | |
+atggcctggactcctctcttcttcttctttgttcttcattgctcaggttctttctcccaa
+cttgtgctcactcagtcatcttcagcctctttctccctgggagcctcagcaaaactcacg
+tgcaccttgagtagtcagcacagtacgtacaccattgaatggtatcagcaacagccactc
+aagcctcctaagtatgtgatggagcttaagaaagatggaagccacagcacaggtgatggg
+attcctgatcgcttctctggatccagctctggtgctgatcgctaccttagcatttccaac
+atccagcctgaagatgaagcaatatacatctgtggtgtgggtgatacaattaaggaacaa
+tttgtgtaac
+>M17529|IGLV2*01|Mus spretus_SPE|F|L-PART1+V-EXON|150..195+289..593|351 nt|1| | | | |351+0=351| | |
+atggcctggacttcacttatactctctctcctggctctctgctcaggggccatttcccag
+gctgttgtgactcaggagtctgcactcaccacatcacctggtggtacagtcatactcact
+tgtcgctcaagtactggggctgttacaactagtaactatgccatttgggtccaagaaaaa
+acagatcatttattcgctggtgtaataggtgatacaagcaaccgagctccaggtgttcct
+gccagattctcaggctccctgattggagacaaggctgccctcaccatcacaggggcacag
+actgaggatgatgcaatgtatttctgtgctctatggtacagcaaccatttc
+>AF357988|IGLV3*01|Mus spretus_B6.lambdaSEG|F|L-PART1+V-EXON|26..71+175..494|366 nt|1| | | | |366+0=366| | |
+atggcctggactcctctcttcttcttcttccttcttcattgctcaggttctttctcccaa
+cctgtgctcactcagtcatcttcagcttctttctccctgggagcctcagcaaaactcacg
+tgcaccttgagtagtgagcacagtacgtacatcattgaatggtaccagcaacagccactc
+aagcctcctaagtatgtgatgcagcttaagaaagatggaagccacagcaagggtgatggg
+atccctgatcgcttctctggatccagctctggtgctgatcgctaccttagcatctccaac
+atccagcctgaagatgaagcaatatacatctgtggtgtagatgacaatattaggggacaa
+ttcgtg
+>IMGT000168|IGLV(I)-122*01|Mustela putorius furo|P|L-PART1+V-EXON|317357..317402+317517..317818|348 nt|1| | | | |348+0=348| | |
+ctgatctaggctccactcctacttaccccattccttctccgcacagggtctgtgactgaa
+cagggctgacagtcaccctcagtgtccatggctctaaacagatgatcacactcacctgca
+ttggaaacagcaacactgttggcaatgaaggagcaacttcactgtagaaacacccaggca
+acatctctaaagtcatgatcaacaggaagaacacccagccctcttgggtgcctgacaaag
+tctctgactccaggtcaggcagcctggcatctctgatcatctctgggctccaggccaaga
+taagggtgaagactcctgctcagggcgatatatcagctcagaggttaa
+>IMGT000131|IGLV(I)-67*01|Mustela putorius furo|P|L-PART1+V-EXON|492974..493019+492551..492860|356 nt|1| | | | |356+0=356| |rev-compl|
+atggatgggactctggtccttctcattgtcttccctcaggacaaatgttttacacccagt
+ctcccatgaccactttccctcagtgtctggatctctggagccgacaattaccatctcttg
+tgctgaaaactgtaatgacatagggaggtataattatatctcctggcaccaaaagcattc
+taacatgccccaccccaaaagctccgacttgtgatttcaatactcgcttatcagggatct
+ctcatcacttctgtggctccaagtctggcaacacagcttccctgaccatctctggggtct
+aggctgaggatgaggctgagtattaatgtttatcataggctgatagtggcactctc
+>IMGT000131|IGLV(I)-68*01|Mustela putorius furo|P|L-PART1+V-EXON|485781..485825+485928..486249|367 nt|1| | | | |367+0=367| | |
+atggccttggctccacatccctccccctcctcatttacagcacagggtcctgggccccgt
+ctgccctgacccagcctccctcccatgtgtgggactttgagacaaatcactgcatctctt
+acagtggaaacagcagccacactggaacttataaccctgtcttctggcaccaatgatgtc
+tggagcagccctcacactccagacagatgctgtgagctctctgccttcagggcttccagt
+tctattctcaggctccagggttgggaacacagcctccttgaccatctctggattgcagtc
+cgagagcgaggctgattttcactgattgttggaggacagccatagcatttatctgcaggg
+ctccaag
+>IMGT000168|IGLV(I)-87*01|Mustela putorius furo|P|L-PART1+V-EXON|960015..960060+960171..960479|355 nt|1| | | | |355+0=355| | |
+atgatctggccccctctcctcctcacccacctcactcactgcacagggtcctgaaaccag
+tctgctgactcagctgccttcagtcagaatttcaccatctcctatgttagaagctccaac
+actagggtggtttggtataagtaggtaccaacagctcctaggaatgacccacaaactcct
+catctattatgatggtggcagtccctctggggccacaggtcggttctctggttctgggtc
+tgtcaactcagcctcctgactatcattgggctccaggctgaggctgaagaggattatgtt
+ttatgaatatgattgttactcccagtcctttgacagtaatagccactctgattaa
+>IMGT000131|IGLV(II)-44*01|Mustela putorius furo|P|L-PART1+V-EXON|845756..845800+846208..846363|201 nt|1| | | | |201+0=201|partial in 3'| |
+atggccaagatccttattctcttcagtatcctgctcacagcacagctctgaggtctcttg
+tgtagtgactcagtccccatctgtgcaggtcaccctgagtcagacagccaggatcatctg
+tggggaaacaacactggaagaagtaaacatattcataggtaccagaagaggccagtcaaa
+gaccccatgctgatcatctat
+>IMGT000168|IGLV(IV)-105*01|Mustela putorius furo|P|L-PART1+V-EXON|571726..571771+571881..572206|372 nt|1| | | | |372+0=372| | |
+atggcctggaaagcagtcctccctgtttttctttctcatggcacaggtcacctctctcag
+cctgtgctgacacaggtgcactccctctctgaatttctcaaaaaaacggatagactcacc
+tacacccagagtagcggcttcagtgttgggggattctatatcatctgacgtgagcagaag
+ccagggagctcttcttggaggctcctatacaattaatcggactcagagtagctccagggc
+tctgggatccccagccacatctctggctaaaaagaggtcttggcccatgtagggcttctg
+ctcatctctgggctgcagcctgtggacgaggctgtctctttttgtgatattttccaaggc
+agctgttatatg
+>IMGT000168|IGLV(IV)-113*01|Mustela putorius furo|P|L-PART1+V-EXON|497131..497176+497296..497606|357 nt|1| | | | |357+0=357| | |
+atggcttggactcttttcctcttcatgttcttgagtcaatgcataggtttcttgtcccaa
+tctgtgctgacccagctgccctccctctcaggattgctggcaacaacagccagacttgcc
+taaatccttgaacagtagtttcagtgttgaaagctataccataagcttgttctactttaa
+gccagttaacctccctggtatatcattgactcacatacttaccaaggctctggagtcagt
+agctgtttctctggataaaaagatgccttagctaatgcagggtttctgctcaactctggg
+ctccattctgaagttgaagttaactattagtttgctctatatcactaaaatgagagc
+>IMGT000168|IGLV(IV)-115*01|Mustela putorius furo|P|L-PART1+V-EXON|438580..438622+438733..438930|241 nt|1| | | | |241+0=241|partial in 3'| |
+acgtccaggactcctttcctcctcttgatctctctctgctcagtctatctgtcccagcct
+gtgctgatccagccaccctccttcagggcatctctaggaacaatagtcagactcatccgc
+actctgaacagggacatcagtacggcagctatatgatgtactgatatcagcaatagccag
+ggagccctcccaggtttttcctgtactaatactcagtcacagacaagaagtggggacctg
+g
+>IMGT000168|IGLV1-102*01|Mustela putorius furo|P|L-PART1+V-EXON|590525..590570+590683..590990|354 nt|1| | | | |354+0=354| | |
+atggcctatttacatctgctcctcagcctcctcactcactgcataggccctgggtccagt
+ctgtgctcactcacctccctccatgtctggggccctggggcagacggtcaccgtctcctg
+tactggaagcagcaccaacattagtattggtacttatatgttctgataccaacaactccc
+aggaacagctctcagagccatcatctatgaaaacagcagaagaccctcaggggtcccaga
+ttgattctctggttccaagtcttgcagcttaacctccctgaccatcactatgctccaggc
+tgaggatgaagctgagttttacctcttaacatgggacaacagccttagtgttga
+>IMGT000168|IGLV1-103*01|Mustela putorius furo|P|L-PART1+V-EXON|579773..579818+579930..580238|355 nt|1| | | | |355+0=355| | |
+atggcgtggtcccctctcttccttaccgtctttgctcactgaacagggtcctgggcccag
+tctgtgctgactcagccaatttctgtgtcccaggccttgggctagagggtctcaatctcc
+tgcgctggaagcagctccaacatctgggatggttatgttgtgaactggtaccaacagctc
+ccaggaacagcacccaggtccataatctatgctaatagcattcaaccctcaggggtcccc
+cagctattctctggctccaagcctggcagctcagccacctgaccatcactggggcccaag
+gtgaggataaggctgattattattgacagttctatgacaatagtatcaatggtca
+>IMGT000168|IGLV1-112*01|Mustela putorius furo|F|L-PART1+V-EXON|501446..501491+501610..501919|356 nt|1| | | | |356+0=356| | |
+atggcctggtatactctcctcttcaccctccttgctcactgcacagcatcctgggcccag
+tctgtgctgactcagccatcctcactgtctgggtctcttggccagagagtcaccatctcc
+tgcactggaggcagcaccaacattggtgatggttatagtgtgtactggtaccaacagcat
+cagggaaaggcccctaaaacaatcatctatggtactagctctagaccctcaggggtccct
+gaacggttttctggctctagatctggcaacactggctccctcaccatcactggactcaag
+actgaggatgaagctgattattactgctcatcatgggacaagagtctcagtggtca
+>IMGT000168|IGLV1-116*01|Mustela putorius furo|F|L-PART1+V-EXON|434236..434281+434394..434700|353 nt|1| | | | |353+0=353| | |
+atggcctggtcccctctcctcctcacactcctcattcactgcacagggtcctggtcccag
+tctgtgctgactcagccaccctctgtgtctgggaccctgggccagagggtcaccatctcc
+tgcactggaagcagcaacaatattggagattatggtgtaacctggcaacaacagctccca
+ggaacagcccccagaaccattatctatgctaatacctatcgaccttcaggggttccagat
+agattctctggctcccaatctggcagcgatgctaccctgaccatcactgggctccaacct
+gaggatgaggccgagtattactgtgcaacatgggacaatagtctcagagctca
+>IMGT000168|IGLV1-120*01|Mustela putorius furo|P|L-PART1+V-EXON|326271..326316+326430..326752|369 nt|1| | | | |369+0=369| | |
+ttggcctgatcccctctcctcctcagcttcctcattaactgcacagggtcctaggtccag
+tctgtgctgactcagctatcctcagtgtctggggctcttgggcagaaggtcaccatttcc
+tgcactggaatccccaccaacatagggtttcatggaatggaatatcaaccttatgtgcac
+tggtaccagcagctccccggaaaggacccagactcctcatctatgaggatgataccagag
+actcgggggttcctgatctattctctggttacatgtcaggcagctcagactccctgacca
+tcactgggctccaggcttaggaaaaggcttattattactgccagtcttaatgctcacaca
+gtgttccag
+>IMGT000168|IGLV1-125*01|Mustela putorius furo|P|L-PART1+V-EXON|303519..303564+303693..303983|337 nt|1| | | | |337+0=337| | |
+atggcctgaacccttctcttcatcacccccctcactctctgctctgggtcccgggcacag
+tctgccctgacccatgtcggggtctgtgggacagagggtcaccctcacctgactggaaac
+agcaacaatgttggacatgttatgtggactggtaccaatggatttctcatggtttgccca
+aaattgtggtgctgggaaccactaggccttcaggaagccccgctctgttctctgggtctg
+acactggggatgtagcctctctgaccgtctctgacctgcagcctgagaacgaggctgatg
+attactgctcagcatgggatgacgtcaacaaggacac
+>IMGT000168|IGLV1-129*01|Mustela putorius furo|P|L-PART1+V-EXON|276406..276451+276591..276904|360 nt|1| | | | |360+0=360| | |
+atggccaggacccttctcttgatcaccctcctcactctctgctcagggccctgggcacag
+tctgcactgatacaggaagcctccatgtcagggtctgtgggacagaaggtcactctcacc
+tgcactgtgaccagcactgggaacctcaacaatgttggagcacgttttgtgggccggtac
+caacagacttctcacagtgccacaaaactgtgatgctcagaaccactagccctcagggtt
+cccagcttgattctctggctcccactctgggaacatggcctttctgaccatctctatcct
+gtagcctgaagctgaggttgattattactgctcagcatgggaccacagcatcaacaagga
+>IMGT000131|IGLV1-73*01|Mustela putorius furo|ORF|L-PART1+V-EXON|301988..302033+302146..302464|365 nt|1| | | | |365+0=365| | |
+atggcctggtcccctgtactcctcaccctcctcattcagtgcacaggatcctgggctgtg
+ctgactcagcctccctatgtgtctggggccctaggtgagagtgtcaccatctcctgcact
+ggaatccccaccagcatagattatgatgaagaggaatacacatataatgtgaactggtac
+caacagctccaaggaaaggtacccattctactcatctatggagataataacagaaatcct
+ggagtccctgatcgattctctggttccaagtcaggcagctcagcctccctgaccatcagt
+ggccttcaggctgaagatgaggctgattattactgccagtccactgacagtagcttcagt
+gctca
+>IMGT000131|IGLV1-75*01|Mustela putorius furo|P|L-PART1+V-EXON|236862..236907+237070..237373|350 nt|1| | | | |350+0=350| | |
+atggcctggtcccttctcctcctcaaattcctcattcacttcacaatgtcatggccaagt
+ctgtgctgagtcagccactttcagtgtctgggtccctgggtcagaggatcaccatcttct
+gcactggaagaagttccaacattggtggctattaagtgtactggtattaattcccggaaa
+caacccccagaaacctcatccatgatgaaaacaatcgaccctcagggattccctgatcac
+ttctctggctccaactctggcaactcagcctccctgactatcaatgggctccaggctgag
+gatgaagctgagtattactgctcagcatgagacagcagccttagtaccaa
+>IMGT000131|IGLV1-79*01|Mustela putorius furo|F|L-PART1+V-EXON|150107..150152+150285..150588|350 nt|1| | | | |350+0=350| | |
+atggcctggagccttttcttcatcaccctcctgactctctgctcaggatcctgggcacag
+tcttccctcacacaagaagcctccttgtcagcgtctgtgggacaggaggtcacactcaac
+tgcgctggaaatgacaacaatgttggagcatattatgtgggctggtaccaacaggtttct
+ggtggtgccccaaaaacagttatgcttggaaccactaggccctcagggatcccagaccga
+ttctctggctctcactctgggaacaaagcctctctgatcatctcaaacctgtggcctgaa
+gacgaagctgattattactgctcaacctgggacaaaggcatcaacaatta
+>IMGT000131|IGLV1-82*01|Mustela putorius furo|P|L-PART1+V-EXON|44818..44863+44976..45279|350 nt|1| | | | |350+0=350| | |
+atggcctggtactttctcctcctcacactactcattcacttcacaagatcatggcccagt
+ctatgctgactcagccaccctcagtgtctgggtccctgggccagaagaacaccatcccct
+gcactggggacagctccaacattggtggttattatgtgtactggtatcaattcccggaaa
+cagcccccagaaacctcatccatgataatagcaatccaccctcagggattccctaattac
+ttctctggctccaaccctggcagcccagcctccctgaccatcactgggattcaggctgag
+gatgaagctgagtcttactgctcaacacgagatagcagtcttagtactga
+>IMGT000168|IGLV1-88*01|Mustela putorius furo|F|L-PART1+V-EXON|948383..948440+948552..948861|368 nt|1| | | | |368+0=368| | |
+atggccttcatcatagctttgtcctctctcctcctcacccttctggctcactgtacaggg
+tcttcggcccagtctatgctgactcagccaccctctgtgtctggggccctgggacagagg
+gtcaccatctcctgcactggaagcagctccaatattgggagtggtaattatgtgtactgg
+taccaacaacttccaggaataacccccaaactcatcatctatggtagtagcaaccgaccc
+tctggtgtcccagatcgattctctggctccaggtctggcagctcaggcaccctgaccatc
+actgggctccacactgaggatgaggctgattattactgctcagcatgggatgacagtctg
+aatgctca
+>IMGT000131|IGLV2-66*01|Mustela putorius furo|P|L-PART1+V-EXON|499657..499702+499816..500122|353 nt|1| | | | |353+0=353| | |
+atggtctggactctggactgactcgccctcctcactcagggcacaggttcctgggcccag
+tctgcctgactcagcctccttcagtgttcagggttctgggatagaccatcaccatctctt
+gtgctggaagcagcagtaacattgggggttaaaattatgtttcctgattccaacagatcc
+caggcacatcccccaaactcctgacttatagtgtaaattctcagctgtcagggatccctg
+atagcttcttgggctccaggaatagcaacatagccttcctgaccatctctgggctccagg
+ctgaagattaggctgactattattattgttcatatataaccagtaacatgtac
+>IMGT000131|IGLV3-1*01|Mustela putorius furo|F|L-PART1+V-EXON|1388295..1388340+1388661..1388956|342 nt|1| | | | |342+0=342| | |
+atggtctggacccctctcctcctcagccttcttgctcactgcacaggttccacagtcgct
+tatgagctgactcaggactcctcggtgtcagtgaacctgggacagacggccaggatcacg
+tgtcggggagacaacattggtagtaaatatgcttactggtaccagcagaagccaagccag
+gcccctctgctaattatctatggtgatagcaaccggccctcagggatccctgagcgattc
+tcaggaacgaactcggggaacacggccaccctgaccatcagcggtgcccaggctgaggat
+gaggctgactattactgtcaggtgtgggacagtggtaatgct
+>IMGT000131|IGLV3-10*01|Mustela putorius furo|P|L-PART1+V-EXON|1292844..1292889+1293045..1293343|345 nt|1| | | | |345+0=345| | |
+atggcctggacccatttcctgctccccatcataactctctgcacatgttccgtggcctcc
+agtgggctgactcagccacgttctgtgtcagtgacccagggacagacagctacaatcacc
+tgctatggagatgtagtgggaaaaagatatgcatattggtaccagcagaagccaagacaa
+gctcctgtgcttgtgattaataaaaataatgagcgaccgtgagagatctctgaccggttc
+tcagcctctaaatcaagaaacacggctatcctgaccatcagcgggactcgagatgaggat
+gaggctgactactattgtcagtcctacgacagcagtggtaatgct
+>IMGT000131|IGLV3-11*01|Mustela putorius furo|ORF|L-PART1+V-EXON|1286796..1286841+1287224..1287522|345 nt|1| | | | |345+0=345| | |
+atgacctggacccctctcctcctcagattcctggctcactgcacagattccatggcctcc
+tgtgtgctgactcagcctcccttgatgtcactgaactggggacagatggtcaggatcacc
+tatgggggaaacaacattggaagtaaaagtgtttactgttaccagcagaagctgggccag
+gctcctgtgctgatcatctattatagcaacagacagccctcaaggattcctgagcaattt
+tcaggcaccaactcgggaaacacggccaccctgaccatcagtgggtcccaggctgaggat
+gaggttgactattactctcaggtgtcacacacctacaatgatcct
+>IMGT000131|IGLV3-13*01|Mustela putorius furo|ORF|L-PART1+V-EXON|1276483..1276528+1276687..1276981|341 nt|1| | | | |341+0=341| | |
+atggcctggagccctctctcactcctcgtcctcactctctgcacaggctctgtgaccagt
+gaactgactcagcctccctcagtgtcagctgccctgggtcagaccgctacaatcacctgc
+actggagaggaagtagaatatatttatgtctactggtaccatcagaagccaggccaagcc
+cctctgacggtcacttacgatgatagtgatcagccttcagggatcccagagaaattctct
+ggctccaagtcagggaacacggccaccctgaccatcagcagcgcacaggccaaggacgag
+gctgactattactgtcagtccttgacagcagtggtaatgct
+>IMGT000131|IGLV3-14*01|Mustela putorius furo|F|L-PART1+V-EXON|1266953..1266998+1267382..1267680|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctctcctcctcggagtcctggctcactgcacaggctccatggcctca
+tatgtgctgactcaaccaccctcactatcggtgaacctggaacagacggccaagatcaca
+tgtgggggaaacaacattgggggtaaaagtgttcactggtaccagcagaagccagcacag
+gtccctgtgctgattatctataatgataaaaaccggccctcagggatccctgaccggttc
+tcaggcaccaactcggggaacacagccaccctgaccatcagcggcacccgcgctgaggac
+gaggctgactattactgtcaggtgtgggacagtggtactaatgct
+>IMGT000131|IGLV3-16*01|Mustela putorius furo|P|L-PART1+V-EXON|1253677..1253722+1253878..1254176|345 nt|1| | | | |345+0=345| | |
+atggcctggacccttttcctgctccccatcatcactctctgcacaggttccgtggcctcc
+agtgggctgactcagctgccctctatgtgggtgacccagggacagacggctacaatcacc
+tgctctggagatgtactagggaaaagatatgcatattggtaccagcagaagccaagacaa
+gctcctgtgcttgtgattaatacaaataatgacagaccatcagagatctctgaccggtgt
+tcagcctctaaatcaggaagcatggccaccctgaccatcagcaggacttgagatgaggat
+gaggctgactactattgtcagtcctatgacagctgtggtaatgct
+>IMGT000131|IGLV3-17*01|Mustela putorius furo|F|L-PART1+V-EXON|1242000..1242045+1241552..1241850|345 nt|1| | | | |345+0=345| |rev-compl|
+atggcctggacccctctttcactccttgtcctcactctctgcacgggctccgtggtctcc
+agtgagctgactcagacgccctttgtgtcagtggccccgggacagaccgctacaatcacc
+tgctctggagaagaactggactatggttatgtacaatggtaccaacagaagccagggcaa
+gcccctctgatggtaatttatttggataatgagcgggcctctgggatcccagagcgattc
+tctggctccaagtcagggaacacggccaccctcactatcagcagcgtacaggccgaggac
+gaggctgactatttctgtcagtcctatgacagcagtggtaatgct
+>IMGT000131|IGLV3-17D*01|Mustela putorius furo|F|L-PART1+V-EXON|1126514..1126559+1126709..1127007|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctctttcactccttgtcctcactctctgcacgggctccgtggtctcc
+agtgagctgactcagacgccctttgtgtcagtggccccgggacagaccgctacaatcacc
+tgctctggagaagaactggactatggttatgtacaatggtaccaacagaagccagggcaa
+gcccctctgatggtaatttatttggataatgagcgggcctctgggatcccagagcgattc
+tctggctccaagtcagggaacacggccaccctcactatcagcagcgtacaggccgaggac
+gaggctgactatttctgtcagtcctatgacagcagtggtaatgct
+>IMGT000131|IGLV3-18*01|Mustela putorius furo|F|L-PART1+V-EXON|1235987..1236032+1235304..1235602|345 nt|1| | | | |345+0=345| |rev-compl|
+atggcctggacccctctcctcctcggattcctggctcactgggcaggatccatggcctcc
+tatgtgctgactcagcctccctcgatgtcagtgaacctgggacagacggtcaggatgact
+tgtgggggaaacaacattggaagaaaaagtgttccgtggtaccagcagaagccaggtctg
+gcccctgtgatgattatctacggtgatagcagccggccctcagggatccctgaccggttc
+tcaggcaccaactcggggaacacagccaccctgaccatcagcggggtccgggctgaggac
+gaggctgactattactgtcaggtatgggacaacagtgctgatgct
+>IMGT000131|IGLV3-18D*01|Mustela putorius furo|F|L-PART1+V-EXON|1132524..1132569+1132954..1133252|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctctcctcctcggattcctggctcactgggcaggatccatggcctcc
+tatgtgctgactcagcctccctcgatgtcagtgaacctgggacagacggtcaggatgact
+tgtgggggaaacaacattggaagaaaaagtgttccgtggtaccagcagaagccaggtctg
+gcccctgtgatgattatctacggtgatagcagccggccctcagggatccctgaccggttc
+tcaggcaccaactcggggaacacagccaccctgaccatcagcggggtccgggctgaggac
+gaggctgactattactgtcaggtatgggacaacagtgctgatgct
+>IMGT000131|IGLV3-2*01|Mustela putorius furo|P|L-PART1+V-EXON|1384255..1384300+1384454..1384751|344 nt|1| | | | |344+0=344| | |
+atggccttcacccctcttctgctccccatcctcactctctgcacaggctccatggcctcc
+agtgctctggttcagcctccctcggtgtccgtgtccctgggacagacggctactatcacc
+tgctctggagaagcactgaacgaatactatacacaatggtaccagcaaaagccaggcgca
+acacccaagctggtcatttataaggacactgaacggccctcagggatccctgaccgattc
+tctggctccagttcagggaacacaaacaccctgatcatcagcggggcccgggccgaggat
+gggctgattattactgtcagtcatcagaggaaactggtactgct
+>IMGT000131|IGLV3-20*01|Mustela putorius furo|F|L-PART1+V-EXON|1205919..1205964+1205465..1205763|345 nt|1| | | | |345+0=345| |rev-compl|
+atggcctggacccttttcctgctccccatcatcactctctgcacaggttccatggcctcc
+agtgggctgactcagccgccctctgtgtcggtgacccagggacagacagctacaatcacc
+tgctctggagatgtactggggaaaagatacgcatattggtaccaacagaagccaagacaa
+gctcctgtgcttgtgattaataaaaataatgagcgaccctcagggatctctgaccggttc
+tcagcttctaaatcaggaaacacggccaccctgaccatcagcgggactcgagatgaggat
+gaggctgactactattgtcagtcctacgacagcagtggtaatgct
+>IMGT000131|IGLV3-20D*01|Mustela putorius furo|F|L-PART1+V-EXON|1162410..1162455+1162611..1162909|345 nt|1| | | | |345+0=345| | |
+atggcctggacccttttcctgctccccatcatcactctctgcacaggttccatggcctcc
+agtgggctgactcagccgccctctgtgtcggtgacccagggacagacagctacaatcacc
+tgctctggagatgtactggggaaaagatacgcatattggtaccaacagaagccaagacaa
+gctcctgtgcttgtgattaataaaaataatgagcgaccctcagggatctctgaccggttc
+tcagcttctaaatcaggaaacacggccaccctgaccatcagcgggactcgagatgaggat
+gaggctgactactattgtcagtcctacgacagcagtggtaatgct
+>IMGT000131|IGLV3-22*01|Mustela putorius furo|F|L-PART1+V-EXON|1185684..1185729+1186114..1186412|345 nt|1| | | | |345+0=345| | |
+atggcctcgacccctctcctcctcggaatcctggctcactgcacaggctccatggcctca
+tatgtgctgactcaaccaccctcactatcggtgaacctgggacagacggccaagatcacg
+tgtgggggagacaacattgggtgtgaaaatgctcactggtaccagcagaagccaggtcag
+gcacctgtgctgattatctatactgataaaaaccagccttcagggatccctgaccggttc
+tcaggctccaactcggggaatacagccaccctgaccatcagcagggcccatgctaaggat
+gaatctgactattactgtcaggtgtgggacagcagtgctaatgct
+>IMGT000131|IGLV3-27*01|Mustela putorius furo|P|L-PART1+V-EXON|1062912..1062956+1063111..1063405|340 nt|1| | | | |340+0=340| | |
+atggactggacccctctcctgctccctgtcctcactctctgcacggctccatggcctcca
+gtgtgctgactcagcctccctctgtgtcagtgtccctaggacagatggctaccatcacct
+gctctggagagatactgagcaaagaatatacacaatggtaccagaagaagccaggccaat
+cacccaagttggtcatttataaggacactgagcatccctctgggatccctgatcatttct
+ctggctccggttcagggaacacacataccctgaccatcagtggggcccaggcggaggatg
+aggctattactgtcagtcattcgatctcagtgctgatgct
+>IMGT000131|IGLV3-29*01|Mustela putorius furo|F|L-PART1+V-EXON|1046236..1046281+1046649..1046950|348 nt|1| | | | |348+0=348| | |
+atggcctggacccctctcctcttcggattcctggctcactgcacaggttctgtggctgcc
+tacgtgctgactcagcctccctcaatgtcggtgaacctgggacggacggccagcatcacc
+tgcagtggagacaacattggaagtacatatgtttcctggaaccaacagaagccgggccag
+gcaccagtgacaattatctatagtgatagcagccggccctcaggaatccctgacaggttc
+tctggctccaactcggggaacatggccaccctgaccatcagcggggcccgggctgaggat
+gaggctgactattactgtgcatcatatgacagtagtagggatactgct
+>IMGT000131|IGLV3-3*01|Mustela putorius furo|P|L-PART1+V-EXON|1379220..1379264+1379633..1379933|346 nt|1| | | | |346+0=346| | |
+atggcctggacccctctcctcctggattcctggctcactgcacaggttcttttactgcct
+atgtgctgactcagcaccttcagtgtcagtgaacctgggacagatggccagcatcacctg
+tgggggagacaacattggaagtacgtatgtttcctggcaccaacagaagccgggccaggc
+acccatgacaattatctatactgacggtggccggccctcgggggtccctgacaggttctc
+tggctccagttcagggaacatggccacactgaccatcagtggggcttgggctgaggacga
+ggctgactattactttctatcatataagggtggtagcgataatgct
+>IMGT000131|IGLV3-31*01|Mustela putorius furo|P|L-PART1+V-EXON|1036721..1036766+1036928..1037226|345 nt|1| | | | |345+0=345| | |
+atggcctggagcactctttcactcctcctcatcactctctgcacagcctccagtgcctcc
+agtgagctgactcagccttcctcagtgtcaattgccttgggtcagacggctacaatcacc
+cgcactggagaggaactggactatgattatgtacactggtacttgtagaagccaggccaa
+gctcctttgacagtcatttatgtttatagtgagtgaccctctgggatcccagagcaattc
+tctggctccaagtcagagaacacggccaccctgaccatcaggagagcacaggctgagaat
+gaggctgactattactgtcagtactatggtggcagtagtactatt
+>IMGT000131|IGLV3-33*01|Mustela putorius furo|F|L-PART1+V-EXON|1024324..1024366+1024719..1025017|342 nt|1| | | | |342+0=342| | |
+atggcctgggccccactccttgttttcctggctcactgcacaggctccatggcctcatat
+gtgctgactcaaccaccctcaatatcggtgaacctgggacagacggccaagatcacatgt
+gagggaaacaacattggaagaaaaagtatttactggtaccagcagaagctggaccagtcc
+cccgtattgattatctataggaatagcaaccggccctcagggatccctgaccggttctca
+ggcaccaactcgggaaacatggccaccctgaccatcagcggagcctgtgctgaggacgag
+gctgactattactgtcaggtgtgggacaacaatagtaatgct
+>IMGT000131|IGLV3-35*01|Mustela putorius furo|P|L-PART1+V-EXON|973680..973725+974092..974390|345 nt|1| | | | |345+0=345| | |
+atggcctggaccactctcctcctaggccttcttgctcacttcacagcttctttggcttcc
+tatgtgctgactcagcctccatctatgtcggtggccctgggacagacagcccaggtcacc
+tgtgggggaaacaacattggaaataaaaatgtttactggtaccagcagaagtcaggccag
+agtcctgtgatgatcatctattctagcagcagcaggccctcagggatccctgagtgattc
+tcaggcaccaactctgggaacacggccaccctgaccatcagtggggcccaggccgaggac
+gaggctgactattactgtcagtcctatgatagcagtggtaatact
+>IMGT000131|IGLV3-36*01|Mustela putorius furo|F|L-PART1+V-EXON|963614..963659+963816..964111|342 nt|1| | | | |342+0=342| | |
+atggcctggaaccctctctcactcctcttcctcactttctgcacaggctccatggtctcc
+agtgagctgacacagctgccctcagtgtcagtggccctgggtcagacggctacaatcacc
+tgcactggagaggaactggactatactgtgcagtggtaccagaagaagccaggccaagcc
+cctttgacaatcatttatgatgagagcgagaggccctcagggatcccagagcgattctct
+ggctccagatcggggaacacagccaccctgaccatcagtggggtccaggctgaggatgag
+gctgactattactgtcagtcctatgacagcaatgctgatgct
+>IMGT000131|IGLV3-37*01|Mustela putorius furo|P|L-PART1+V-EXON|949594..949631+949999..950297|337 nt|1| | | | |337+0=337| | |
+atgacctggacccctctcctcctttgctcactgcacaggctctatggcctcctacatgct
+gactcagcccccatctgtgtcagtggccctgggacagatggcccaggtcacctgtggggg
+aaacaacattggaagtaaacacgtttactggtaccagcagcagcaaggccagcctccttt
+actgattatctatcatagcaacagatggccctcagggatccctgagtgattctcaggcac
+caactcagggaacacagccaatgtgcccatcagctgggtccaggctgaggatgaggctga
+ctattactgtcagatgtgggacagcagtgctgatgct
+>IMGT000131|IGLV3-38*01|Mustela putorius furo|F|L-PART1+V-EXON|945614..945659+945813..946111|345 nt|1| | | | |345+0=345| | |
+atggcctggagccctctgtcacttctcatcctcactctctgtacaggctctgtgacctcc
+agtgaactgactcagcctccctcagtgtcagttgccctgggtcagacggctacagtcacc
+tgcactggaggggagttagagtatttttatgtacactggtaccagcagaagccaggccaa
+gcccctttgacaatcatttatggtgataaggagaggccctcagggatcccagagcgattc
+tctggctccaagtcggggagcacggctaccctgaccatcagcagcgcacaggctgaggac
+gaggctgactattactgtcagtcctttgacatcagtagcaaagct
+>IMGT000131|IGLV3-39*01|Mustela putorius furo|F|L-PART1+V-EXON|938702..938747+938905..939203|345 nt|1| | | | |345+0=345| | |
+atggactggatccctctcctactccccgtcctcactctctgcacaggctctatggcctcc
+agtgtgttgactcagcctcattcagtgtcagtgtccctgggacagatggctaccatcagc
+tgctctggagagatattgtcaggaagttatgcatattggtaccagaagaagccaggccaa
+ccccctgtgcaggtcatttataaggacactgagcgtccttctgggatcccggaccgattc
+tctggctccagttctggcaccacacacaccctgaccatcaacggggcccaggccgaggat
+gaggctgactattactgccagtcatcatatagcagtggtcaagct
+>IMGT000131|IGLV3-4*01|Mustela putorius furo|P|L-PART1+V-EXON|1356599..1356643+1356818..1357083|311 nt|1| | | | |311+0=311| | |
+atggcctggaccctcactcactcctcgttctcactctctgtacaggtctctgggcagtgg
+ccctgggacagacagctacaatcacctgcactggagaggaaatggactatgattatgtac
+actggtaccagcagaagccagggcaagcccctttgatggtcatttatgcagatagtgagc
+ggccctctgggatcccagagtgattctctggctccaagtcaggcaacatggccaccctga
+ccatcagcatgtcacaggccgaggacaaggctgactattactgtcattcctatgacagca
+gcagtaatgct
+>IMGT000131|IGLV3-41*01|Mustela putorius furo|F|L-PART1+V-EXON|907731..907776+908152..908453|348 nt|1| | | | |348+0=348| | |
+atggcctggtcccctcttctccttggattcctggctcactgcacaggttttgtggctgcc
+tatgagctgactcagcctcccttaatgtcggtgaacctgggacggacggccagcatcacc
+tgcagtagagacaacattggaaatacatatgtttcctggtaccaacagaagctgggcaag
+gcacccatgatgattatctatagtggtagcaaccggccctcagggatcccagaccggttc
+tctggctccaattcagggaacacggccaccctgaccatcagcggggctcaggcagaggac
+gaggctgactattactgtttatcatataagagtggtagtggtaatgat
+>IMGT000131|IGLV3-45*01|Mustela putorius furo|F|L-PART1+V-EXON|835571..835616+835984..836282|345 nt|1| | | | |345+0=345| | |
+atggcctggactcctctccttcttggcctccttgctcattgcacaggttctgtggcctcc
+tatgtgctgactcagcctccatctgtgtcagtggctctgggacagacagcccaggttacc
+tgcgggggaaacaacattggaaataaatttgttcactggtaccagcagaagccgggccag
+gctcctgtgctgatcatctataacagcaacaaacggccctcagggattcctgagcgattt
+tcaggcaccaaatctgggaacacggccaccctgaccatcagtgggtcccgggctgaggat
+gaggctgactattactgtcaggtgtgggatagaagttctgatgct
+>IMGT000131|IGLV3-46*01|Mustela putorius furo|F|L-PART1+V-EXON|822894..822939+823093..823391|345 nt|1| | | | |345+0=345| | |
+atggcctggagccctctgtcacttctcatcctcactctctgtacaggctctgtgacctcc
+agtgaactgactcagcctccctcagtgtcagttgccctgggtcagacggctacagtcacc
+tgcactggaggggaattagagtatttttatgtacactggtaccagcagaagccaggccaa
+gcccctttgacaatcatttatggtgataaggagaggccctcagggatcccagagcgattc
+tctggctccaagtcggggagcacggccaccctgaccatcagcagcgcacaggctgaggac
+gaggctgactattactgtcagtcctttgacaccagtgttaatgct
+>IMGT000131|IGLV3-47*01|Mustela putorius furo|F|L-PART1+V-EXON|814602..814647+814767..815065|345 nt|1| | | | |345+0=345| | |
+atgtactggatccctctcctactccccgtcctcactctatgcacaggctccatggcctcc
+agtgtgttgactcagcctcatttggtgtcagtgtccctgggagagacagctaccatcacc
+tgctctggggaagtactgagcaagtactatgcacaatggtaccagcagaaggcaggtcaa
+gcccccaagcaggtcatttataaggacactgagcgtccttctgggatccctgaccgattc
+tctggttccagttcagggaccacacacaccctgaccatcaacagggtccaggctgaggat
+gaggctgactattactgtcagtcatcagatagcagtgataaagct
+>IMGT000131|IGLV3-49*01|Mustela putorius furo|F|L-PART1+V-EXON|770856..770901+771222..771520|345 nt|1| | | | |345+0=345| | |
+atggcctggacgcctctcctccttggcctccttgctcactgcacaggttctatggcctcc
+tatgtgctgacacagcccccatctgtgtcggtggccctggggcagacggcccaggtcaca
+tgtacgggaaacaacattggaagtaaacatgtttactggtaccagcagcagccaggccat
+atccctgtgctgatcatctataatagcaacaaacggccctcagggactcctgagcgattt
+tcaggcaccggctctgggaacacggccaccctgaccatcagtggggcccaggctgaggac
+gaggctgactattactgtcatatgttggatagcagtgctgattct
+>IMGT000131|IGLV3-50*01|Mustela putorius furo|F|L-PART1+V-EXON|764700..764745+765113..765417|351 nt|1| | | | |351+0=351| | |
+atggcctggacacctctcctccttggattcctggctcactgcacaggttctatgtctgcc
+tacgtgctgactcagcctccctcaatgtcggtgaacctgggacagatggccagcatcacc
+tgcagtggagacaacattggaggaatatatgtttcctggcaacaactgaagttgggacag
+acacccatgacaattatatatagtgatagcaaccagccctcaggaatccctgacaggttc
+tctggctccaactcagggaacatggccaccctgaccatcagcggggcccaggctgaagat
+gaggctattactgactattactgtgcatatgacagtagtagggatactgct
+>IMGT000131|IGLV3-53*01|Mustela putorius furo|P|L-PART1+V-EXON|737816..737858+737997..738293|340 nt|1| | | | |340+0=340| | |
+acagcctggactcctctcctgttccccctccttctctgcacaggttctgtggccacttct
+gcactgacacaactgcctgtggtgtccattgccttgggagagatgaccagtattatattc
+caaggagacagcttaggaagcagtttggctaaccagtaccagcaaaaaccaggcaaagcc
+cccatgctgatcatatatgaagaaaacaacctgcattcagggatccatgaccgatttttt
+ggctccaacatgggggatgccaccaccctgaccatcagtgggcccaggccaaggatgagg
+ctgactattagtgccaatcatatgactacatggtgatgct
+>IMGT000131|IGLV3-56*01|Mustela putorius furo|F|L-PART1+V-EXON|652892..652937+653305..653603|345 nt|1| | | | |345+0=345| | |
+atggcctggactcctctccttcttggcctccttgctcactgcacaggttctgtggcctcc
+tatgtgctgactcagcccccatctgtgtcagtggctctgggaaagacagcccaggtcacc
+tgtgggggaaacaacattggaaataaatatgttcactggtaccagcagaaggcaggccag
+gctcctgtgctgatcatctatgaaagcaacaaacggccctcagggattcctgagcgattt
+tcaggcaccaactctgggaacacggccaccctgactatcagtggggcccgggctgaggac
+gaggctgactattactgtcaggtgtgggatagcagttctaatact
+>IMGT000131|IGLV3-57*01|Mustela putorius furo|F|L-PART1+V-EXON|646196..646241+646399..646697|345 nt|1| | | | |345+0=345| | |
+atggactggactccttttctgctctccgtcctcactctctgcacagggtctgtggcctcc
+agtgtgctgactcagtctccctcggtgtctgtgtccctgggacaaacggctacaatcacc
+tgctctggagaagtactgaacaaaaaatacgcacagtggttccagcagaagccaggccaa
+gcacccatgctggtcatttataaggacactgagcgtccttctgggatccctgaccgattc
+tctggctccagttcagggaccacacacaccctgaccattagtgggacccgggctgaggac
+gaggctgactattactgtcagtcctatgacagcaatactgatgct
+>IMGT000131|IGLV3-58*01|Mustela putorius furo|P|L-PART1+V-EXON|639599..639644+640128..640423|342 nt|1| | | | |342+0=342| | |
+acagcctgaacccctgtcctcctcagcctcctgtctctctgcagaggatccatggcctcc
+tacttgctgatgagcctctgtcagtgcttttgaacctgggacagagagatagaatcacct
+gtggtggaaacaatattggaaggaaagatggtcagtggtaccaacaaagctggtccagga
+ccccctgcagattatctatggtgatagcaactgggactaaggcatccctgacggattctc
+cagctccggcttgggaacatggtcatcctgcccatcagtggggccatggcggaggatgag
+gctgaatattactgtcactcattcgaccacagtggtaatgct
+>IMGT000131|IGLV3-59*01|Mustela putorius furo|P|L-PART1+V-EXON|632678..632722+633150..633440|336 nt|1| | | | |336+0=336| | |
+atggcctgactcctctcctcctcagattcctggatcgctgcacaggctccatggcctcct
+acatgctgagtgaacctctctcgatgtcagtgaacctagaacagatagccaggatcacct
+gtgggagaaacgacattggaaaagtgtttactggtaccagcagaagccaggccaggctcc
+cattctgattatctatgaagatagcaactggccctcagggatccctgaccagttcttggg
+taccaatacagggaacacagccaccctgaccatcagcagggcctgggctgaggatgaggc
+tattactgtcaggtgtgggacagcagtgctgatgct
+>IMGT000131|IGLV3-6*01|Mustela putorius furo|F|L-PART1+V-EXON|1325663..1325708+1325863..1326161|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctctttcactccttgtcctcactctctgcacaggctctgtggtctcc
+agtgaggtgactcagccaccctttgtgtcagtggccctgggacagaccgctacaatcacc
+tgcaccggagagaaggtgaaatatagctctatacactggtaccagcagaagccagggcaa
+gcccctctgaccgtcatttatgcagagattgagcggccctctgggatcccagagcgattc
+tctggctccaggtcagggaacacggccaccctcaccatcagcagtgtacaggccgaggac
+gaggctgactattactgtcagtcccattacagctatgataatgct
+>IMGT000131|IGLV3-60*01|Mustela putorius furo|F|L-PART1+V-EXON|626130..626175+626327..626625|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctcttctgctcccagtcctcactctttgcacaggctccatggcctcc
+agtgtgctgactcagtctccctcagtatcagtgtccctgggacagacagctaccatcacc
+tgctctggagagatactgagcaaaagttatgcacgatggcaccagcagaagccaggccaa
+tcccctgtgaacattatttataaggacacccagcgtccctctgggatccctgaccgattc
+tctgggtccagctcagggagcacacacaccctgaccatcagcagggctcaggctgaggac
+gaggctgactactactgtcaaggatgggatggcaatggtaaagct
+>IMGT000131|IGLV3-61*01|Mustela putorius furo|P|L-PART1+V-EXON|622106..622151+622307..622601|341 nt|1| | | | |341+0=341| | |
+agagcttggactcttctcctgcccctcatcatcactctctgcacaggttccatggcctcc
+agtgggctgactcagtctccctctgtgtcagtggccatgggacagagggctacaatcacc
+tgctctggagatgtactggggaaaagatatgcatattggtaccagcagaagccaaaacaa
+gctcctgtgcttgtgattaataaaaataatgatcaaatctcagggatctctgactggttc
+tcaggctctacctcaggaatcacagccacgctgaccatcagtgggacctgggctgaggac
+aaggatattactctcagtcctatgacagcagtggtaatgct
+>IMGT000131|IGLV3-8*01|Mustela putorius furo|F|L-PART1+V-EXON|1309938..1309983+1310367..1310665|345 nt|1| | | | |345+0=345| | |
+atggcctggacccctctcctccttggattcctggctcactgcacaggctccatggcctcg
+tatgtgctgactcaaccaccctcaatatcggtgaaactgggacagacggccaagatcacg
+tgtgggggagacaacattgggaataaatatgcttactggtaccagcagaagccaggcagg
+gtccctgtgctgattatctacgaggatagcaaaaggccgtcagggattcctgaccagttc
+tcaggcaccaactcagggaatacagccaccctgaccatcagcggggcccgtgctgaggac
+gaggctgactattactgtcaggtgtgggacagcagtactaatgct
+>IMGT000131|IGLV4-19*01|Mustela putorius furo|P|L-PART1+V-EXON|1210805..1210850+1210356..1210701|392 nt|1| | | | |392+0=392| |rev-compl|
+acggactgggttcccttctaccttctaccctttattattgtcacggttttctgtgctctg
+cctgtgctgactcagcctccatctgcatctgcctccctgggagcctctgtcaagctcacc
+tgcaccctgagcagggagcaaaacactggttcactggtatcacaggatactagttgttca
+ctgctgtcaacaggcccagggaaggcccctcggtatgtgatgaaggttaatagtgacgga
+agccacagcaagggggacgagatccccagtcgcttctcaggatccagctctggggctgac
+cgctatttaaccatctccgacatccagtctgaggatgaggctgagtattactgtggtgac
+agccataaaatcgatggtcaatatggttaagc
+>IMGT000131|IGLV4-19D*01|Mustela putorius furo|P|L-PART1+V-EXON|1157527..1157572+1157676..1158021|392 nt|1| | | | |392+0=392| | |
+acggactgggttcccttctaccttctaccctttattattgtcacggttttctgtgctctg
+cctgtgctgactcagcctccatctgcatctgcctccctgggagcctctgtcaagctcacc
+tgcaccctgagcagggagcaaaacactggttcactggtatcacaggatactagttgttca
+ctgctgtcaacaggcccagggaaggcccctcggtatgtgatgaaggttaatagtgacgga
+agccacagcaagggggacgagatccccagtcgcttctcaggatccagctctggggctgac
+cgctatttaaccatctccgacatccagtctgaggatgaggctgagtattactgtggtgac
+agccataaaatcgatggtcaatatggttaagc
+>IMGT000131|IGLV4-23*01|Mustela putorius furo|F|L-PART1+V-EXON|1178137..1178182+1178286..1178610|371 nt|1| | | | |371+0=371| | |
+atggactggggttccttctacctcctgccctttattatctctacaggtttctgtgctctg
+cctgtgctgactcagcctccatctgcgtctgcctccctgggagcctctgtcaagctcacc
+tgcaccctgagcagggagcacagcagttactatgttctctggtatcaacagcgaccaggg
+aaggcccctcagtatgtgatgaaggttaatagtgacggaagccacagcaagggggacggg
+atccccagtcgcttctcaggatccagctctggggctgaccgctatttaagcatctccgac
+atccagtctgaggatgaggctgagtatcactgcggtgagaagcatacaatcgatggtcaa
+actggttaagc
+>IMGT000131|IGLV4-26*01|Mustela putorius furo|F|L-PART1+V-EXON|1083238..1083283+1083387..1083711|371 nt|1| | | | |371+0=371| | |
+atgggctgggtgccattctacctcctgccctttattttctctacaggtttctgtgctgca
+cctgtgctgactcagcctccatctgcatctgcctctccaggagcctctgtcaagctcacc
+tgcaccctgagcagggagcacagcaattactatattcactggtatcaacaggaaccaggg
+aaggcccctcggtatgtgatgatggttaatagtgacggaagccacaacaagggggacgga
+atccccagtcgcttctcaggatccagctctggggttgaccgctacttaaccatctccgac
+atccagtctgaggatgaggctgagtattactgtggtgcagactacaaaatcgatggtcaa
+gtacattaagc
+>IMGT000131|IGLV4-5*01|Mustela putorius furo|F|L-PART1+V-EXON|1341961..1342006+1342109..1342433|371 nt|1| | | | |371+0=371| | |
+atggactgggttcccttctacatcctgcccttcattttctctacaggtttctgtgctctg
+cctgtgctgactcagcctccatcagcaaatgcctccctggaagcctcagtcaagcttaca
+tgcactctgagcagggagcacagcaattactatgttctctggtatcaacaggaaccaggg
+aaggcccctcggtatttgatgaaggttaatagtgacggaagttacagcaagggggatggg
+atccccagtcgcttctcaggctccagctctggggctgaccgctatttaaccatctccgac
+atccagtctgaggatgaagctgagtattactgcggtgagagccatacaatcgatggccaa
+tacggttaagc
+>IMGT000131|IGLV4-54*01|Mustela putorius furo|F|L-PART1+V-EXON|733173..733218+733322..733646|371 nt|1| | | | |371+0=371| | |
+atggactgggttcccttctacatcatgccctttattttctctacaggcttctgtgctctg
+cctgtgctgacccagctttcatctgcatctgcctccctgggagcctcagtcaagctcacc
+tgcaccctgagcagtgagcacagcaattatttggttcactggtatcaacagcgaccaggg
+aaggctcccctgtatatgatgacagttaatagagatggaagccacagcaatggggatggg
+atccccaaccgcttctcaggctccagctctggagttgaccgctatttagccatctccaac
+atccagtctgaagatgaggctgagtattactgtggtgcagactatagcattggtggtcag
+tacggttaagc
+>IMGT000131|IGLV4-62*01|Mustela putorius furo|ORF|L-PART1+V-EXON|617164..617209+617311..617635|371 nt|1| | | | |371+0=371| | |
+atgggctgggttctattctacctcctcctctttattttctctacaggttttagtgctctg
+cctatgctgactcagcctccatctgcatctgtctccctgggagccttagtcaacctcacc
+tgcaccctgagcagggagcacagcaattactttgttcgctggtatcaacagaaaccaggg
+gatgcccctcagtatgtgatgaaggttaataatgacagaagccacagcaagggggacagg
+atccccaattgcttctcaagctccagctctggagatgactgctatttaaccaactccaac
+atccagtctgaggatgagcctgagtgttactgcggtgagagccataccatcgatggtcaa
+tctggttaagc
+>IMGT000131|IGLV4-63*01|Mustela putorius furo|P|L-PART1+V-EXON|593422..593467+593562..593885|370 nt|1| | | | |370+0=370| | |
+atggaccgggttcccttctacttcctgccctttattttctctacaggtttctgtgctctg
+cctgtgctgactcagcctccatctgcttctgcttccctgggagcctcagtcaagatcacc
+tgtaccctgagcagggagcacagcaattttgtgattcagtagtatcaacaatgaccaagg
+aaggctcctcagtatgtgatgaaagttaatagtgatggaagccacagcaagggggatggg
+atccccaattgcttttcaggctccagctctggggttgaccgctatttaacaatctccaac
+acccaatctgatgatgaggctaagtattactgaggtggaggctatcaaattgatgtcaat
+atgggtaagc
+>IMGT000168|IGLV5-100*01|Mustela putorius furo|P|L-PART1+V-EXON|609403..609448+609526..609854|375 nt|1| | | | |375+0=375| | |
+atggtctgaatccctgccttctttatgtacctctctcactgcataggttctgtgtcccag
+catgtgctgactcagctgtcttctctctccatcgcaaggaacaacagtcagactcaccag
+taccctgagcagtaacatcagtgttggcagctataacatgtgctggcaccagcaatagct
+agggagccctccccagtatctgctataccaccatttggactcacataaacaccagggctc
+tcagatcctcagtcacttctctggcaaagatgtctcagctcatgcagcttctgctcatct
+ctgggctgcagcctgaagatgaggctgatgattactatgctacagctcccagctgtgggg
+gcagctttcattcca
+>IMGT000168|IGLV5-101*01|Mustela putorius furo|P|L-PART1+V-EXON|595347..595392+595509..595844|382 nt|1| | | | |382+0=382| | |
+atggtctggattcctgtcctccttacggtcccctcctattatacagattccctgtcccag
+cctatactgatccagccgccctccatctctgcatctctgggagcaacagccagactcacc
+tgcaacttcagcagtgacttcagtgttggcagctaccaaacatccttgtaccagaagaag
+ccaaggagccctcctcagcatcttctgagggtctactcatacttaaataagcaccagagc
+ttcagggtccccagccgcttctctggatccaaagatacctcagccaatgcagggcttctg
+ctcatatctgggctgcagccttaaaacaaggctgatgattactgtgctaaaggtcatggc
+agtgggagcagatacacttatc
+>IMGT000168|IGLV5-104*01|Mustela putorius furo|P|L-PART1+V-EXON|575569..575614+575731..576062|378 nt|1| | | | |378+0=378| | |
+atggactggacttcactcctcctcatggtctgctctcaatgcacagtttctccatcccag
+ccagtgctgacccagctgtcctctctctctgtatccctgggaacaactgccagactcacc
+tgcacccaacagtggcttcattgttagtggtcacaacatacactggttccaacagaagcc
+agggagccctccccagtttctcctatttttctactcagactcaaataagaactagtgctt
+cagggtcaccagccacttctctggccccagcgatgctttggccaatccagggcttctgcg
+tttctgtcagctgcagcctgaagataaggctgatgattactgtgctacagttcctgacag
+tgggagcagctttcattc
+>IMGT000168|IGLV5-107*01|Mustela putorius furo|P|L-PART1+V-EXON|556223..556268+556385..556718|380 nt|1| | | | |380+0=380| | |
+atggtctggctacctgtcctacttgtgttcctgtctcaccagacaggttccctgtcccag
+cctgtgttgacccagctgacctccctctctgtatctaggaaacaaaagccagactcaact
+gcaccctgagcagtggattcggtgttggcaactgtatcatattctggtgccagtagcatc
+catgaagccttccctggtacctcctgtacttctacccagactcaattacagagctgggat
+ctggggtcccgagctgattctctggatccagtgatgtcttggccaatgcaggagttctgc
+ttatctctggatgcagtcggaggacaaggctggctactcctgtgctacagaacatagcgg
+tagaagcagcagccattact
+>IMGT000168|IGLV5-109*01|Mustela putorius furo|F|L-PART1+V-EXON|543125..543170+543330..543652|369 nt|1| | | | |369+0=369| | |
+atggcctggattcctgtcctcctcatgctcctgtctcactgcacaggatctttggcccag
+cctgtgctgacccagccgccctcactctctgcctctctgggaacaatagccagactcacc
+tgcaccttgagcagggacatcagtgttggtagtaaatacatgtactggtaccagcagaag
+ccagggacccctccccgggttctcctgtactactactcagactcaaatacacagctggga
+cctgggattcccagtcgcttctctggctccaaggacacttcagccaatgcagggattctg
+ctcatctctgggctgcagcctgaggacgaggctgactattactgtgcagtggggcatagt
+ggtgctggt
+>IMGT000168|IGLV5-114*01|Mustela putorius furo|P|L-PART1+V-EXON|470056..470099+470219..470554|380 nt|1| | | | |380+0=380| | |
+atggcctggaactctgtcctccttgtgctcttgtcactgcacaggttccctgtcccagcc
+tgtgctgacccagccgccctccctctctacatctccaggaacaacagccagactcacctg
+ctccctgagcagggacatcagtgttggtagtaaatacatgtactggtaccagcaaaagcc
+ttgaagtccaccccaatttttcctgttctactacacagattcagacaagcagctgggacc
+tggggtccccagtcatgtctctggttccaaagatgcctccactaatatggcaagtttgct
+cacctctgacctgcagcctgaggacaaggctgactattactgcagtgtaggttacagcag
+tgggagcagttttcgttact
+>IMGT000168|IGLV5-121*01|Mustela putorius furo|P|L-PART1+V-EXON|319210..319250+319372..319693|363 nt|1| | | | |363+0=363| | |
+atggcctggtctcccctttgtgctcctctcttattgcacaggttctctgttccaaacggt
+gccagcccagccacctccccctctgcatttccaggatctacagccaggctcacctgcacc
+ctgagcagtggcttcagtgttgacatctgctacatacattggtaccagcagaagtcaggg
+agtcctccacagtttctcctgcactactactcagactcaaataagcaccagggttctggg
+atccctagatgcttctcaggatccaaagatgcctcatccaaagcaatgcctctcctcatc
+tctgggctgcagtttgagaatgaggctgactcttcctatctgattggacacaatggtgat
+tct
+>IMGT000168|IGLV5-124*01|Mustela putorius furo|P|L-PART1+V-EXON|310859..310904+311021..311356|382 nt|1| | | | |382+0=382| | |
+atggcctggactctaatcttcctcttgctcctctgtcactgcacaggctccatgtcccag
+cttgtggtgaatcagccaccatccctctctgcatccctgggatcatcagccagaaccacc
+tgcagcctgagcggtggctacaatgttgtcagttattctataacttggttccagcagaag
+gcagggagccctccctagtatctcctgtggttctactcagactcagataagcaccagggc
+tcaggggtccccagctacttccctggctccaaagatgcttctgccaatgcagggcttctc
+ctcatctcggagctgtgctctgagggcaacgctgactattttggagctacagatcatggc
+agtgggagcagctaccattact
+>IMGT000168|IGLV5-126*01|Mustela putorius furo|P|L-PART1+V-EXON|299349..299394+299510..299834|371 nt|1| | | | |371+0=371| | |
+atggcctgggttcctgtcctcctcatgttcctgtctcaaatcacaggttccctgtccaag
+cctgtgctgacccagccaccctctgtgtctgcatctccaggaacaacagccagactcacc
+tgcaccctgagcagtggtttcagtattggcagctactgcatttactggtatccgcagaag
+caagggagccctccccagtatctcttgtactactactcagactccattacagagctggga
+cctgggatccccagccacttctctggctccaaaaagacacctcggccaatgcagggcttc
+tgctcatctctgggctgcagcctgagggtgaggctaactgttactgtgcagtctggcaca
+gtgatgctggt
+>IMGT000168|IGLV5-127*01|Mustela putorius furo|P|L-PART1+V-EXON|292581..292626+292728..293062|381 nt|1| | | | |381+0=381| | |
+atggtgtgaatacctgtcctccttgtattcctgtctcactagacagttttcctgtcccag
+cctgtgttgacccagctgacctccctctctgtatctagggaacagaagccagattcacat
+gcaatctcagcagtggattcagtgttggcaattatatcatgttctggtactaccagcagc
+cagagagcccttcctggtatctcctgtactgctactcagactcaattacagtgctgggat
+ctgatgcccccagctgattctctggatccaatgatgtcttggccaatgtaggacctctgc
+tcatctctgggatgcagtctgagaatgaggctggctattcctgtgctacagaacatagcg
+gtggaagcagctgtcattact
+>IMGT000168|IGLV5-130*01|Mustela putorius furo|F|L-PART1+V-EXON|271110..271155+271306..271628|369 nt|1| | | | |369+0=369| | |
+atggcctggattcctgtcctcctcatgctcctgtctctctgtacaggatctttggcccag
+cctgtgctgacccagccgccctcactctctgcatctccgggaacaacagccagactcacc
+tgcaccttgagcagggatatcagtgttggtagtaaatacatgcactggtaccagcagaag
+ccagggacccctcccaggtatctcctgtactactactcagactcaagtacacagctggga
+cctgggattcccagtcgcttctctggctccaaggatacctcagccaatgcagggattctg
+ctcatctctgggctgcagcctgaggacgaggctgactattactgtgcagtgtggcacagt
+ggtgctggt
+>IMGT000131|IGLV5-70*01|Mustela putorius furo|P|L-PART1+V-EXON|358903..358946+359053..359388|380 nt|1| | | | |380+0=380| | |
+atggcctggactcatcttcctggggctcctggctcaccatggaggttccctgtctctgtc
+tgtgctgaaccagtcaccctccctctctgcatctcccggaacaacagccagactcatctg
+caccttgagcagtgacttcagtgtaggcagctactacatattctggtaccaacagaagca
+agctagccctccccggtatatcctgtgccataagtcagatgcagataaccaccagggttc
+ctgggtccccagccacatctctgggtccatagatgcctccaccaatgagtggcttctgct
+catctccagactgtagcctgaggacgaggctgactattactgtgctctatatcattatat
+tggaaatgactatcattctc
+>IMGT000131|IGLV5-71*01|Mustela putorius furo|F|L-PART1+V-EXON|354631..354676+354798..355120|369 nt|1| | | | |369+0=369| | |
+atggcctggactcttgttctcctcatgttcctgtctcactgcacaggttccatctcccag
+cttttggtgacccagcctcccttcctctctgcatctctggaaacaacagccagactcacc
+tgcaccctgagcagtgacatcagtgttgatatttacccgatattctggtaccagcagaag
+ccagggagccctcctcgttacctccttacctatgtaacagactcaaacaagcaccagggc
+tctggggtcccgagccgcttctctggatccaaagatgcctcagccagtgcagggatcctg
+ctcatctctgggctccaggcagaggatgaggctgattattactgtcagtcatttgatgtt
+agtgatgga
+>IMGT000131|IGLV5-72*01|Mustela putorius furo|P|L-PART1+V-EXON|310836..310881+310975..311315|387 nt|1| | | | |387+0=387| | |
+atggcctggactcctcccttcctcccattcctccctctgagaatctgttccctggcccag
+cctgtgctgacccagttaccctcttcctctgcatgtctgggaacaacagtcagactcacc
+tgcaccctgagcagtggcctcagtgttgacaactattacataaatttgtaccaacagaag
+ccagggagccctccccagtatctcctgtactattattcagacccacatacagagttggaa
+cctgggggtccccagctgcttctctggatccaaagatgcctcagccaatgcagggcttct
+gctcatctctgggctgcagcctgaggatgaggctgaatatttctgtgctacatacagctc
+atggcagtgagagcagcattcattact
+>IMGT000131|IGLV5-74*01|Mustela putorius furo|P|L-PART1+V-EXON|296351..296396+296518..296835|364 nt|1| | | | |364+0=364| | |
+tgggtctggactcctaccttcctcatcctcttctctcactacacatgttccctgtccttg
+cctgtgccaacctagccaccctctctctctgcatctcctgggacaacagccagactcacc
+tgtgccctttggattcgatattggcaactactacatacactggcaccaacagaagccaga
+aagccctccatggtttctcctatactactactcagacttggataagcaccagggttctgg
+ggtcccaagctgcttctctggatctaaagatgcctcagccaaagcagcgcatctgctaac
+ctctgggcttcagccttaaaagaaggctgactactactgtctttttggacacaataatgc
+ttct
+>IMGT000131|IGLV5-76*01|Mustela putorius furo|P|L-PART1+V-EXON|233381..233426+233545..233879|381 nt|1| | | | |381+0=381| | |
+gtgtcaaggattcctaatctcttcatcttcctctctcaatgtacatggtccctgtcccaa
+cctgtgctgacccagccacactcctgctctgcatctctgggagcaacagccatactcact
+tgcaacctgatcagtggctttggttttaacagctactacataaactggtactggcaaaag
+ccagggaaccctactcagtgtctcctgtactactacttagactcagataagcaccagggc
+tctctgatccacagctagttctctggatccaaaggtgtcccagccagtgcaggggttctg
+ctcatctctgggatgcaacctgaggataagactgactattacagtgctacagctcatgac
+catgggagaagctataatact
+>IMGT000131|IGLV5-80*01|Mustela putorius furo|P|L-PART1+V-EXON|141692..141738+141854..142188|382 nt|1| | | | |382+0=382| | |
+atggtctggatgactgtcctcctcatcctcctctgtcacttgcacaggttccctatcaca
+atctgagataatccagctgccctccctctctgcatctctgggatcatctgccagactaac
+ctgcaccctgatcagtggcttcagtgtccacaggtattacataaactggtaccagtagaa
+gacagagagccctcctgggtagctcctgcactactactcagactcagataagcatcaggg
+ctctggggtccccagctgcttctaaagatgccttgaccaaagctgggcttctgcttatct
+ctgggctccaacctgagacgaggctgactattactgtgctacaagtcatggcagtgggag
+cagctatacctacctacctacc
+>IMGT000131|IGLV5-81*01|Mustela putorius furo|F|L-PART1+V-EXON|133231..133276+133397..133719|369 nt|1| | | | |369+0=369| | |
+atggcctggagccctgtcctcctcttgctcctctgtcattgcacaggttccctgtcccag
+cctgtgctgacccagccaacgtccctctctgcatctgtaggagcaacagccagactcacc
+tgtaccttgagcagggacataagtgtcagtgggaaaaacatgtactggtatcagcagaag
+cctggaagccctccccggtttttcctgtactactactcagactcagacaagcagctggga
+cctggggtccccagtcgagtctctggatccaaagatacccccacaaacacagcaattttg
+ttcatctctgggctccagcctgaggacgaggctgattattactgtcaggtatataccagt
+gttgctcag
+>IMGT000168|IGLV5-86*01|Mustela putorius furo|P|L-PART1+V-EXON|963976..964021+964121..964440|366 nt|1| | | | |366+0=366| | |
+atggactagaacccttttctccacataatcctctctcactgcacaggttccccattccag
+cctgtgctggcctaggtgcactacctctctgcttcccgtggagcatgaggcagactcacc
+tgcaccctcagcagtggcttcggtgttggtatatacaggatattctgcaccagctaaagc
+caaggagtcattcccagtttctccttatatacttgatatacacagcctcagacatataac
+agggccctgggctccccagcagcttcttggatccaaagatacatgcagggtttctgctaa
+tctctgggttgttgcctgaggacgatgctgacaattaactgtaatatttggcatggcagc
+tctagt
+>IMGT000168|IGLV5-89*01|Mustela putorius furo|P|L-PART1+V-EXON|906471..906513+906635..906964|373 nt|1| | | | |373+0=373| | |
+attgcctggactcctctcctccttcccctctctcattgcacaagttacctgtcctagcct
+ctgctgagccagacaccctccctctgcatctctgggaacagcagccagactcaacttcac
+cctgagcactggtttcagtcttggtagctatgacatatactggttctaacagaagccagg
+gagacctctctggtattttctgtacaaacactcagacttagataagcaccagggatccag
+gattcccagactcttctgtggctccagagatgtctcagccaatgcacagttcctgcttgt
+ttattggtggcagcatgatgatgaggctaaatattactgtggtacaactcacagcagtgg
+gagcagttactgt
+>IMGT000168|IGLV5-91*01|Mustela putorius furo|ORF|L-PART1+V-EXON|727344..727389+727485..727801|363 nt|1| | | | |363+0=363| | |
+atggcctggattccagtcctcttcatgctcctctcccagtatacaggttccctgtcccag
+ccagtgctgactcagccaccatccctctctgcctctctcggaacaacagccagactcacc
+tgcaccctgagcagtggcttcagtgtcaggagttataacatatactggtaccagcagaag
+ccagggagccctcccaggtatctcctgtggttctactcagactcagataagcaccagggc
+tcgggggtccccagccgcttctctggctccaaagatgccaatgcagggcttctactcatc
+tctgggctccagcctgaggacgaggctgactattactgtgctgtgtaccataccagtggc
+agc
+>IMGT000168|IGLV5-95*01|Mustela putorius furo|P|L-PART1+V-EXON|681045..681090+681324..681657|380 nt|1| | | | |380+0=380| | |
+atggcctgaacacttgtcctcctcatgttcctatatttctctacaggttccctgccccag
+cctgtgctaatccagctttcctccttctctgcactgctgggaacaatggcagactcactt
+gtaccctgagcagtggtttctgtgttggcagctactacctcagctggtaccaacagaagc
+cagggagtccttccaggtttctcttgtactattactcagactcaatttcacgttgggata
+tggggtccccagacacttctctggctccaaatatgcctcagcaaatgctgggcttctgct
+tttctctgggctgcagccagaggatgaggctgactattacagtgttacagcttatagcag
+tgggagcagctttcattagc
+>IMGT000168|IGLV5-98*01|Mustela putorius furo|F|L-PART1+V-EXON|624897..624942+625064..625399|382 nt|1| | | | |382+0=382| | |
+atggcctgggccacggtcctcctcatgctcctctgtcactgcacaggttccctgtcccag
+cctgtgctgacccaacctccctccctctctgcttccctgggatcatcagccagacgcacc
+tgcaccctgagcagggacatcaatgttggtggtaaaaacatgttctggtaccagcagaag
+cccggaagccctccccgttatttcctgtactactactcagactcagataagcagctggga
+cctggggtccccagtcgtgtctccggatccaaagatacctccaccaatacggcaattatg
+ctcatctctgggcttcagcctgaggatgaggctgactattactgtgctacagctcatggc
+agtgggagcagttttcattacc
+>IMGT000168|IGLV7-110*01|Mustela putorius furo|P|L-PART1+V-EXON|519694..519741+519990..520296|355 nt|1| | | | |355+0=355| | |
+atgacctggactcttctcttccacctcccctcctcacccattgcccagggacatttcctc
+aggctgtaaccacagcttgggggtcctcactgacgatgttccccagagggacagtgactg
+tgatctgtttctccagcactggagcagttaccaatgctcactatccatactgccagcaga
+agcttgctcaagtccccaggacattggtttaaaatataagcaataaacagtcctggaccc
+ccaccaagttttcaggttccctcttttgcagcaaagctcccctgactgttctatgtgctt
+tagcctaaggacaaggctgaacaccactggtggctactctcagagtggtgcttgg
+>IMGT000168|IGLV7-118*01|Mustela putorius furo|P|L-PART1+V-EXON|419519..419565+419653..419955|350 nt|1| | | | |350+0=350| | |
+atgacctggactcttctcttccaccacccctcctcacccattacccagggcactttctta
+ggatgtggtgacttgggggccctcactgactatgttccccatgagggacagtgactgtca
+cctgttgcttgagcactggaacagttaccaatgctaactatccataatgccagcagaagc
+ctgaactacacaacactcatgaaagaaattgaagaagacacaaaaagatggaagaccatt
+ccatgttcttggatcggaagaataaacattgttaaaatgtctatactgcctagaacaatc
+tatacttttaatgccattccaatcaaaattccaccagtattcttcaaaga
+>IMGT000131|IGLV7-69*01|Mustela putorius furo|F|L-PART1+V-EXON|383361..383409+383495..383799|354 nt|1| | | | |354+0=354| | |
+atgacctggactccactcttcctactccccttcctcacctactgcccagggaccagttct
+gaggctgtggtgacccaggagccctcactgactgtgtccccaggagagacagtcactctc
+acctgtgcctccagctatggtgcagtcagcaatggacattttccatgttggttccagcag
+aagcctggccaatcccctaggacattgatttataatacacacaataaaccttcctggacc
+cctgcccgattctcaggctccctccttgggggcaaagctgtcctgaccctcacaggggct
+cagcctgaggatgaggctgagtaccactgcttcctgcaatatggtgatgggagg
+>IMGT000168|IGLV8-108*01|Mustela putorius furo|P|L-PART1+V-EXON|551188..551233+551339..551644|352 nt|1| | | | |352+0=352| | |
+atgacctagatgttatttctccttgggctcattgcatatggctcagagcagactctcaga
+gtgtggtgaaccagaagccatcactgttaatgtctccaggagggacagtcaccctaactt
+gtggcctcagctctggctcagtctctgcaactatctcccttcactgattcccgcagaccc
+cggaccaggctccccacatgctcatccacagcacaagcagcctcccttttggggtccctg
+tttgcttctctggatccagctctgggaacaaagccattctcactatcatgatggtcgagg
+ctgaggatgaggtcgactatcactgtttgctgtctgtgggtggtggtcctta
+>IMGT000168|IGLV8-128*01|Mustela putorius furo|P|L-PART1+V-EXON|282390..282435+282522..282820|345 nt|1| | | | |345+0=345| | |
+atggcctggaccttgtttcttcttggactcattgcatatggctcaggaacagactctcag
+aatgtggtgatccagaagctgtcactgtcagtgtctccaggagggacagtcacactcagt
+tgtggtctcagctctggctcagtctctgcaactaactcccctcactggttccagcagacc
+ccagggcagtctccctgcatgctcatccacagcacaagcagccacccctttgggatccct
+gattgcttcccagctctgggaacaaagacatcctcactatcatgatggtcaaggttgagg
+atgaggccaactatcactgcttactgtctgtgggacctctttaca
+>IMGT000131|IGLV8-77*01|Mustela putorius furo|F|L-PART1+V-EXON|224163..224208+224310..224616|353 nt|1| | | | |353+0=353| | |
+atggcctggaaggtgcttcttcttgggctccttgcttatggcttaggagcagattctcag
+acggtggtgatccaggagccatcactgtgggtatctccaggagggacagtcacactcact
+tgtggactcagctctggctcagtctcttccaataactacccttactggtaccagcagacc
+ccaggcaagactccccgcttgcttatatatgacacaaacaaccgcctccctggggtccct
+ggtcgcttctctggatcaatctctgggaacaaagccgccctcaccatcacaggggcccaa
+cttgaggatgaagccgactatcactgtttgctgtatatgggtagtggttctta
+>IMGT000131|IGLV8-84*01|Mustela putorius furo|ORF|L-PART1+V-EXON|29088..29133+29235..29541|353 nt|1| | | | |353+0=353| | |
+atggcctggaaggtgcttcttcttgggctccttgcttatggctcaggggcaaattctcag
+actgtggtgattcaggagccatcagtgtcagtatctccaggaggcgcagtcacactcacc
+tgtggcctcagctctggatcagtctctaccagtaactaccctcaatggttccagcagacc
+ccaggcaaggctccccgcttgcttatctacagcacaagcagccgcccctctggggtccct
+ggtcgcttctctggatccatctctgggaacaaagccgccttcaccatcaaagaggcccaa
+cttgaggatgaagccaactatcactgtttgctgtatatgggtagtggtattca
+>IMGT000168|IGLV8-90*01|Mustela putorius furo|P|L-PART1+V-EXON|902082..902127+902255..902561|353 nt|1| | | | |353+0=353| | |
+atggtctggaaggtgcttcttctttggctcctttcttatggctcaggagcagattctcca
+actgtggggatccaggagccatcactgtcagtatctccaggagggacaggtacatttgct
+tatcgcctcaactctgggccagtccctaccagtaactaacctgacaggtaccagcagact
+ccaggaaaggctccctgcttgcttatctactgtacaaacagctacccctctggagttcct
+gatcgcttctctggatccatctctgggaacacagccacccacactatcacaggggctcaa
+cttgaggatgaagacaactatcactgtttgctgtatgtgggtagtgctacatg
+

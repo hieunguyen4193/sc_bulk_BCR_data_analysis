@@ -1,0 +1,884 @@
+---
+title: "Data analysis first dataset - GEX, 26.10.2023"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    keep_md: true
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: false
+    theme: lumen
+---
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+
+```{r echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+#####----------------------------------------------------------------------#####
+
+# clean up 
+gc()
+rm(list = ls())
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPARATION
+#####----------------------------------------------------------------------#####
+analysis.case <- "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1"
+
+source("/media/hieunguyen/HNSD01/src/bcr_data_analysis/1st_2nd_datasets/00_helper_functions.R")
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPRATIONS
+#####----------------------------------------------------------------------#####
+outdir <- "/media/hieunguyen/HNSD_mini/outdir"
+PROJECT <- "1st_2nd_BSimons_Datasets"
+
+path.to.output <- file.path(outdir, PROJECT, "data_analysis")
+
+path.to.01.output <- file.path(path.to.output, "01_output")
+path.to.02.output <- file.path(path.to.output, "02_output", analysis.case)
+dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
+
+path.to.save.table <- file.path(path.to.02.output, "tables")
+path.to.save.figures <- file.path(path.to.02.output, "figures")
+
+dir.create(path.to.save.table, showWarnings = FALSE, recursive = TRUE)
+dir.create(path.to.save.figures, showWarnings = FALSE, recursive = TRUE)
+
+s.obj <- readRDS(file.path(path.to.01.output, "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1", "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1.rds"))
+
+if ("svglite" %in% installed.packages() == FALSE){
+  install.packages("svglite")
+}
+
+s.obj.colonization <- hash()
+s.obj.sample <- hash()
+for (stage.id in unique(s.obj$stage)){
+  s.obj.colonization[[stage.id]] <- subset(s.obj, stage == stage.id)
+}
+
+for (sample.id in unique(s.obj$name)){
+  s.obj.sample[[sample.id]] <- subset(s.obj, name == sample.id)
+}
+
+```
+# Some QC metrics after filtering out cells
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+  all.QC <- list()
+  
+  # Number of cells obtained per experiment/sample
+  all.QC$cell.counts.plot <- ggplot(s.obj@meta.data, 
+                                    aes(x=name , fill=name)) + 
+    geom_bar() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ggtitle("Number of cells in each dataset")
+  
+  # distribution of number of UMI in each sample
+  all.QC$nCountRNA.distribution <- ggplot(s.obj@meta.data,
+                                          aes(color=name, x=nCount_RNA, fill = name)) + 
+    geom_density(alpha = 0.2) +
+    scale_x_log10() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ylab("Cell density") +
+    geom_vline(xintercept = 500, color = "red") +
+    ggtitle("Distribution of read depths in each sample")
+  
+  # distribution of number of features (genes detected) in each sample
+  all.QC$nFeature_RNA.distribution <- ggplot(s.obj@meta.data,
+                                             aes(color=name, x=nFeature_RNA, fill = name, y = ..scaled..)) + 
+    geom_density(alpha = 0.2) +
+    scale_x_log10() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ylab("Cell density") +
+    geom_vline(xintercept = 1000, color = "red") +
+    xlim(1000, 10000) +
+    ggtitle("Distribution of number of detected genes in each sample")
+  
+  
+  # scatter plot showing the relation between cell read-depth and number of genes detected.
+  ## with Mitochondrial percentage
+  all.QC$nCount.vs.nFeature.MT <- ggplot(s.obj@meta.data, 
+                                         aes(x=nCount_RNA, y=nFeature_RNA, color=percent.mt)) + 
+    geom_point() + 
+    scale_colour_gradient(low = "gray90", high = "black") +
+    stat_smooth(method=lm, formula = y ~ x) + # apply a linear regression to show the relation, if existed.
+    scale_x_log10() + 
+    scale_y_log10() + 
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 12)) +
+    facet_wrap(~name) +
+    ggtitle("Scatter plot: nCount_RNA vs. nFeature_RNA, cmap % Mitochondrial genes")
+  
+  ## with Ribosome percentage
+  all.QC$nCount.vs.nFeature.Ribo <- ggplot(s.obj@meta.data, 
+                                           aes(x=nCount_RNA, y=nFeature_RNA, color=percent.ribo)) + 
+    geom_point() + 
+    scale_colour_gradient(low = "gray90", high = "black") +
+    stat_smooth(method=lm, formula = y ~ x) + # apply a linear regression to show the relation, if existed.
+    scale_x_log10() + 
+    scale_y_log10() + 
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 12)) +
+    facet_wrap(~name) +
+    ggtitle("Scatter plot: nCount_RNA vs. nFeature_RNA, cmap % Ribosome genes")
+  
+  s.obj@meta.data <- s.obj@meta.data %>% 
+    mutate(log10GenesPerUMI = log10(nFeature_RNA) / log10(nCount_RNA))
+  
+  all.QC$complexity <- ggplot(s.obj@meta.data,
+                              aes(x=log10GenesPerUMI, color = name, fill=name)) +
+    geom_density(alpha = 0.2) +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    geom_vline(xintercept = 0.8) +
+    ggtitle("Complexity: Log10(nCount_RNA) / log10(nFeature_RNA)")
+  
+  # add new slot for all.QC into the existed SEURAT OBJECT. 
+  s.obj@misc$all.QC.after.filtering <- all.QC
+```
+
+## Raw data Quality control  {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$all.QC)){
+ 
+    cat('###',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$all.QC[plot.name])
+    cat(' \n \n')
+}
+```
+
+
+
+## Ambient RNA background correction 
+
+### DecontX clusters {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$ambient.cluster.RNA.plot)){
+ 
+    cat('####',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$ambient.cluster.RNA.plot[plot.name])
+    cat(' \n \n')
+}
+```
+
+### Contamination level in each sample
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+ggplot(s.obj@meta.data, aes(x=name, y=AmbientRNA)) + 
+  geom_boxplot()
+
+```
+
+
+### Ambient RNA contamination level {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$ambient.contamination.plot)){
+ 
+    cat('####',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$ambient.contamination.plot[plot.name])
+    cat(' \n \n')
+}
+```
+
+
+## Descriptive statistics and filtering threshold {.tabset}
+This section is devoted to the descriptive statistics of the following varialbes: `nFeature_RNA, nCount_RNA, percent.mt, percent.ribo`. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.item in c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.ribo")){
+  boxplot <- s.obj@meta.data %>% ggplot(aes_string(x = "name", y = plot.item)) +
+    geom_boxplot(outlier.colour="black", outlier.shape=16,
+               outlier.size=2, notch=FALSE) +
+    ggtitle(sprintf("Boxplot: Distribution of %s in each dataset", plot.item))
+  cat('###', plot.item,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+  
+  print(boxplot)
+  
+  cat(' \n \n')
+}
+```
+
+
+
+## Descriptive statistics + UMAP {.tabset}
+
+### % Mitochondrial
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "percent.mt", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % Ribosome
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "percent.ribo", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % nCount RNA
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "nCount_RNA", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % nGenes 
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "nFeature_RNA", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+## Number of cells in each cluster
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+count.cell.clusters <- table(s.obj@meta.data$seurat_clusters)  %>% as.data.frame()
+colnames(count.cell.clusters) <- c("cluster", "count")
+
+count.cell.clusters %>% create_dt()
+```
+
+## Number of cells in each colonization
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+s.obj@meta.data %>% subset(select = c(seurat_clusters, stage)) %>% table() %>% as.data.frame() %>% pivot_wider(names_from = "stage", values_from = "Freq") %>% create_dt()
+```
+
+## Cell cycle analysis
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+all.genes <- rownames(x = s.obj)
+s.genes <- paste0("^", cc.genes$s.genes, "$", collapse = "|")
+s.genes <- all.genes[grepl(s.genes, all.genes, ignore.case = TRUE)]
+g2m.genes <- paste0("^", cc.genes$g2m.genes, "$", collapse = "|")
+g2m.genes <- all.genes[grepl(g2m.genes, all.genes, ignore.case = TRUE)]
+
+s.obj <- CellCycleScoring(s.obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+```
+
+### UMAP grouped by cell cycle phase
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+DimPlot(object= s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "Phase")
+```
+
+### PCA grouped by cell cycle phase
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+DimPlot(object= s.obj, reduction = "INTE_PCA", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "Phase")
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+Idents(s.obj) <- "seurat_clusters"
+```
+
+# Summary QC 
+## Bioinformatics pipeline
+Count, barcode, feature matrices were generated by CellRanger pipeline (v. 7.1.0) with default parameters. Sequence alignment and transcript quantification were done with Mm10 reference genome. Downstream analysis was performed by our custom pipeline written in R using Seurat v.4.0. Contaimnated ambient RNA was estimated by decontX (celda v1.12, https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-1950-6). Doublets were detected by DoubletFinder (https://www.sciencedirect.com/science/article/pii/S2405471219300730). Dimensional reductions, PCA and UMAP, as well as cells clustering, were done by built-in functions in Seurat. Samples were integrated by built-in SEURAT integration algorithm to remove any potential batch effects. 
+
+Cells whose number of UMI less than 100 or number of genes less than 50 were filtered out. Moreover, cells having percentage of mitochondrial higher than 10% were also excluded from the analysis. By differential gene expression analysis between clusters versus clusters, cells populations were identified. We excluded some clusters and kept only populations of interest. 
+
+## Summary QC table
+We summarize the QC metrics for each sample in this table
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+##### HELPER FUNCTION TO GENERATE SUMMARY QC METRICS
+generate_summary_qc <- function(meta.data){
+  sumqcdf <- data.frame()
+for (sample.id in unique(meta.data$name)){
+  subset.metadata <- subset(meta.data, meta.data$name == sample.id)
+  
+  tmpdf <- data.frame(Sample = c(sample.id))
+  tmpdf$min.nCount_RNA <- min(subset.metadata$nCount_RNA)
+  tmpdf$max.nCount_RNA <- max(subset.metadata$nCount_RNA)
+  tmpdf$mean.nCount_RNA <- mean(subset.metadata$nCount_RNA)
+  tmpdf$median.nCount_RNA <- median(subset.metadata$nCount_RNA)
+  
+  tmpdf$min.nFeature_RNA <- min(subset.metadata$nFeature_RNA)
+  tmpdf$max.nFeature_RNA <- max(subset.metadata$nFeature_RNA)
+  tmpdf$mean.nFeature_RNA <- mean(subset.metadata$nFeature_RNA)
+  tmpdf$median.nFeature_RNA <- median(subset.metadata$nFeature_RNA)
+  
+  tmpdf$min.percent.mt <- min(subset.metadata$percent.mt)
+  tmpdf$max.percent.mt <- max(subset.metadata$percent.mt)
+  tmpdf$mean.percent.mt <- mean(subset.metadata$percent.mt)
+  tmpdf$median.percent.mt <- median(subset.metadata$percent.mt)
+  
+  tmpdf$min.percent.ribo <- min(subset.metadata$percent.ribo)
+  tmpdf$max.percent.ribo <- max(subset.metadata$percent.ribo)
+  tmpdf$mean.percent.ribo <- mean(subset.metadata$percent.ribo)
+  tmpdf$median.percent.ribo <- median(subset.metadata$percent.ribo)
+  
+  tmpdf$min.log10GenesPerUMI <- min(subset.metadata$log10GenesPerUMI)
+  tmpdf$max.log10GenesPerUMI <- max(subset.metadata$log10GenesPerUMI)
+  tmpdf$mean.log10GenesPerUMI <- mean(subset.metadata$log10GenesPerUMI)
+  tmpdf$median.log10GenesPerUMI <- median(subset.metadata$log10GenesPerUMI)
+  
+  tmpdf$min.AmbientRNA <- min(subset.metadata$AmbientRNA)
+  tmpdf$max.AmbientRNA <- max(subset.metadata$AmbientRNA)
+  tmpdf$mean.AmbientRNA <- mean(subset.metadata$AmbientRNA)
+  tmpdf$median.AmbientRNA <- median(subset.metadata$AmbientRNA)
+  
+  tmpdf$num.Clones <- length(unique(subset.metadata$CTstrict))
+  tmpdf$num.Clusters <- length(unique(subset.metadata$seurat_clusters))
+  
+  sumqcdf <- rbind(sumqcdf, tmpdf)
+}
+  return(sumqcdf)
+}
+```
+
+### Raw data QC metrics
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+s.obj.raw <- readRDS(file.path(path.to.01.output, "raw_seurat_objects", "merged_all_first_dataset_BCR.rds"))
+meta.data.raw <- s.obj.raw@meta.data
+sumqc.df.raw <- generate_summary_qc(meta.data.raw)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+sumqc.df.raw %>% create_dt()
+```
+
+### After filtering 
+
+This is the summary QC metrics for the data we used in downstream analysis
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+meta.data <- s.obj@meta.data
+sumqcdf <- generate_summary_qc(meta.data)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+sumqcdf %>% create_dt()
+```
+
+# UMAP
+
+## All clusters 
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, pt.size = 1, repel = TRUE)
+ggsave(plot = p, filename = "UMAP_all_samples_all_cluster.1stDataset.svg", path = file.path(path.to.save.figures), device = "svg", width = 15, height = 10, dpi = 300)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+print(p)
+```
+
+## UMAP, colonization on integrated UMAP {.tabset}
+```{r colonization_on_integrated_UMAP, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10, dev='svg', dpi = 300}
+meta.data <- s.obj@meta.data
+
+library(scales)
+
+colors <- hue_pal()(4)
+
+colonization <- hash()
+
+for ( i in seq(1, length(unique(meta.data$stage)))){
+
+  stage.id <- unique(meta.data$stage)[[i]]
+  cat (sprintf("### colonization: %s \n", stage.id))
+  p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", 
+                                      cells.highlight = list(colonization = colnames(subset(s.obj, stage == stage.id))),
+                                      cols = "gray", order = TRUE, cols.highlight = colors[[i]],
+                                      sizes.highlight = 1, label = FALSE, pt.size = 0.5) +
+    ggtitle(sprintf("colonization: %s", stage.id))
+  ggsave(plot = p, filename = sprintf("UMAP_colonization_%s.svg", stage.id), path = file.path(path.to.save.figures), device = "svg", width = 15, height = 10, dpi = 300)
+  print(p)
+  cat("\n \n")
+}
+
+```
+
+## UMAP, each sample {.tabset}
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
+colors <- hue_pal()(7)
+for ( i in seq(1, length(unique(meta.data$name)))){
+
+  stage.id <- unique(meta.data$name)[[i]]
+  cat (sprintf("### Sample: %s \n", stage.id))
+  p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", 
+                                      cells.highlight = list(colonization = colnames(subset(s.obj, name == stage.id))),
+                                      cols = "gray", order = TRUE, cols.highlight = colors[[i]],
+                                      sizes.highlight = 1, label = FALSE, pt.size = 0.5) +
+    ggtitle(sprintf("Sample: %s", stage.id))
+  print(p)
+  ggsave(plot = p, filename = sprintf("UMAP_sample_%s.svg", stage.id), path = file.path(path.to.save.figures), device = "svg", width = 15, height = 10, dpi = 300)
+  cat("\n \n")
+}
+```
+
+# Differential gene expression analysis between clusters
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+if (file.exists(file.path(path.to.02.output, "cluster_markers.rds")) == FALSE){
+  cluster.markers <- FindAllMarkers(object = s.obj, assay = "RNA", test.use = "wilcox")
+  saveRDS(cluster.markers, file.path(path.to.02.output, "cluster_markers.raw.rds"))
+  cluster.markers <- subset(cluster.markers, cluster.markers$p_val_adj <= 0.05 & cluster.markers$avg_log2FC >= 0)
+  saveRDS(cluster.markers, file.path(path.to.02.output, "cluster_markers.rds"))  
+} else {
+  cluster.markers <- readRDS(file.path(path.to.02.output, "cluster_markers.rds"))
+}
+```
+
+## Heatmap: Top N up-gene in each clusters
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+topN <- 10
+tmp.cluster.markers.up <- subset(cluster.markers, cluster.markers$avg_log2FC >= 0 & cluster.markers$p_val_adj <= 0.05)
+
+selected.genes <- data.frame()
+for (cluster.id in unique(tmp.cluster.markers.up$cluster)){
+  tmp <- subset(tmp.cluster.markers.up, tmp.cluster.markers.up$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  tmp.genes <- head(tmp, topN)
+  selected.genes <- rbind(selected.genes, tmp.genes)
+}
+
+p <- DoHeatmap(object = s.obj, features = selected.genes$gene) + scale_fill_viridis_c(option = "plasma")
+ggsave(plot = p, filename = "Heatmap_topN_up_genes_in_all_clusters.svg", path = file.path(path.to.save.figures), device = "svg", width = 28, height = 20, dpi = 300)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=28, fig.height=20}
+print(p)
+```
+
+
+### Tables of all cluster marker genes {.tabset}
+```{r echo=FALSE, include=FALSE}
+cluster.markers %>% create_dt()
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+
+for (cluster.id in sort(unique(cluster.markers$cluster))){
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  tmp.cluster.markers <- tmp.cluster.markers %>% mutate_if(is.numeric, round, 6) 
+  
+  cat(paste("\n\n#### Cluster: ", cluster.id, "##\n"))
+  print( htmltools::tagList(datatable(tmp.cluster.markers, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+
+```
+
+
+### Top-12 cluster marker genes `FeaturePlot` {.tabset}
+Here we just show the top-12 genes (ranked by `avg_log2FC`) for each cluster. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = head(tmp.cluster.markers, 12)$gene, ncol = 3, label = TRUE, pt.size = 0.5, label.size = 5, label.color = "red")  
+  print(p)
+  cat("\n \n")
+}
+```
+
+### Top-12 cluster marker genes `DotPlot` {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- DotPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+### Top-12 cluster marker genes `Vlnplot` {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- VlnPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+# Analysis on colonizations
+
+## Shannon entropy for cells in different colonizations
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+colonization.cells <- hash()
+colonization.cell.shannon <- hash()
+for (group in unique(s.obj$stage)){
+  colonization.cells[[group]] <- row.names(subset(s.obj@meta.data, s.obj@meta.data$stage == group))
+  colonization.cell.shannon[[group]] <- calculate_shannon_entropy(colonization.cells[[group]], s.obj)
+}
+
+colonization.cell.shannondf <- data.frame(colonization = names(colonization.cell.shannon))
+colonization.cell.shannondf$Shannon.entropy <- unlist(lapply(colonization.cell.shannondf$colonization, function(x){
+  return(colonization.cell.shannon[[x]])
+}))
+colonization.cell.shannondf %>% create_dt()
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+writexl::write_xlsx(colonization.cell.shannondf, file.path(path.to.save.table, "Cell_Shannon_entropy_in_colonizations.xlsx"))
+```
+
+## Sampling cells and calculating their Shannon entropies (colonization cells) {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+real.colonization.shannondf <- data.frame(names(colonization.cell.shannon))
+colnames(real.colonization.shannondf) <- "data"
+real.colonization.shannondf$Shannon.entropy <- values(colonization.cell.shannon)
+real.colonization.shannondf$case <- names(colonization.cell.shannon)
+
+all.sampling.size <- seq(1000, 3000, 200)
+all.cells <- row.names(s.obj@meta.data)
+
+dir.create(file.path(path.to.save.table, "[validation]sampling_cell_shannon_entropy_colonizations"), showWarnings = FALSE, recursive = TRUE)
+for (num.sampling.cells in all.sampling.size){
+    if (file.exists(file.path(path.to.save.table, "[validation]sampling_cell_shannon_entropy_colonizations",  sprintf("sampling_cell_shannon_entropy_colonizations.%s.xlsx", num.sampling.cells))) == FALSE){
+      all.sampling.entropies <- c()
+      for (count in seq(1, 1000)){
+        sampling.cells <- sample(all.cells, num.sampling.cells)
+        tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj)
+        all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+      }
+      
+      samplingdf <- data.frame(data = all.sampling.entropies)
+      colnames(samplingdf) <- c("Shannon.entropy")
+      samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+      samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+      samplingdf$case <- "Sampling"
+      plotdf <- rbind(samplingdf, real.colonization.shannondf)
+    
+      writexl::write_xlsx(x = plotdf, path = file.path(path.to.save.table, "[validation]sampling_cell_shannon_entropy_colonizations",  sprintf("sampling_cell_shannon_entropy_colonizations.%s.xlsx", num.sampling.cells)))
+    } else {
+      plotdf <- readxl::read_xlsx(file.path(path.to.save.table, "[validation]sampling_cell_shannon_entropy_colonizations",  sprintf("sampling_cell_shannon_entropy_colonizations.%s.xlsx", num.sampling.cells)))
+    }
+    p <- plotdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+        ggtitle(sprintf("Colonization sampling %s cells Shannon entropy", num.sampling.cells)) +
+        ylim(c(0, 1))
+    cat(sprintf("### Sampling %s cells \n", num.sampling.cells))
+    print(p)
+    cat("\n \n")
+}
+```
+
+## Shannon entropy for cells in different samples
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+singleSample.cells <- hash()
+singleSample.cell.shannon <- hash()
+for (group in unique(s.obj$name)){
+  singleSample.cells[[group]] <- row.names(subset(s.obj@meta.data, s.obj@meta.data$name == group))
+  singleSample.cell.shannon[[group]] <- calculate_shannon_entropy(singleSample.cells[[group]], s.obj)
+}
+singleSample.cell.shannondf <- data.frame(Sample = names(singleSample.cell.shannon))
+singleSample.cell.shannondf$Shannon.entropy <- unlist(lapply(singleSample.cell.shannondf$Sample, function(x){
+  return(singleSample.cell.shannon[[x]])
+}))
+
+singleSample.cell.shannondf %>% create_dt()
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+writexl::write_xlsx(singleSample.cell.shannondf, file.path(path.to.save.table, "Cell_Shannon_entropy_in_samples.xlsx"))
+```
+
+# VDJ data analysis
+## All clones and Shannon entropy (all colonizations/samples)
+
+### Summary table
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+all.shannon.entropy <- s.obj@meta.data %>% subset(select = c(CTstrict)) %>% table() %>% as.data.frame() %>%
+  subset(is.na(CTstrict) == FALSE) 
+colnames(all.shannon.entropy) <- c("clone", "count")
+
+all.shannon.entropy <- all.shannon.entropy %>%
+  rowwise() %>% 
+  mutate(Shannon.entropy = ifelse(count >= 5, calculate_shannon_entropy(input.s.obj =  s.obj, barcodes = subset(meta.data, meta.data$CTstrict == clone)$barcode), NA)) 
+
+
+
+all.shannon.entropy <- all.shannon.entropy %>% rowwise() %>%
+  mutate(check.MM9 = ifelse(clone %in% unique(s.obj.colonization$MM9$CTstrict), 
+                            nrow(subset(s.obj.colonization$MM9@meta.data, s.obj.colonization$MM9@meta.data$CTstrict == clone)), 
+                            0)) %>%
+  mutate(check.MM9_Ecoli = ifelse(clone %in% unique(s.obj.colonization$MM9_Ecoli$CTstrict), 
+                            nrow(subset(s.obj.colonization$MM9_Ecoli@meta.data, s.obj.colonization$MM9_Ecoli@meta.data$CTstrict == clone)), 
+                            0)) %>%
+  mutate(check.MM9_Ecoli_SPF = ifelse(clone %in% unique(s.obj.colonization$MM9_Ecoli_SPF$CTstrict), 
+                            nrow(subset(s.obj.colonization$MM9_Ecoli_SPF@meta.data, s.obj.colonization$MM9_Ecoli_SPF@meta.data$CTstrict == clone)), 
+                            0)) %>%
+  mutate(check.MM9_SPF = ifelse(clone %in% unique(s.obj.colonization$MM9_SPF$CTstrict), 
+                            nrow(subset(s.obj.colonization$MM9_SPF@meta.data, s.obj.colonization$MM9_SPF@meta.data$CTstrict == clone)), 
+                            0))
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+all.shannon.entropy %>% arrange(desc(count)) %>% create_dt()
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+s.obj$Shannon.entropy <- unlist(lapply(s.obj$CTstrict, function(x){
+  return(subset(all.shannon.entropy, all.shannon.entropy$clone == x)$Shannon.entropy)
+}))
+```
+
+### Sampling cells from all samples/colonizations and clonal Shannon entropy {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+sampling.size <- sort(unique(all.shannon.entropy$count))
+sampling.size <- sampling.size[sampling.size >= 5]
+  
+tmp.shannon.entropy <- all.shannon.entropy %>%
+    subset(select = c(clone, Shannon.entropy))
+colnames(tmp.shannon.entropy) <- c("data", "Shannon.entropy")
+  
+dir.create(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_all"))
+  
+for (num.sampling.cells in sampling.size){
+    if (file.exists(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_all", sprintf("[Validation]sampling_clonal_shannon_entropy_all.%s.xlsx", num.sampling.cells))) == FALSE){
+    all.cells <- colnames(s.obj)
+    all.sampling.entropies <- c()
+    
+    for (count in seq(1, 1000)){
+      sampling.cells <- sample(all.cells, num.sampling.cells)
+      tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj)
+      all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+    }
+    
+    samplingdf <- data.frame(data = all.sampling.entropies)
+    colnames(samplingdf) <- c("Shannon.entropy")
+    samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+    samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+    samplingdf$case <- "Sampling"
+    
+    tmp.shannon.entropy$case <- "real_clone"
+    
+    validationdf <- rbind(tmp.shannon.entropy, samplingdf)
+    
+    writexl::write_xlsx(validationdf, file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_all", sprintf("[Validation]sampling_clonal_shannon_entropy_all.%s.xlsx", num.sampling.cells)))      
+    } else {
+      validationdf <- readxl::read_excel(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_all", sprintf("[Validation]sampling_clonal_shannon_entropy_all.%s.xlsx", num.sampling.cells)))
+    }
+    p <- validationdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+    ggtitle(sprintf("Shannon entropy: Real clone vs sampling %s cells", num.sampling.cells))
+    cat(sprintf("#### Sampling %s cells \n", num.sampling.cells))
+    # print(p)
+    cat("\n \n")
+
+  }
+```
+
+
+### UMAP + shannon entropy
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+keep.cells <- row.names(subset(s.obj@meta.data, is.na(s.obj@meta.data$CTstrict) == FALSE))
+s.obj.1st.integrated.with.clone <- subset(s.obj, cells = keep.cells)
+
+p <- FeaturePlot(object = s.obj.1st.integrated.with.clone, reduction = "INTE_UMAP", features = "Shannon.entropy", label = TRUE, label.size = 8, label.color = "blue", pt.size = 0.5) + scale_color_gradient(low = "#FFFF00", high = "#FF0000", na.value = "lightgray", limits = c(0, 1))
+
+ggsave(plot = p, filename = "UMAP_clonal_shannon_entropy_all.svg", path = path.to.save.figures, width = 15, height = 10, device = "svg", dpi = 300)
+print(p)
+```
+
+## Shannon entropy in colonizations
+
+We extract cells from a particular colonization, collect all clones and calculate their Shannon entropy. This Shannon entropy measures the diversity of the clone within the colonization only, so it is different from the "all samples/colonizations" Shannon entropy.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+colonization.clone.shannon <- hash()
+
+for (group in unique(s.obj$stage)){
+  if (file.exists(file.path(path.to.save.table, sprintf("clone_shannon_in_colonization_%s.xlsx", group))) == FALSE){
+      tmp.s.obj <- s.obj.colonization[[group]]
+      tmp.metadata <- tmp.s.obj@meta.data %>% subset(select = c(CTstrict)) %>% 
+        table() %>%
+        as.data.frame() %>%
+        arrange(desc(Freq))
+      colnames(tmp.metadata) <- c("clone", "count")
+      
+      tmp.metadata$colonization.Shannon <- unlist(
+        lapply(
+          tmp.metadata$clone, function(x){
+            barcodes <- subset(tmp.s.obj@meta.data, tmp.s.obj@meta.data$CTstrict == x) %>% rownames()
+            if (length(barcodes) >= 5){
+              output <- calculate_shannon_entropy(barcodes = barcodes, input.s.obj = tmp.s.obj)
+            } else {
+              output <- NA
+            }
+            return(output)
+          }
+        )
+      )
+      writexl::write_xlsx(tmp.metadata, file.path(path.to.save.table, sprintf("clone_shannon_in_colonization_%s.xlsx", group)))    
+  } else {
+    tmp.metadata <- readxl::read_xlsx(file.path(path.to.save.table, sprintf("clone_shannon_in_colonization_%s.xlsx", group)))
+  }
+  colonization.clone.shannon[[group]] <- tmp.metadata
+}
+```
+
+
+### Tables {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+for (group in names(colonization.clone.shannon)){
+  tmp.table <- colonization.clone.shannon[[group]]  %>% subset(is.na(colonization.Shannon) == FALSE)
+  cat(paste("\n\n#### Colonization: ", sample.id, "##\n"))
+  print( htmltools::tagList(datatable(tmp.table, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+```
+
+### UMAP {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+for (group in names(s.obj.colonization)){
+  tmp <- s.obj.colonization[[group]]
+  
+  meta.data <- tmp@meta.data %>% rownames_to_column("barcode")
+  tmp.colonization.clone.shannon <- colonization.clone.shannon[[group]]
+  colnames(tmp.colonization.clone.shannon) <- c("CTstrict", "count", "colonization.Shannon")
+  meta.data <- merge(meta.data, tmp.colonization.clone.shannon, by.x = "CTstrict", by.y = "CTstrict", all.x = TRUE) %>%
+     column_to_rownames("barcode")
+  meta.data <- meta.data[row.names(tmp@meta.data), ]
+  tmp <- AddMetaData(object = tmp, metadata = meta.data$colonization.Shannon, col.name = "colonization.Shannon")
+  
+  s.obj.colonization[[group]]  <- tmp
+  
+  DefaultAssay(tmp) <- "RNA"
+  cat(sprintf("#### colonization: %s \n", group))
+
+  p <- FeaturePlot(object = tmp, reduction = "INTE_UMAP", features = c("colonization.Shannon"), pt.size = 1) + scale_color_gradient(low = "#FFFF00", high = "#FF0000", na.value = "lightgray", limits = c(0, 1)) + ggtitle("")
+  print(p)
+  ggsave(plot = p, filename = sprintf("UMAP_clonal_shannon_entropy_colonization_%s.svg", group),
+         path = path.to.save.figures, dpi = 300, height = 10, width = 15)
+  cat("\n \n")
+  
+}
+```
+
+### Sanpling cells from each colonization and their Shannon entropy distributions
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+dir.create(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_colonization"), showWarnings = FALSE, recursive = TRUE)
+for (colonization in names(s.obj.colonization)){
+      cat(sprintf("### Colonization %s {.tabset} \n \n", colonization))
+      sampling.size <- unique(colonization.clone.shannon[[colonization]]$count)
+      sampling.size <- sampling.size[sampling.size >= 5]
+      
+      colonization.shannon.entropy <- colonization.clone.shannon[[colonization]] %>%
+        subset(select = c(clone, colonization.Shannon))
+      colnames(colonization.shannon.entropy) <- c("data", "Shannon.entropy")
+      
+      for (num.sampling.cells in sampling.size){
+        if (file.exists(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_colonization", sprintf("[Validation]sampling_clonal_shannon_entropy_colonization_%s.%s.xlsx", colonization, num.sampling.cells))) == FALSE){
+          all.cells <- colnames(s.obj.colonization[[colonization]])
+          all.sampling.entropies <- c()
+          for (count in seq(1, 1000)){
+            sampling.cells <- sample(all.cells, num.sampling.cells)
+            tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj.colonization[[colonization]])
+            all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+            }
+          samplingdf <- data.frame(data = all.sampling.entropies)
+          colnames(samplingdf) <- c("Shannon.entropy")
+          samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+          samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+          samplingdf$case <- "Sampling"
+        
+          colonization.shannon.entropy$case <- "real_clone"
+        
+          validationdf <- rbind(colonization.shannon.entropy, samplingdf)
+          writexl::write_xlsx(validationdf, file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_colonization", sprintf("[Validation]sampling_clonal_shannon_entropy_colonization_%s.%s.xlsx", colonization, num.sampling.cells)))
+          } else {
+            validationdf <- readxl::read_xlsx(file.path(path.to.save.table, "[validation]sampling_clonal_shannon_entropy_colonization", sprintf("[Validation]sampling_clonal_shannon_entropy_colonization_%s.%s.xlsx", colonization, num.sampling.cells)))
+            }
+        p <- validationdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+      ggtitle(sprintf("Shannon entropy: Real clone vs sampling %s cells", num.sampling.cells))
+        cat(sprintf("#### Sampling %s cells \n", num.sampling.cells))
+        print(p)
+        cat("\n \n")
+      }
+}
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+```
+
+

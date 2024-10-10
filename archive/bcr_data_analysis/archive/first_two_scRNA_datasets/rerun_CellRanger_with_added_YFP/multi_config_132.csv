@@ -1,0 +1,9 @@
+[gene-expression]
+reference,/home/hieunguyen/CRC1382/src/src_pipeline/build-mm10-with-YFP//mm10-with-YFP
+expect-cells,1000
+[vdj]
+reference,/home/hieunguyen/CRC1382/src/src_pipeline/GRCm38_VDJ_reference/refdata-cellranger-vdj-GRCm38-alts-ensembl-7.0.0
+[libraries]
+fastq_id,fastqs,lanes,feature_types,subsample_rate
+132_GEX,/media/hieunguyen/HD0/ext_HDD/raw_data/BSimons_datasets/220504_Simons_Pabst_MolMedizin_scVDJseq/genomics.rwth-aachen.de/data/220504_Simons_Pabst_MolMedizin_scVDJseq/fastq/132_GEX,1|2,gene expression,
+132_VDJ,/media/hieunguyen/HD0/ext_HDD/raw_data/BSimons_datasets/220504_Simons_Pabst_MolMedizin_scVDJseq/genomics.rwth-aachen.de/data/220504_Simons_Pabst_MolMedizin_scVDJseq/fastq/132_VDJ,1|2,vdj,

@@ -1,0 +1,51 @@
+>M12832|TRGV1*01|Mus_musculus_BALB/c|F|L-PART1+L-PART2|8..50+143..147|48 nt|1| | | | |48+0=48| | |
+atgctgctcctgagatggcccaccttctgctgcctctgggtttttggg
+>AF021335|TRGV1*02|Mus_musculus|F|L-PART1+L-PART2|39772..39814+39907..39911|48 nt|1| | | | |48+0=48| | |
+atgctgctcctgagatggcccaccttctgctgcctctgggtttttggg
+>IMGT000187|TRGV1*04|Mus_musculus_NOD/SCID|F|L-PART1+L-PART2|123050..123092+123185..123189|48 nt|1| | | | |48+0=48| | |
+atgctgctcctgagatggcccaccttctgctgcctctgggtttttggg
+>M12831|TRGV2*01|Mus_musculus_BALB/c|F|L-PART1+L-PART2|373..415+520..524|48 nt|1| | | | |48+0=48| | |
+atgctgctcctgagatggttcacctcctgctgcctctgggtttttggg
+>AF037352|TRGV3*01|Mus_musculus|F|L-PART1+L-PART2|66096..66141+66246..66250|51 nt|1| | | | |51+0=51| | |
+atgctgctcctgagaatgttcacctcctgctgctgcctctgggtttttggg
+>AF037352|TRGV4*01|Mus_musculus|F|L-PART1+L-PART2|8236..8347+8455..8459|117 nt|1| | | | |117+0=117| | |
+atgaagaaccctggctcacaagccctgcttcctttatatcttccctgggaagccaacctg
+gcagatgagaatccactcctgaaagtagtcattttcttatgcctcttgacatttgga
+>IMGT000187|TRGV4*04|Mus_musculus_NOD/SCID|F|L-PART1+L-PART2|16500..16611+16719..16723|117 nt|1| | | | |117+0=117| | |
+atgaagaaccctggctcacaagccctgcttcctttatatcttccctgggaagccaacctg
+gcagatgagaatccactcctgaaagtagtcattttcttatgcctcttgacatttgga
+>AF037352|TRGV5*01|Mus_musculus|F|L-PART1+L-PART2|15523..15565+15673..15677|48 nt|1| | | | |48+0=48| | |
+atgtcaacctcttggctttttcttctgtctttgacctgtgtttatgga
+>D29793|TRGV6*01|Mus_musculus_C57BL/6|F|L-PART1+L-PART2|1802..1895+2052..2056|99 nt|1| | | | |99+0=99| | |
+atggggcttctgctacaagtcttcacactggcctccctcaggatttgtaagtgcatggcc
+ttcaggggaatcgaggatacagggaaaagagccaaggga
+>AF037352|TRGV6*02|Mus_musculus|F|L-PART1+L-PART2|13613..13706+13863..13867|99 nt|1| | | | |99+0=99| | |
+atggggcttctgctacaagtcttcacactggcctccctcaggatttgtaagtgcatggcc
+ttcaggggaatcgaggatacagggaaaagagccaaggga
+>D29794|TRGV7*01|Mus_musculus_C57BL/6|F|L-PART1+L-PART2|2238..2280+2382..2392|54 nt|1| | | | |54+0=54| | |
+atgctgtgggctctggccctacttctagctttcttgccggctggcagacaaaca
+>AF037352|TRGV7*02|Mus_musculus|F|L-PART1+L-PART2|1311..1353+1454..1464|54 nt|1| | | | |54+0=54| | |
+atgctgtgggctctggccctacttctagctttcttgcctgctggcagacaaaca
+>IMGT000195|TRGV2-1*01|Mustela putorius furo|F|L-PART1+L-PART2|105287..105329+105425..105432|51 nt|1| | | | |51+0=51| | |
+atgctgggtccccttgccctcctgtgtgctctcctgtttcctgatggtgga
+>IMGT000195|TRGV2-2*01|Mustela putorius furo|F|L-PART1+L-PART2|170494..170536+170632..170639|51 nt|1| | | | |51+0=51| | |
+atgctgggtccccttgccatcctgtgtgctctcctgtttcccggcggtgga
+>IMGT000195|TRGV2-3*01|Mustela putorius furo|F|L-PART1+L-PART2|237438..237480+237575..237582|51 nt|1| | | | |51+0=51| | |
+atgctgggtccccttgccatcctgtgtgctctcctgtttcccggtggtgga
+>IMGT000195|TRGV3-1*01|Mustela putorius furo|P|L-PART1+L-PART2|9838..9880+9989..9999|54 nt|1| | | | |54+0=54| | |
+atgccaatgttggaaatggtcattgtcttatccttctgggcctttggccttgga
+>IMGT000195|TRGV3-2*01|Mustela putorius furo|P|L-PART1+L-PART2|124969..125011+125118..125128|54 nt|1| | | | |54+0=54| | |
+atgccacagctgaaagcattcattttcttgtctcccaggcctattggctttggg
+>IMGT000195|TRGV5-1*01|Mustela putorius furo|F|L-PART1+L-PART2|411293..411338+411599..411609|57 nt|1| | | | |57+0=57| | |
+atgctgctcccatcacaggtcatcctgctggcctctctgtggatctatgcagatgca
+>IMGT000195|TRGV6-1*01|Mustela putorius furo|F|L-PART1+L-PART2|389369..389411+389496..389503|51 nt|1| | | | |51+0=51| | |
+atgctgggtgcacttgccatcttttgtgccctcctgttttccggtggccac
+>IMGT000195|TRGV7-1*01|Mustela putorius furo|F|L-PART1+L-PART2|402199..402241+402336..402346|54 nt|1| | | | |54+0=54| | |
+atgccactgctagaagctgtcatcttctcatccctctgggcctttggccttggg
+>IMGT000195|TRGV7-2*01|Mustela putorius furo|F|L-PART1+L-PART2|461094..461136+461247..461257|54 nt|1| | | | |54+0=54| | |
+atgccacttctggaagcagtcatcttctcctgtctctgggcctttggcctcggg
+>IMGT000195|TRGV7-3*01|Mustela putorius furo|ORF|L-PART1+L-PART2|472376..472418+472529..472539|54 nt|1| | | | |54+0=54| | |
+atgccacttctggaagcagtcatcttctcctgtctctgggcctttggcctcggg
+>IMGT000195|TRGVD*01|Mustela putorius furo|P|L-PART1+L-PART2|489058..489100+489501..489511|54 nt|1| | | | |54+0=54| | |
+atactgtggctccctttctctgctgtctatgggtcttagctgtatgcaaatgca
+

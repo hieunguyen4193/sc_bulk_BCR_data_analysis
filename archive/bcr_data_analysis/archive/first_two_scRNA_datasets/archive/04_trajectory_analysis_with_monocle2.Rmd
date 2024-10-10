@@ -1,0 +1,334 @@
+---
+title: "Monocle2 trajectory analysis"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    number_sections: true
+    df_print: paged
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    theme: lumen
+params:
+  dataset.name: NA
+---
+  
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+$(document).ready(function() {
+  $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+  // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=14, results='hide'}
+my_random_seed <- 42
+set.seed(my_random_seed)
+
+scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+
+path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/BSimons/CRC1382_BSimons_project/BSimons_scRNAseq_analysis"
+source(file.path(path.to.project.src, "00_helper_functions.R"))
+
+#####-----------------------------------------------------------------------#####
+##### install monocle
+#####-----------------------------------------------------------------------#####
+# if ("monocle3" %in% installed.packages()){
+# remove.packages("monocle3")
+# devtools::install_github("cysouw/qlcMatrix")
+# install.packages("DDRTree")
+# install.packages("densityClust")
+# BiocManager::install("monocle.objSingleCell", update = FALSE)
+# install.packages("fastICA")
+# BiocManager::install("biocViews", update = FALSE)
+# # remove.packages("BiocGenerics")
+# BiocManager::install("HSMMSingleCell", update = FALSE)
+# # install.packages("/media/hieunguyen/HD0/storage/offline_pkgs/monocle_2.30.0.tar.gz", type = "source", repos = NULL)
+# install.packages("/media/hieunguyen/HD0/storage/offline_pkgs/monocle_2.30.0/monocle", type = "source", repos = NULL)
+# BiocManager::install("tradeSeq", update = FALSE)
+# }
+#####-----------------------------------------------------------------------#####
+
+if ("svglite" %in% installed.packages() == FALSE){
+  install.packages("svglite")
+}
+library(devtools)
+library(monocle)
+
+# dataset.name <- "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1"
+dataset.name <- "2nd_dataset_removed_5_6.without_reInt.res1"
+
+# dataset.name <- params$dataset.name
+
+outdir <- "/media/hieunguyen/HD0/outdir/CRC1382"
+path.to.main.output <- file.path(outdir, "BSimons", "OUTPUT", "THESIS_OUTPUT_20231026")
+path.to.01.output <- file.path(path.to.main.output, "01_output")
+path.to.04.output <- file.path(path.to.main.output, "04_output", dataset.name)
+dir.create(path.to.04.output, showWarnings = FALSE, recursive = TRUE)
+
+cluster.resolution <- 0.5
+
+path.to.input.s.obj <- file.path(path.to.01.output, dataset.name, sprintf("%s.rds", dataset.name))
+s.obj <- readRDS(path.to.input.s.obj)
+
+if (file.exists(file.path(path.to.04.output, "monocle_obj.rds")) == FALSE){
+  print("Running monocle2 ...")
+  monocle.obj <- run_monocle2(s.obj, path.to.04.output)
+} else {
+  print("monocle object exists!")
+  monocle.obj <- readRDS(file.path(path.to.04.output, "monocle_obj.rds"))  
+}
+
+```
+
+# Plot
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
+```
+
+## UMAP
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+plot_cell_trajectory(monocle.obj, color_by = "seurat_clusters")
+```
+
+## Cell trajectory from `monocle2`
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+plot_cell_trajectory(monocle.obj)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+plot_cell_trajectory(monocle.obj, color_by = "Pseudotime")
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+##### Add pseudotime information to the main seurat object
+seurat.metadata <- s.obj@meta.data %>% rownames_to_column("barcode")
+monocle.metadata <- pData(monocle.obj) %>% rownames_to_column("barcode") %>%
+  subset(select = c(barcode, Pseudotime, State))
+
+meta.data <- merge(seurat.metadata, monocle.metadata, by.x = "barcode", by.y = "barcode") %>%
+  column_to_rownames("barcode")
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+s.obj <- AddMetaData(object = s.obj, metadata = meta.data$Pseudotime, col.name = "Pseudotime")
+s.obj <- AddMetaData(object = s.obj, metadata = meta.data$State, col.name = "State")
+```
+
+## UMAP: grouped by trajectory STATE
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "State")
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, features = c("Pseudotime"))
+```
+
+# Differential gene expression tests (trajectories)
+
+## Differential gene expression test along trajectories (VGAM)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+if (file.exists(file.path(path.to.04.output, "pseudotime.markers.rds")) == FALSE){
+  pseudotime.markers <- differentialGeneTest(monocle.obj, fullModelFormulaStr = "~sm.ns(Pseudotime)", cores = 16, verbose = TRUE)
+  saveRDS(pseudotime.markers, file.path(path.to.04.output, "pseudotime.markers.rds"))
+} else {
+  pseudotime.markers <- readRDS(file.path(path.to.04.output, "pseudotime.markers.rds"))
+}
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+sig_gene_names <- row.names(subset(pseudotime.markers, qval < 0.1))
+plot_pseudotime_heatmap(monocle.obj[head(sig_gene_names, 10),],
+                num_clusters = 3,
+                cores = 1,
+                show_rownames = T)
+```
+
+# Differential gene expression test (TradeSeq)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+devtools::install_github("statOmics/tradeSeq")
+library(tradeSeq)
+
+info <- extract_monocle_info(monocle.obj)
+cellWeights <- info$cellWeights
+pseudotime <- info$pseudotime
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+tmp.cellWeights <- data.frame(cellWeights) %>% rownames_to_column("barcode")
+meta.data <- merge(meta.data, tmp.cellWeights, by.x = "barcode", by.y = "barcode")
+meta.data <- meta.data %>% column_to_rownames("barcode")
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+
+for (tmp.col in colnames(cellWeights)){
+  s.obj <- AddMetaData(object = s.obj, metadata = meta.data[[tmp.col]], col.name = tmp.col)
+}
+```
+
+A matrix of cell weights defining the probability that a cell belongs to a particular lineage. Each row represents a cell and each column represents a lineage. If only a single lineage, provide a matrix with one column containing all values of 1.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (tmp.col in colnames(cellWeights)){
+  p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", group.by = tmp.col, label = TRUE, pt.size = 1.5)
+  print(p)
+}
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+print(sprintf("Number of lineage in this dataset: %s", ncol(cellWeights)))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+if (file.exists(file.path(path.to.04.output, "sce.rds")) == FALSE){
+  sce <- fitGAM(counts = Biobase::exprs(monocle.obj),
+              cellWeights = cellWeights,
+              pseudotime = pseudotime, 
+              sce = TRUE, 
+              nknots = 6,
+              parallel = TRUE, 
+              genes = intersect(row.names(Biobase::exprs(monocle.obj)), VariableFeatures(s.obj)))
+  saveRDS(sce, file.path(path.to.04.output, "sce.rds"))  
+} else {
+  sce <- readRDS(file.path(path.to.04.output, "sce.rds"))
+}
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+#####----------------------------------------------------------------------#####
+##### Test within lineage
+#####----------------------------------------------------------------------#####
+if (file.exists(file.path(path.to.04.output, "tradeseq_test_res.rds")) == FALSE){
+  tradeseq.testres <- hash()
+  ##### Association test
+  tmp <- associationTest(sce)
+  tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+  tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+  tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% arrange(desc(meanLogFC)) %>% 
+    rownames_to_column("Gene")
+  tradeseq.testres[["Association_test"]] <- tmp
+  
+  ##### Start vs End test
+  tmp <- startVsEndTest(sce)
+  tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+  tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+  tmp <- subset(tmp, tmp$p.adjust <= 0.05)  %>% 
+    rownames_to_column("Gene")
+  tradeseq.testres[["StartVsEnd_test"]] <- tmp
+  
+  #####----------------------------------------------------------------------#####
+  ##### Test across lineage
+  #####----------------------------------------------------------------------#####
+  if (ncol(cellWeights) >= 2){
+    ##### End vs End test
+    tmp <- diffEndTest(sce)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>%
+      rownames_to_column("Gene")
+    tradeseq.testres[["diff_End_test"]] <- tmp
+    
+    ##### Pattern test
+    tmp <- patternTest(sce)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% 
+      rownames_to_column("Gene")
+    tradeseq.testres[["Pattern_test"]] <- tmp
+    
+    ##### early DE test
+    tmp <- earlyDETest(sce,)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% 
+      rownames_to_column("Gene")
+    tradeseq.testres[["EarlyDE_test"]] <- tmp
+
+  }
+  saveRDS(tradeseq.testres, file.path(path.to.04.output, "tradeseq_test_res.rds"))
+} else {
+  tradeseq.testres <- readRDS(file.path(path.to.04.output, "tradeseq_test_res.rds"))
+}
+```
+
+## All test results (table) {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10, include=FALSE}
+tradeseq.testres$Association_test %>% create_dt()
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (input.test in names(tradeseq.testres)){
+  cat(sprintf("### Test: %s \n", input.test))
+  tmp <- tradeseq.testres[[input.test]]
+  print( htmltools::tagList(datatable(tmp, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+```
+
+# Branch analysis (monocle-BEAM)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+if (file.exists(file.path(path.to.04.output, "BEAM_res.rds")) == FALSE){
+  BEAM_res <- BEAM(monocle.obj, branch_point = 1, cores = 10)
+  BEAM_res <- BEAM_res[order(BEAM_res$qval),]
+  BEAM_res <- BEAM_res[,c("gene_short_name", "pval", "qval")]
+  saveRDS(BEAM_res, file.path(path.to.04.output, "BEAM_res.rds"))  
+} else {
+  BEAM_res <- readRDS(file.path(path.to.04.output, "BEAM_res.rds"))
+}
+
+BEAM_res <- BEAM_res[order(BEAM_res$qval),]
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+selected.BEAM.genes <-  head(BEAM_res, 100)
+p <- plot_genes_branched_heatmap(monocle.obj[selected.BEAM.genes$gene_short_name,],
+                                 branch_point = 1,
+                                 num_clusters = 4,
+                                 cores = 1,
+                                 use_gene_short_name = T,
+                                 show_rownames = T, 
+                                 return_heatmap = TRUE)
+ggsave(plot = p$ph_res, filename = "BEAM_branch_DE_genes_top100.svg", device = "svg", path = file.path(path.to.04.output), dpi = 300, width = 20, height = 15)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+```
+

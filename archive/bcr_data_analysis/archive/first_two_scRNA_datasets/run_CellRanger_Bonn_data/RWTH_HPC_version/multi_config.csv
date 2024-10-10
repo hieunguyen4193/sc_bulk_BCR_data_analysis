@@ -1,0 +1,13 @@
+[gene-expression],,,,
+reference,/work/uk104163/CRC1382/cellranger/refdata-gex-mm10-2020-A,,,
+expect-cells,1000,,,
+chemistry,SC5P-R2,,,
+[vdj],,,,
+reference,/work/uk104163/CRC1382/cellranger/refdata-cellranger-vdj-GRCm38-alts-ensembl-7.0.0,,,
+[libraries],,,,
+fastq_id,fastqs,lanes,feature_types,subsample_rate
+GF_7w_14wG,/work/uk104163/CRC1382/raw_data/Exp_GF_7W_14W/Exp_GF_7W_14W/GEX,any,gene expression,
+GF_7w_14wB,/work/uk104163/CRC1382/raw_data/Exp_GF_7W_14W/Exp_GF_7W_14W/VDJ,any,vdj,
+GF_7w_14wS,/work/uk104163/CRC1382/raw_data/Exp_GF_7W_14W/Exp_GF_7W_14W/Index,any,antibody capture,
+[feature],,,,
+reference,/work/uk104163/CRC1382/raw_data/Exp_GF_7W_14W/FB.csv,,,

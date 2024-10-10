@@ -1,0 +1,448 @@
+---
+title: "Monocle3 trajectory analysis"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    number_sections: true
+    df_print: paged
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    theme: lumen
+params:
+  org.dataset: NA
+  config.version: NA
+---
+  
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+$(document).ready(function() {
+  $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+  // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=14, results='hide'}
+my_random_seed <- 42
+set.seed(my_random_seed)
+
+scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+
+path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/BSimons/CRC1382_BSimons_project/BSimons_scRNAseq_analysis"
+
+source(file.path(path.to.project.src, "00_helper_functions.R"))
+
+#####-----------------------------------------------------------------------#####
+##### install monocle
+#####-----------------------------------------------------------------------#####
+# BiocManager::install("tradeSeq", update = FALSE)
+
+if ("svglite" %in% installed.packages() == FALSE){
+  install.packages("svglite")
+}
+library(devtools)
+
+# dataset.name <- params$dataset.name
+dataset.name <- "2nd_dataset_removed_5_6.without_reInt.res1"
+# dataset.name <- "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1"
+  
+outdir <- "/media/hieunguyen/HD0/outdir/CRC1382"
+
+path.to.main.output <- file.path(outdir, "BSimons", "OUTPUT", "THESIS_OUTPUT_20231026")
+path.to.01.output <- file.path(path.to.main.output, "01_output", dataset.name)
+path.to.02.output <- file.path(path.to.main.output, "02_output", dataset.name)
+path.to.05.output <- file.path(path.to.main.output, "05_output", dataset.name)
+dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
+
+s.obj <- readRDS(file.path(path.to.01.output, sprintf("%s.rds", dataset.name)))
+
+s.obj@active.assay = 'RNA'
+library(monocle3)
+
+if (file.exists(file.path(path.to.05.output, "monocle3.rds")) == FALSE){
+  #####----------------------------------------------------------------------#####
+  # CONVERT THE SEURAT OBJECT TO MONOCLE3 OBJECT
+  #####----------------------------------------------------------------------#####
+  # Note that we transfer the UMAP coordinates from our Seurat object to the new
+  # monocle3 object, do not re-generate a new UMAP coordinate. 
+    monocle.obj <- new_cell_data_set(expression_data = GetAssayData(s.obj, slot = "counts"),
+                            cell_metadata = s.obj@meta.data)
+  rowData(monocle.obj)$gene_name <- rownames(monocle.obj)
+  rowData(monocle.obj)$gene_short_name <- rowData(monocle.obj)$gene_name
+  monocle.obj@int_colData@listData$reducedDims$UMAP <- s.obj@reductions$RNA_UMAP@cell.embeddings
+  
+  #####----------------------------------------------------------------------#####
+  # RUN CLUSTERING FOR TRAJECTORIES INFERENCE
+  #####----------------------------------------------------------------------#####
+  monocle.obj <- cluster_cells(monocle.obj, resolution=1e-7, random_seed = my_random_seed)
+  set.seed(my_random_seed)
+  monocle.obj <- learn_graph(cds = monocle.obj, use_partition = TRUE, verbose = TRUE)
+  saveRDS(monocle.obj, file.path(path.to.05.output, "monocle3.rds"))
+} else {
+  monocle.obj <- readRDS(file.path(path.to.05.output, "monocle3.rds"))
+}
+
+```
+
+# UMAP
+
+## UMAP, grouped by clusters
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=14, results='asis'}
+DimPlot(object= s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
+```
+
+## UMAP, all principal point and trajectory
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=14, results='asis'}
+# Run this plot_cells function to find the "coordinate" names of pricipals points (starting-ending points of the trajectories)
+plot_cells(monocle.obj, 
+           label_principal_points = TRUE, 
+           graph_label_size = 6, 
+           show_trajectory_graph = TRUE, 
+           cell_size = 1, 
+           color_cells_by = "seurat_clusters", 
+           label_cell_groups = TRUE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=14, results='asis'}
+plot_cells(monocle.obj, 
+           label_principal_points = TRUE, 
+           graph_label_size = 6, 
+           show_trajectory_graph = TRUE, 
+           cell_size = 1, 
+           color_cells_by = "partition", 
+           label_cell_groups = TRUE)
+```
+
+## Plot all nodes
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=TRUE, fig.height=10, fig.width=20, results='asis'}
+assign.node.label <- function(x){
+  if (x == 1){
+    return("root")
+  } else if (x == 3){
+    return("branch")
+  } else {
+    return(NA)
+  }
+}
+mst <- principal_graph(monocle.obj)$UMAP
+list_of_principal_points <- names(which(igraph::degree(mst) == 1))
+all.nodes <- monocle.obj@principal_graph_aux$UMAP$dp_mst %>% t() %>% data.frame() %>% rownames_to_column("node") %>%
+  rowwise() %>%
+  mutate(node.degree = igraph::degree(mst)[[node]]) %>%
+  mutate(label = assign.node.label(node.degree)) %>%
+  mutate(node.name = ifelse(node.degree %in% c(1, 3), node, NA))
+
+all.nodes$node.degree <- factor(all.nodes$node.degree, levels = seq(1, length(unique(all.nodes$node.degree))))
+p1 <- all.nodes %>% ggplot(aes(x = UMAP_1, y = UMAP_2, color = node.degree, label = label)) + geom_point(size = 3) + geom_text_repel(size = 6)
+p2 <- all.nodes %>% ggplot(aes(x = UMAP_1, y = UMAP_2, color = node.degree, label = node.name)) + geom_point(size = 3) + geom_text_repel(size = 6)
+p1 + p2
+```
+
+
+## Trajectories {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=10, fig.width=18}
+
+for (principal_node in list_of_principal_points){
+  monocle.obj <- order_cells(cds = monocle.obj, reduction_method = "UMAP", root_pr_nodes = principal_node)
+  s.obj <- AddMetaData(
+  object = s.obj,
+  metadata = monocle.obj@principal_graph_aux@listData$UMAP$pseudotime,
+  col.name = sprintf("pseudotime_%s", principal_node)
+)
+  cat(sprintf("#### Principal point: %s \n", principal_node))
+  p <- plot_cells(cds = monocle.obj,
+             color_cells_by = "pseudotime", 
+             graph_label_size=8, 
+             cell_size = 1,
+             reduction_method = "UMAP", 
+             label_branch_points = FALSE, 
+             label_cell_groups = FALSE, 
+             label_groups_by_cluster = FALSE, 
+             labels_per_group = FALSE, 
+             label_roots = TRUE, 
+             label_leaves = FALSE, 
+             label_principal_points = FALSE, 
+             trajectory_graph_segment_size = 3) + 
+    ggtitle(sprintf("Principal node: %s", principal_node))
+  print(p)
+  cat("\n \n")
+}
+```
+
+## Pseudotime on UMAP with cell seurat_clusters {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=10, fig.width=18}
+for (principal_node in list_of_principal_points){
+  Idents(s.obj) <- "seurat_clusters"
+  cat(sprintf("#### Principal node %s \n", principal_node))
+  p <- FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = sprintf("pseudotime_%s", principal_node), label = TRUE, label.size = 8, label.color = "red") + scale_color_viridis_c()
+  print(p)
+  cat("\n \n")
+}
+```
+
+# Differential gene expession analysis
+
+## Graph test (built-in test in monocle3)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', include=FALSE, fig.height=10, fig.width=18}
+if (file.exists(file.path(path.to.05.output, "monocle.obj_graph_test_res.rds")) == FALSE){
+  monocle.obj_graph_test_res <- graph_test(monocle.obj, neighbor_graph="principal_graph", cores=16)
+  saveRDS(monocle.obj_graph_test_res, file.path(path.to.05.output, "monocle.obj_graph_test_res.rds"))
+} else {
+  monocle.obj_graph_test_res <- readRDS(file.path(path.to.05.output, "monocle.obj_graph_test_res.rds"))
+}
+
+sig_monocle.obj_graph_test_res <- subset(monocle.obj_graph_test_res, q_value < 0.05)
+sig_res <- row.names(sig_monocle.obj_graph_test_res)
+sig_monocle.obj_graph_test_res <- sig_monocle.obj_graph_test_res %>% arrange(desc(morans_I))
+```
+
+### List of all DE genes along trajectories
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', include=TRUE, fig.height=10, fig.width=18}
+sig_monocle.obj_graph_test_res %>% mutate_if(is.numeric, round, 6) %>% create_dt()
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=10, fig.width=18}
+gt0.5_genes <- subset(sig_monocle.obj_graph_test_res, sig_monocle.obj_graph_test_res$morans_I >= 0.5)$gene_name
+split.selected.genes <- split(gt0.5_genes, ceiling(seq_along(gt0.5_genes) / 9))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=15, fig.width=20}
+for (selected.starting.point in list_of_principal_points){
+  cat(sprintf("## Genes that change as a function of pseudotime, starting point: %s \n", selected.starting.point))
+  cat("### on UMAP {.tabset} \n")
+  for (case in names(split.selected.genes)){
+    cat(sprintf("#### Part %s \n", case))
+    subset_monocle.obj <- monocle.obj[rowData(monocle.obj)$gene_short_name %in% split.selected.genes[[case]],]
+    subset_monocle.obj <- order_cells(cds = subset_monocle.obj, reduction_method = "UMAP", root_pr_nodes = selected.starting.point)
+  
+    p1 <- plot_cells(cds = monocle.obj, genes = split.selected.genes[[case]],
+                     cell_size = 2,
+             show_trajectory_graph=FALSE,
+             label_cell_groups=FALSE,
+             label_leaves=FALSE) + scale_color_gradient(low = "#34eb77", high = "#eb3449")
+    print(p1)
+    cat("\n \n")
+  }
+  
+  cat("\n \n")
+  cat("### As a function {.tabset} \n")
+  for (case in names(split.selected.genes)){
+    cat(sprintf("#### Part %s \n", case))
+    subset_monocle.obj <- monocle.obj[rowData(monocle.obj)$gene_short_name %in% split.selected.genes[[case]],]
+    subset_monocle.obj <- order_cells(cds = subset_monocle.obj, reduction_method = "UMAP", root_pr_nodes = selected.starting.point)
+    p2 <- plot_genes_in_pseudotime(color_cells_by="seurat_clusters", cds_subset = subset_monocle.obj, min_expr = 0.5, horizontal_jitter = 0.1)
+    print(p2)
+    cat("\n \n")
+  }
+}
+```
+
+
+# TradeSeq Test
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=10, fig.width=14}
+cell_ids <- colnames(monocle.obj)
+closest_vertex <- monocle.obj@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+closest_vertex <- as.matrix(closest_vertex[colnames(monocle.obj), ])
+closest_vertex <- closest_vertex[cell_ids, ]
+closest_vertex <- as.numeric(names(which.max(table(closest_vertex))))
+mst <- principal_graph(monocle.obj)$UMAP
+root_pr_nodes <- igraph::V(mst)$name[closest_vertex]
+
+library(tradeSeq)
+library(SingleCellExperiment)
+library(magrittr)
+# Get the closest vertice for every cell
+y_to_cells <-  principal_graph_aux(monocle.obj)$UMAP$pr_graph_cell_proj_closest_vertex %>%
+  as.data.frame()
+y_to_cells$cells <- rownames(y_to_cells)
+y_to_cells$Y <- y_to_cells$V1
+
+# Get the root vertices
+# It is the same node as above
+root <- monocle.obj@principal_graph_aux$UMAP$root_pr_nodes
+
+# Get the other endpoints
+endpoints <- names(which(igraph::degree(mst) == 1))
+if (length(endpoints) > 1){
+  endpoints <- endpoints[!endpoints %in% root]  
+} 
+
+# For each endpoint
+cellWeights <- lapply(endpoints, function(endpoint) {
+  # We find the path between the endpoint and the root
+  path <- igraph::shortest_paths(mst, root, endpoint)$vpath[[1]]
+  path <- as.character(path)
+  # We find the cells that map along that path
+  df <- y_to_cells[y_to_cells$Y %in% path, ]
+  df <- data.frame(weights = as.numeric(colnames(monocle.obj) %in% df$cells))
+  colnames(df) <- endpoint
+  return(df)
+  }) %>% do.call(what = 'cbind', args = .) %>%
+    as.matrix()
+
+
+rownames(cellWeights) <- colnames(monocle.obj)
+
+cellWeightsdf <- data.frame(cellWeights)
+cellWeightsdf <- subset(cellWeightsdf, rowSums(cellWeightsdf) > 0)
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+meta.data <- merge(meta.data, cellWeightsdf %>% rownames_to_column("barcode"), by.x = "barcode", by.y = "barcode", all.x = TRUE) %>%
+  column_to_rownames("barcode")
+
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+
+for (tmp.col in colnames(cellWeights)){
+  s.obj <- AddMetaData(object = s.obj, metadata = meta.data[[tmp.col]], col.name = tmp.col)
+}
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (tmp.col in colnames(cellWeights)){
+  p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", group.by = tmp.col, label = TRUE, pt.size = 1.5)
+  print(p)
+}
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.height=10, fig.width=14}
+pseudotime <- matrix(pseudotime(monocle.obj[, rownames(cellWeightsdf)]), 
+                     ncol = ncol(cellWeightsdf),
+                     nrow = ncol(monocle.obj[, rownames(cellWeightsdf)]), 
+                     byrow = FALSE)
+
+input.GAM.counts <- GetAssayData(s.obj, slot = "count", assay = "RNA")[, rownames(cellWeightsdf)]
+
+print("Start working on fitGAM...")
+if (file.exists(file.path(path.to.05.output, "sce.rds")) == FALSE){
+  # eval_to_choose_K <- evaluateK(counts = input.GAM.counts, 
+  #                               pseudotime = pseudotime,
+  #                               cellWeights = as.matrix(cellWeightsdf),
+  #                               k = 3:9, 
+  #                               nGenes = 100,
+  #                               verbose = TRUE, 
+  #                               plot = TRUE,
+  #                               parallel = FALSE)
+  # saveRDS(eval_to_choose_K, file.path(path.to.05.output, "eval_to_choose_K.rds"))
+  sce <- fitGAM(counts = input.GAM.counts,
+              cellWeights = as.matrix(cellWeightsdf),
+              pseudotime = pseudotime, 
+              sce = TRUE, 
+              verbose = TRUE,
+              nknots = 5,
+              parallel = FALSE, 
+              genes = intersect(row.names(input.GAM.counts), VariableFeatures(s.obj)))
+  saveRDS(sce, file.path(path.to.05.output, "sce.rds"))  
+} else {
+  sce <- readRDS(file.path(path.to.05.output, "sce.rds"))
+}
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+#####----------------------------------------------------------------------#####
+##### Test within lineage
+#####----------------------------------------------------------------------#####
+if (file.exists(file.path(path.to.05.output, "tradeseq_test_res.rds")) == FALSE){
+  tradeseq.testres <- hash()
+  ##### Association test
+  tmp <- associationTest(sce)
+  tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+  tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+  tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% arrange(desc(meanLogFC)) %>% 
+    rownames_to_column("Gene")
+  tradeseq.testres[["Association_test"]] <- tmp
+  
+  ##### Start vs End test
+  tmp <- startVsEndTest(sce)
+  tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+  tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+  tmp <- subset(tmp, tmp$p.adjust <= 0.05)  %>% 
+    rownames_to_column("Gene")
+  tradeseq.testres[["StartVsEnd_test"]] <- tmp
+  
+  #####----------------------------------------------------------------------#####
+  ##### Test across lineage
+  #####----------------------------------------------------------------------#####
+  ##### End vs End test
+  if (ncol(cellWeightsdf) > 1){
+    tmp <- diffEndTest(sce)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% 
+      rownames_to_column("Gene")
+    tradeseq.testres[["diff_End_test"]] <- tmp    
+    
+    ##### early DE test
+    tmp <- earlyDETest(sce)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05)  %>% 
+      rownames_to_column("Gene")
+    tradeseq.testres[["EarlyDE_test"]] <- tmp
+    
+    ##### Pattern test
+    tmp <- patternTest(sce)
+    tmp <- subset(tmp, is.na(tmp$pvalue) == FALSE)
+    tmp$p.adjust <- p.adjust(tmp$pvalue, method = "BH")
+    tmp <- subset(tmp, tmp$p.adjust <= 0.05) %>% 
+      rownames_to_column("Gene")
+    tradeseq.testres[["Pattern_test"]] <- tmp
+  }
+  saveRDS(tradeseq.testres, file.path(path.to.05.output, "tradeseq_test_res.rds"))
+} else {
+  tradeseq.testres <- readRDS(file.path(path.to.05.output, "tradeseq_test_res.rds"))
+}
+
+```
+
+## All test results (table) {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10, include=FALSE}
+tradeseq.testres$Association_test %>% create_dt()
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (input.test in names(tradeseq.testres)){
+  cat(sprintf("### Test: %s \n", input.test))
+  tmp <- tradeseq.testres[[input.test]]
+  print( htmltools::tagList(datatable(tmp, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+```

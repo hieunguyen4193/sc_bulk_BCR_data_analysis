@@ -1,0 +1,791 @@
+---
+title: "Data analysis second dataset - GEX, 26.10.2023"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    keep_md: true
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: false
+    theme: lumen
+---
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+
+```{r echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+# clean up 
+gc()
+rm(list = ls())
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPARATION
+#####----------------------------------------------------------------------#####
+analysis.case <- "2nd_dataset_removed_5_6.without_reInt.res1"
+
+source("/media/hieunguyen/HNSD01/src/bcr_data_analysis/1st_2nd_datasets/00_helper_functions.R")
+# scrna_pipeline_src <- "/home/uk104163/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
+
+if ("svglite" %in% installed.packages() == FALSE){
+  install.packages("svglite")
+}
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPRATIONS
+#####----------------------------------------------------------------------#####
+outdir <- "/media/hieunguyen/HNSD_mini/outdir"
+PROJECT <- "1st_2nd_BSimons_Datasets"
+
+path.to.output <- file.path(outdir, PROJECT, "data_analysis")
+
+path.to.01.output <- file.path(path.to.output, "01_output")
+path.to.02.output <- file.path(path.to.output, "02_output", analysis.case)
+path.to.03.output <- file.path(path.to.output, "03_output", analysis.case)
+dir.create(path.to.03.output, showWarnings = FALSE, recursive = TRUE)
+
+path.to.save.table <- file.path(path.to.03.output, "tables")
+path.to.save.figures <- file.path(path.to.03.output, "figures")
+
+dir.create(path.to.save.table, showWarnings = FALSE, recursive = TRUE)
+dir.create(path.to.save.figures, showWarnings = FALSE, recursive = TRUE)
+
+s.obj <- readRDS(file.path(path.to.01.output, "2nd_dataset_removed_5_6.without_reInt.res1", "2nd_dataset_removed_5_6.without_reInt.res1.rds"))
+
+count.YFP <- GetAssayData(s.obj, slot = "counts")["YFP", ]
+count.YFP <- count.YFP[count.YFP != 0]
+yfp.cells <- names(count.YFP)
+non.yfp.cells <- to_vec(for (item in colnames(s.obj)) if (item %in% yfp.cells == FALSE) item)
+
+s.obj.yfp <- subset(s.obj, cells = yfp.cells)
+s.obj.nonyfp <- subset(s.obj, cells = non.yfp.cells)
+```
+
+# Some QC metrics after filtering out cells
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+  all.QC <- list()
+  
+  # Number of cells obtained per experiment/sample
+  all.QC$cell.counts.plot <- ggplot(s.obj@meta.data, 
+                                    aes(x=name , fill=name)) + 
+    geom_bar() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ggtitle("Number of cells in each dataset")
+  
+  # distribution of number of UMI in each sample
+  all.QC$nCountRNA.distribution <- ggplot(s.obj@meta.data,
+                                          aes(color=name, x=nCount_RNA, fill = name)) + 
+    geom_density(alpha = 0.2) +
+    scale_x_log10() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ylab("Cell density") +
+    geom_vline(xintercept = 500, color = "red") +
+    ggtitle("Distribution of read depths in each sample")
+  
+  # distribution of number of features (genes detected) in each sample
+  all.QC$nFeature_RNA.distribution <- ggplot(s.obj@meta.data,
+                                             aes(color=name, x=nFeature_RNA, fill = name, y = ..scaled..)) + 
+    geom_density(alpha = 0.2) +
+    scale_x_log10() +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    ylab("Cell density") +
+    geom_vline(xintercept = 1000, color = "red") +
+    xlim(1000, 10000) +
+    ggtitle("Distribution of number of detected genes in each sample")
+  
+  
+  # scatter plot showing the relation between cell read-depth and number of genes detected.
+  ## with Mitochondrial percentage
+  all.QC$nCount.vs.nFeature.MT <- ggplot(s.obj@meta.data, 
+                                         aes(x=nCount_RNA, y=nFeature_RNA, color=percent.mt)) + 
+    geom_point() + 
+    scale_colour_gradient(low = "gray90", high = "black") +
+    stat_smooth(method=lm, formula = y ~ x) + # apply a linear regression to show the relation, if existed.
+    scale_x_log10() + 
+    scale_y_log10() + 
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 12)) +
+    facet_wrap(~name) +
+    ggtitle("Scatter plot: nCount_RNA vs. nFeature_RNA, cmap % Mitochondrial genes")
+  
+  ## with Ribosome percentage
+  all.QC$nCount.vs.nFeature.Ribo <- ggplot(s.obj@meta.data, 
+                                           aes(x=nCount_RNA, y=nFeature_RNA, color=percent.ribo)) + 
+    geom_point() + 
+    scale_colour_gradient(low = "gray90", high = "black") +
+    stat_smooth(method=lm, formula = y ~ x) + # apply a linear regression to show the relation, if existed.
+    scale_x_log10() + 
+    scale_y_log10() + 
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 12)) +
+    facet_wrap(~name) +
+    ggtitle("Scatter plot: nCount_RNA vs. nFeature_RNA, cmap % Ribosome genes")
+  
+  s.obj@meta.data <- s.obj@meta.data %>% 
+    mutate(log10GenesPerUMI = log10(nFeature_RNA) / log10(nCount_RNA))
+  
+  all.QC$complexity <- ggplot(s.obj@meta.data,
+                              aes(x=log10GenesPerUMI, color = name, fill=name)) +
+    geom_density(alpha = 0.2) +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+    theme(plot.title = element_text(hjust=0.5, face="bold", size = 14)) +
+    geom_vline(xintercept = 0.8) +
+    ggtitle("Complexity: Log10(nCount_RNA) / log10(nFeature_RNA)")
+  
+  # add new slot for all.QC into the existed SEURAT OBJECT. 
+  s.obj@misc$all.QC.after.filtering <- all.QC
+```
+
+## Raw data Quality control  {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$all.QC)){
+ 
+    cat('###',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$all.QC[plot.name])
+    cat(' \n \n')
+}
+```
+
+
+
+## Ambient RNA background correction 
+
+### DecontX clusters {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$ambient.cluster.RNA.plot)){
+ 
+    cat('####',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$ambient.cluster.RNA.plot[plot.name])
+    cat(' \n \n')
+}
+```
+
+### Contamination level in each sample
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+ggplot(s.obj@meta.data, aes(x=name, y=AmbientRNA)) + 
+  geom_boxplot()
+
+```
+
+
+### Ambient RNA contamination level {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.name in names(s.obj@misc$ambient.contamination.plot)){
+ 
+    cat('####',plot.name,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+    print(s.obj@misc$ambient.contamination.plot[plot.name])
+    cat(' \n \n')
+}
+```
+
+
+## Descriptive statistics and filtering threshold {.tabset}
+This section is devoted to the descriptive statistics of the following varialbes: `nFeature_RNA, nCount_RNA, percent.mt, percent.ribo`. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (plot.item in c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.ribo")){
+  boxplot <- s.obj@meta.data %>% ggplot(aes_string(x = "name", y = plot.item)) +
+    geom_boxplot(outlier.colour="black", outlier.shape=16,
+               outlier.size=2, notch=FALSE) +
+    ggtitle(sprintf("Boxplot: Distribution of %s in each dataset", plot.item))
+  cat('###', plot.item,'{.unlisted .unnumbered} \n')
+    
+    ##### 
+    # plots or tables that we want to show in tabs
+    #####
+  
+  print(boxplot)
+  
+  cat(' \n \n')
+}
+```
+
+
+
+## Descriptive statistics + UMAP {.tabset}
+
+### % Mitochondrial
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "percent.mt", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % Ribosome
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "percent.ribo", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % nCount RNA
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "nCount_RNA", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+### % nGenes 
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", feature = "nFeature_RNA", label = TRUE, label.size = 8, pt.size = 0.5, label.color = "red", )
+```
+
+## Number of cells in each cluster
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+count.cell.clusters <- table(s.obj@meta.data$seurat_clusters)  %>% as.data.frame()
+colnames(count.cell.clusters) <- c("cluster", "count")
+
+count.cell.clusters %>% create_dt()
+```
+
+## Number of cells in each colonization
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+s.obj@meta.data %>% subset(select = c(seurat_clusters, stage)) %>% table() %>% as.data.frame() %>% pivot_wider(names_from = "stage", values_from = "Freq") %>% create_dt()
+```
+
+## Cell cycle analysis
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+all.genes <- rownames(x = s.obj)
+s.genes <- paste0("^", cc.genes$s.genes, "$", collapse = "|")
+s.genes <- all.genes[grepl(s.genes, all.genes, ignore.case = TRUE)]
+g2m.genes <- paste0("^", cc.genes$g2m.genes, "$", collapse = "|")
+g2m.genes <- all.genes[grepl(g2m.genes, all.genes, ignore.case = TRUE)]
+
+s.obj <- CellCycleScoring(s.obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+```
+
+### UMAP grouped by cell cycle phase
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+DimPlot(object= s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "Phase")
+```
+
+### PCA grouped by cell cycle phase
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+DimPlot(object= s.obj, reduction = "INTE_PCA", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "Phase")
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+Idents(s.obj) <- "seurat_clusters"
+```
+
+# Summary QC 
+## Bioinformatics pipeline
+Count, barcode, feature matrices were generated by CellRanger pipeline (v. 7.1.0) with default parameters. Sequence alignment and transcript quantification were done with a modified Mm10 reference genome, in which we manually added the gene YFP. Downstream analysis was performed by our custom pipeline written in R using Seurat v.4.0. Contaimnated ambient RNA was estimated by decontX (celda v1.12, https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-1950-6). Doublets were detected by DoubletFinder (https://www.sciencedirect.com/science/article/pii/S2405471219300730). Dimensional reductions, PCA and UMAP, as well as cells clustering, were done by built-in functions in Seurat. Samples were integrated by built-in SEURAT integration algorithm to remove any potential batch effects. 
+
+Cells whose number of UMI less than 100 or number of genes less than 50 were filtered out. Moreover, cells having percentage of mitochondrial higher than 10% were also excluded from the analysis. By differential gene expression analysis between clusters versus clusters, cells populations were identified. We excluded some clusters and kept only populations of interest. 
+
+## Summary QC table
+We summarize the QC metrics for each sample in this table
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+##### HELPER FUNCTION TO GENERATE SUMMARY QC METRICS
+generate_summary_qc <- function(meta.data){
+  sumqcdf <- data.frame()
+for (sample.id in unique(meta.data$name)){
+  subset.metadata <- subset(meta.data, meta.data$name == sample.id)
+  
+  tmpdf <- data.frame(Sample = c(sample.id))
+  tmpdf$min.nCount_RNA <- min(subset.metadata$nCount_RNA)
+  tmpdf$max.nCount_RNA <- max(subset.metadata$nCount_RNA)
+  tmpdf$mean.nCount_RNA <- mean(subset.metadata$nCount_RNA)
+  tmpdf$median.nCount_RNA <- median(subset.metadata$nCount_RNA)
+  
+  tmpdf$min.nFeature_RNA <- min(subset.metadata$nFeature_RNA)
+  tmpdf$max.nFeature_RNA <- max(subset.metadata$nFeature_RNA)
+  tmpdf$mean.nFeature_RNA <- mean(subset.metadata$nFeature_RNA)
+  tmpdf$median.nFeature_RNA <- median(subset.metadata$nFeature_RNA)
+  
+  tmpdf$min.percent.mt <- min(subset.metadata$percent.mt)
+  tmpdf$max.percent.mt <- max(subset.metadata$percent.mt)
+  tmpdf$mean.percent.mt <- mean(subset.metadata$percent.mt)
+  tmpdf$median.percent.mt <- median(subset.metadata$percent.mt)
+  
+  tmpdf$min.percent.ribo <- min(subset.metadata$percent.ribo)
+  tmpdf$max.percent.ribo <- max(subset.metadata$percent.ribo)
+  tmpdf$mean.percent.ribo <- mean(subset.metadata$percent.ribo)
+  tmpdf$median.percent.ribo <- median(subset.metadata$percent.ribo)
+  
+  tmpdf$min.log10GenesPerUMI <- min(subset.metadata$log10GenesPerUMI)
+  tmpdf$max.log10GenesPerUMI <- max(subset.metadata$log10GenesPerUMI)
+  tmpdf$mean.log10GenesPerUMI <- mean(subset.metadata$log10GenesPerUMI)
+  tmpdf$median.log10GenesPerUMI <- median(subset.metadata$log10GenesPerUMI)
+  
+  tmpdf$min.AmbientRNA <- min(subset.metadata$AmbientRNA)
+  tmpdf$max.AmbientRNA <- max(subset.metadata$AmbientRNA)
+  tmpdf$mean.AmbientRNA <- mean(subset.metadata$AmbientRNA)
+  tmpdf$median.AmbientRNA <- median(subset.metadata$AmbientRNA)
+  
+  tmpdf$num.Clones <- length(unique(subset.metadata$CTstrict))
+  tmpdf$num.Clusters <- length(unique(subset.metadata$seurat_clusters))
+  
+  sumqcdf <- rbind(sumqcdf, tmpdf)
+}
+  return(sumqcdf)
+}
+```
+
+### Raw data QC metrics
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+s.obj.raw <- readRDS(file.path(path.to.01.output, "raw_seurat_objects", "merged_all_second_dataset_BCR.rds"))
+meta.data.raw <- s.obj.raw@meta.data
+sumqc.df.raw <- generate_summary_qc(meta.data.raw)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+sumqc.df.raw %>% create_dt()
+```
+
+### After filtering 
+
+This is the summary QC metrics for the data we used in downstream analysis
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+meta.data <- s.obj@meta.data
+sumqcdf <- generate_summary_qc(meta.data)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+sumqcdf %>% create_dt()
+```
+
+# UMAP
+
+## UMAP group by clusters
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.height=10, fig.width=15}
+p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_in_2nd_dataset.svg", device = "svg", dpi = 300, width = 10, height = 15)
+print(p)
+```
+
+## UMAP group by samples
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.height=10, fig.width=15}
+p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, group.by = "name")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_in_2nd_dataset.bySample.svg", device = "svg", dpi = 300, width = 10, height = 15)
+print(p)
+```
+
+## UMAP: highlighted YFP+ cells
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+p <- DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, cells.highlight = yfp.cells, cols.highlight = "red") +
+  theme(legend.position = "none")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_highlighted_YFP_pos.svg", device = "svg", dpi = 300, width = 10, height = 15) 
+print(p)
+```
+
+
+## UMAP: highlighted YFP+ cells, sample 132
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+p <- DimPlot(object = subset(s.obj, name == "Sample_132"), reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, cells.highlight = yfp.cells, cols.highlight = "red") +
+  theme(legend.position = "none")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_highlighted_YFP_pos.Sample132.svg", device = "svg", dpi = 300, width = 10, height = 15) 
+print(p)
+```
+
+## UMAP: highlighted YFP+ cells, sample 133
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+p <- DimPlot(object = subset(s.obj, name == "Sample_133"), reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, cells.highlight = yfp.cells, cols.highlight = "red") +
+  theme(legend.position = "none")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_highlighted_YFP_pos.Sample133.svg", device = "svg", dpi = 300, width = 10, height = 15) 
+print(p)
+```
+
+## UMAP: highlighted cells with clonal information, Sample 132
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+tmp.s.obj <- subset(s.obj, name == "Sample_132")
+withVDJ.cells <- rownames(subset(tmp.s.obj@meta.data, is.na(tmp.s.obj@meta.data$CTstrict) == FALSE))
+p <- DimPlot(object = tmp.s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, cells.highlight = withVDJ.cells, cols.highlight = "red") +
+  theme(legend.position = "none")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_highlighted_cells_with_clonalInfo.Sample132.svg", device = "svg", dpi = 300, width = 10, height = 15) 
+print(p)
+```
+
+## UMAP: highlighted cells with clonal information, Sample 133
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+tmp.s.obj <- subset(s.obj, name == "Sample_133")
+withVDJ.cells <- rownames(subset(tmp.s.obj@meta.data, is.na(tmp.s.obj@meta.data$CTstrict) == FALSE))
+p <- DimPlot(object = tmp.s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE, cells.highlight = withVDJ.cells, cols.highlight = "red") +
+  theme(legend.position = "none")
+ggsave(plot = p, path = path.to.save.figures, filename = "UMAP_all_clusters_highlighted_cells_with_clonalInfo.Sample133.svg", device = "svg", dpi = 300, width = 10, height = 15) 
+print(p)
+```
+
+# Differential gene expression analysis between clusters
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+if (file.exists(file.path(path.to.03.output, "cluster_markers.rds")) == FALSE){
+  cluster.markers <- FindAllMarkers(object = s.obj, assay = "RNA", test.use = "wilcox")
+  saveRDS(cluster.markers, file.path(path.to.03.output, "cluster_markers.raw.rds"))
+  cluster.markers <- subset(cluster.markers, cluster.markers$p_val_adj <= 0.05 & cluster.markers$avg_log2FC >= 0)
+  saveRDS(cluster.markers, file.path(path.to.03.output, "cluster_markers.rds"))  
+} else {
+  cluster.markers <- readRDS(file.path(path.to.03.output, "cluster_markers.rds"))
+}
+```
+
+## Heatmap: Top N up-gene in each clusters
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=15, fig.height=10}
+topN <- 10
+tmp.cluster.markers.up <- subset(cluster.markers, cluster.markers$avg_log2FC >= 0 & cluster.markers$p_val_adj <= 0.05)
+
+selected.genes <- data.frame()
+for (cluster.id in unique(tmp.cluster.markers.up$cluster)){
+  tmp <- subset(tmp.cluster.markers.up, tmp.cluster.markers.up$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  tmp.genes <- head(tmp, topN)
+  selected.genes <- rbind(selected.genes, tmp.genes)
+}
+
+p <- DoHeatmap(object = s.obj, features = selected.genes$gene) + scale_fill_viridis_c(option = "plasma")
+ggsave(plot = p, filename = "Heatmap_topN_up_genes_in_all_clusters.svg", path = file.path(path.to.save.figures), device = "svg", width = 28, height = 20, dpi = 300)
+```
+
+
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=28, fig.height=20}
+print(p)
+```
+
+
+### Tables of all cluster marker genes {.tabset}
+```{r echo=FALSE, include=FALSE}
+cluster.markers %>% create_dt()
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+
+for (cluster.id in sort(unique(cluster.markers$cluster))){
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  tmp.cluster.markers <- tmp.cluster.markers %>% mutate_if(is.numeric, round, 6) 
+  
+  cat(paste("\n\n#### Cluster: ", cluster.id, "##\n"))
+  print( htmltools::tagList(datatable(tmp.cluster.markers, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+
+```
+
+
+### Top-12 cluster marker genes `FeaturePlot` {.tabset}
+Here we just show the top-12 genes (ranked by `avg_log2FC`) for each cluster. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = head(tmp.cluster.markers, 12)$gene, ncol = 3, label = TRUE, pt.size = 0.5, label.size = 5, label.color = "red")  
+  print(p)
+  cat("\n \n")
+}
+```
+
+### Top-12 cluster marker genes `DotPlot` {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- DotPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+### Top-12 cluster marker genes `Vlnplot` {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=30, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("#### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- VlnPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+# Distribution of YFP cells in all two samples
+## Sampling cells from *YFP- cells* and compare Shannon entropy with YFP+ cells
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+all.sampling.sizes <- c(100, 200, 300, 400, 500)
+
+sampling.shannon.df <- data.frame()
+for (sampling.size in all.sampling.sizes){
+  all.sampling.shannon <- c()
+
+  for (i in seq(1, 100)){
+    sampling.cells <- sample(non.yfp.cells, sampling.size)
+    sampling.shannon <- calculate_shannon_entropy(barcodes = sampling.cells, input.s.obj = s.obj)
+    all.sampling.shannon <- c(all.sampling.shannon, sampling.shannon)
+  }
+  
+  tmpdf <- data.frame(data = all.sampling.shannon)
+  tmpdf$sampling_size <- sampling.size
+  sampling.shannon.df <- rbind(sampling.shannon.df, tmpdf)
+}
+
+yfp.shannon.df <- data.frame(data = c(calculate_shannon_entropy(barcodes = yfp.cells, input.s.obj = s.obj)))
+yfp.shannon.df$sampling_size <- "YFP.Shannon"
+sampling.shannon.df <- rbind(sampling.shannon.df, yfp.shannon.df)
+sampling.shannon.df$sampling_size <- factor(sampling.shannon.df$sampling_size, levels = c("YFP.Shannon", all.sampling.sizes))
+
+p <- ggplot(data = sampling.shannon.df, aes(x = sampling_size, y = data, fill = sampling_size)) + geom_boxplot()
+ggsave(plot = p, filename = "[validation]sampling_cells_Shannon_entropy_from_nonYFP_compare_YFP.svg", path = path.to.save.figures, device = "svg", dpi = 300, width = 15, height = 10)
+
+writexl::write_xlsx(sampling.shannon.df, file.path(path.to.save.table, "[validation]sampling_cells_Shannon_entropy_from_nonYFP_compare_YFP.xlsx"))
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+print(p)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+print(sprintf("Shannon entropy of YFP cells: %s", calculate_shannon_entropy(barcodes = yfp.cells, input.s.obj = s.obj)))
+```
+
+# VDJ data analysis
+## All clones (in all 2 samples, both YFP+ and YFP-) and Shannon entropy (all colonizations/samples)
+
+### Summary table
+
+- `count`: Total number of cells. 
+
+- `Shannon.entropy`: Shannon entropy of the clone, calculated in all clusters of all two samples in both condition YFP+ and YFP -
+
+- `count.Sample132/133`: Number of cells in Sample 132/133.
+
+- `count.in.YFP`: number of YFP+ cells of the clone.
+
+- `count.in.nonYFP`: number of YFP- cells of the clone. 
+
+- `clone.in.YFP`: "yes" if the clone also appear in YFP+ cells.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+all.shannon.entropy <- s.obj@meta.data %>% subset(select = c(CTstrict)) %>% table() %>% as.data.frame() %>%
+  subset(is.na(CTstrict) == FALSE) 
+colnames(all.shannon.entropy) <- c("clone", "count")
+
+all.shannon.entropy <- all.shannon.entropy %>%
+  rowwise() %>% 
+  mutate(Shannon.entropy = ifelse(count >= 5, calculate_shannon_entropy(input.s.obj =  s.obj, barcodes = subset(meta.data, meta.data$CTstrict == clone)$barcode), NA)) 
+
+all.shannon.entropy <- all.shannon.entropy %>% rowwise() %>% 
+  mutate(count.Sample132 = subset(s.obj@meta.data, s.obj@meta.data$CTstrict == clone & s.obj@meta.data$name == "Sample_132") %>% nrow()) %>%
+  mutate(count.Sample133 = subset(s.obj@meta.data, s.obj@meta.data$CTstrict == clone & s.obj@meta.data$name == "Sample_133") %>% nrow()) %>%
+  mutate(count.in.YFP = subset(s.obj.yfp@meta.data, s.obj.yfp@meta.data$CTstrict == clone) %>% nrow()) %>%
+  mutate(count.in.nonYFP = subset(s.obj.nonyfp@meta.data, s.obj.nonyfp@meta.data$CTstrict == clone) %>% nrow()) %>%
+  mutate(count.in.YFP.132 = subset(s.obj.yfp@meta.data, s.obj.yfp@meta.data$CTstrict == clone & s.obj.yfp@meta.data$name == "Sample_132") %>% nrow()) %>%
+  mutate(count.in.YFP.133 = subset(s.obj.yfp@meta.data, s.obj.yfp@meta.data$CTstrict == clone & s.obj.yfp@meta.data$name == "Sample_133") %>% nrow()) %>%
+  mutate(clone_in_yfp = ifelse(count.in.YFP != 0, "yes", "no"))
+```
+
+
+### Sampling cells and calculate Shannon entropy {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+for (num.sampling.cells in c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)){
+  all.cells <- colnames(s.obj)
+  all.sampling.entropies <- c()
+  
+  if (file.exists(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_all_cells_sampling_%s.xlsx", num.sampling.cells))) == FALSE){
+      for (count in seq(1, 1000)){
+        sampling.cells <- sample(all.cells, num.sampling.cells)
+        tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj)
+        all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+        }
+  
+      samplingdf <- data.frame(data = all.sampling.entropies)
+      colnames(samplingdf) <- c("Shannon.entropy")
+      samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+      samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+      samplingdf$case <- "Sampling"
+      
+      tmp.all.shannon.entropy <- all.shannon.entropy %>% subset(select = c(clone, Shannon.entropy))
+      colnames(tmp.all.shannon.entropy) <- c("data", "Shannon.entropy")
+      tmp.all.shannon.entropy$case <- "real_clone"
+      validationdf <- rbind(tmp.all.shannon.entropy, samplingdf)
+      
+      writexl::write_xlsx(validationdf, file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_all_cells_sampling_%s.xlsx", num.sampling.cells)))
+  } else {
+    validationdf <- readxl::read_xlsx(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_all_cells_sampling_%s.xlsx", num.sampling.cells)))
+  }
+  p <- validationdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+    ggtitle(sprintf("Shannon entropy: Real clone vs sampling %s cells", num.sampling.cells))
+  cat(sprintf("#### Sampling %s cells \n", num.sampling.cells))
+  print(p)
+  cat("\n \n")
+}
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+all.shannon.entropy %>% arrange(desc(count)) %>% create_dt()
+```
+
+## YFP clones only
+
+### Summary table
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+meta.data <- s.obj.yfp@meta.data %>% rownames_to_column("barcode")
+all.shannon.entropy.yfp <- s.obj.yfp@meta.data %>% subset(select = c(CTstrict)) %>% table() %>% as.data.frame() %>%
+  subset(is.na(CTstrict) == FALSE) 
+colnames(all.shannon.entropy.yfp) <- c("clone", "count")
+
+all.shannon.entropy.yfp <- all.shannon.entropy.yfp %>%
+  rowwise() %>% 
+  mutate(Shannon.entropy = ifelse(count >= 5, calculate_shannon_entropy(input.s.obj =  s.obj.yfp, barcodes = subset(meta.data, meta.data$CTstrict == clone)$barcode), NA)) 
+
+all.shannon.entropy.yfp %>% arrange(desc(count)) %>% create_dt()
+```
+
+### Sampling cells and calculate Shannon entropy {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+for (num.sampling.cells in c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)){
+  all.cells <- colnames(s.obj.yfp)
+  all.sampling.entropies <- c()
+  
+  if (file.exists(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_YFP_cells_sampling_%s.xlsx", num.sampling.cells))) == FALSE){
+    for (count in seq(1, 1000)){
+      sampling.cells <- sample(all.cells, num.sampling.cells)
+      tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj.yfp)
+      all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+    }
+    
+    samplingdf <- data.frame(data = all.sampling.entropies)
+    colnames(samplingdf) <- c("Shannon.entropy")
+    samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+    samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+    samplingdf$case <- "Sampling"
+    
+    tmp.all.shannon.entropy <- all.shannon.entropy.yfp %>% subset(select = c(clone, Shannon.entropy))
+    colnames(tmp.all.shannon.entropy) <- c("data", "Shannon.entropy")
+    tmp.all.shannon.entropy$case <- "real_clone"
+    validationdf <- rbind(tmp.all.shannon.entropy, samplingdf)
+      
+    writexl::write_xlsx(validationdf, file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_YFP_cells_sampling_%s.xlsx", num.sampling.cells)))
+  } else {
+    validationdf <- readxl::read_xlsx(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_YFP_cells_sampling_%s.xlsx", num.sampling.cells)))
+  }
+  p <- validationdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+    ggtitle(sprintf("Shannon entropy: Real clone vs sampling %s cells", num.sampling.cells))
+  cat(sprintf("#### Sampling %s cells \n", num.sampling.cells))
+  print(p)
+  cat("\n \n")
+}
+```
+
+## nonYFP clones only
+
+### Summary table
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+meta.data <- s.obj.nonyfp@meta.data %>% rownames_to_column("barcode")
+all.shannon.entropy.nonyfp <- s.obj.nonyfp@meta.data %>% subset(select = c(CTstrict)) %>% table() %>% as.data.frame() %>%
+  subset(is.na(CTstrict) == FALSE) 
+colnames(all.shannon.entropy.nonyfp) <- c("clone", "count")
+
+all.shannon.entropy.nonyfp <- all.shannon.entropy.nonyfp %>%
+  rowwise() %>% 
+  mutate(Shannon.entropy = ifelse(count >= 5, calculate_shannon_entropy(input.s.obj =  s.obj.nonyfp, barcodes = subset(meta.data, meta.data$CTstrict == clone)$barcode), NA)) 
+
+all.shannon.entropy.nonyfp %>% arrange(desc(count)) %>% create_dt()
+```
+
+### Sampling cells and calculate Shannon entropy {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+for (num.sampling.cells in c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)){
+  all.cells <- colnames(s.obj.nonyfp)
+  all.sampling.entropies <- c()
+  
+  if (file.exists(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_nonYFP_cells_sampling_%s.xlsx", num.sampling.cells))) == FALSE){
+    for (count in seq(1, 1000)){
+      sampling.cells <- sample(all.cells, num.sampling.cells)
+      tmp.sampling.shannon.entropy <- calculate_shannon_entropy(sampling.cells, s.obj.nonyfp)
+      all.sampling.entropies <- c(all.sampling.entropies, tmp.sampling.shannon.entropy)
+    }
+    
+    samplingdf <- data.frame(data = all.sampling.entropies)
+    colnames(samplingdf) <- c("Shannon.entropy")
+    samplingdf$data <- to_vec( for (item in seq(1, 1000)) sprintf("sampling_%s", item))
+    samplingdf <- samplingdf[c("data", "Shannon.entropy")]
+    samplingdf$case <- "Sampling"
+    
+    tmp.all.shannon.entropy <- all.shannon.entropy.nonyfp %>% subset(select = c(clone, Shannon.entropy))
+    colnames(tmp.all.shannon.entropy) <- c("data", "Shannon.entropy")
+    tmp.all.shannon.entropy$case <- "real_clone"
+    validationdf <- rbind(tmp.all.shannon.entropy, samplingdf)
+      
+    writexl::write_xlsx(validationdf, file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_nonYFP_cells_sampling_%s.xlsx", num.sampling.cells)))
+  } else {
+    validationdf <- readxl::read_xlsx(file.path(path.to.save.table, sprintf("[validation]clonal_Shannon_entropy_nonYFP_cells_sampling_%s.xlsx", num.sampling.cells)))
+  }
+  p <- validationdf %>% ggplot(aes(x = case, y = Shannon.entropy)) + geom_boxplot() +
+    ggtitle(sprintf("Shannon entropy: Real clone vs sampling %s cells", num.sampling.cells))
+  cat(sprintf("#### Sampling %s cells \n", num.sampling.cells))
+  print(p)
+  cat("\n \n")
+}
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=15, fig.height=10}
+```
+
