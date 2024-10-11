@@ -9,10 +9,13 @@ rm(list = ls())
 
 # Run all samples from the first and second datasets, each samples is processed
 # separately.
-
-# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type =  "source", repos = NULL)
-# devtools::install_github("ncborcherding/scRepertoire@v1")
-
+if (packageVersion("Matrix") != "1.5.4.1"){
+  install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type =  "source", repos = NULL)  
+}
+if (packageVersion("scRepertoire") != "1.11.0"){
+  devtools::install_github("ncborcherding/scRepertoire@v1", upgrade = FALSE)
+}
+library("scRepertoire")
 # __________VDJ DATA ANYLYSIS PIPELINE__________
 path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
@@ -62,7 +65,6 @@ for (analysis.round in c("1st")){
   stage_lst[["MM9_SPF_S3"]] <- c(MM9_SPF_S3 = "MM9_SPF")
   stage_lst[["MM9_SPF_S9"]] <- c(MM9_SPF_S9 = "MM9_SPF")
   
-  
   MINCELLS  = 5
   MINGENES  = 50
   
@@ -110,7 +112,7 @@ for (analysis.round in c("1st")){
                             ambientRNA_thres = 0.5)
   
   remove_doublet <- TRUE
-  path.to.10X.doublet.estimation <- file.path(path.to.storage, "DoubletEstimation10X.csv")
+  path.to.10X.doublet.estimation <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/DoubletEstimation10X.csv"
   
   num.PCA <- 25
   num.PC.used.in.UMAP <- 25
@@ -150,6 +152,3 @@ for (analysis.round in c("1st")){
                               sw = sw)
   }
 }
-
-
-

@@ -1,0 +1,239 @@
+---
+title: "`r params$PROJECT` Quality Control Hashtag-Antibody 1, 2, 3. Different quantiles comparison (Sample: `r params$sample.id`)"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    keep_md: no
+    df_print: paged
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+params:
+  PROJECT: NA
+  sample.id: NA
+  outdir: NA
+  output.version: NA
+  config.version: NA
+---
+  
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+$(document).ready(function() {
+  $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+  // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.width=20, fig.height=12}
+scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+
+path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/bcr_data_analysis/240805_data_analysis"
+source(file.path(path.to.project.src, "hashtag_notes.R"))
+
+PROJECT <- params$PROJECT
+sample.id <- params$sample.id
+outdir <- params$outdir
+output.version <- params$output.version
+config.version <- params$config.version
+
+# outdir <- "/home/hieunguyen/CRC1382/outdir"
+# PROJECT <- "240805_BSimons"
+# sample.id <- "M1"
+# output.version <- "20240820"
+# config.version <- "default"
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+print(sprintf("Data saved at %s", outdir))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.width=20, fig.height=12}
+path.to.main.input <- file.path(outdir, PROJECT, output.version, config.version, "1st_round")
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis", output.version, config.version)
+path.to.01.output <- file.path(path.to.main.output, "01_output")
+dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
+
+path.to.before.filter.sobj <- file.path(path.to.main.input, sprintf("%s_1st_round/s1_output", sample.id), sprintf("%s.output.s1.rds", PROJECT))
+before.filter.s.obj <- readRDS(path.to.before.filter.sobj)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+DefaultAssay(before.filter.s.obj) <- "ADT"
+
+all.hts <- num.hashtags[[sample.id]]
+counts.adt <- GetAssayData(before.filter.s.obj, slot = "counts", assay = "ADT")
+s.obj.HTO <- CreateSeuratObject(counts = counts.adt[all.hts, ] + 1, assay = "HTO") #### add pseudo count + 1 to avoide error "Cells with zero counts exist as a cluster"
+s.obj.HTO <- NormalizeData(s.obj.HTO, normalization.method = "CLR")
+
+maindf <- counts.adt[all.hts, ] %>% as.data.frame() %>% t() %>% as.data.frame() %>% rownames_to_column("barcode")
+maindf.pivot <- maindf %>% pivot_longer(!barcode, names_to = "hashtag", values_to = "count")
+```
+# Boxplot: Distribution of "counts" in each hashtag
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+maindf.pivot %>% ggplot(aes(x = hashtag, y = count, fill = hashtag)) + geom_boxplot()
+```
+
+Note: In this analysis, we keep all cells obtained from the output of `CellRanger`; conditions on the percentage of Mitochondrial and Ambient RNA contamination have not been applied yet. 
+
+# Quantile 0.99
+## Cell hashtags demultiplexing
+
+### Assigned cut-off 
+```{r echo=FALSE}
+chosen.quantile <- 0.99
+s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quantile)
+```
+
+```{r echo=FALSE}
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+```
+
+### Summary table: Number of cells in each classified hashtag group
+
+We perform a k-medoid clustering on the normalized Hashtag values, which initially separates cells into K(# of samples)+1 clusters. For each hashtag, we use the cluster with the lowest average value as the negative group. (Reference: https://satijalab.org/seurat/articles/hashing_vignette.html#8-hto-dataset-from-human-pbmcs)
+
+- `Negative`: Cells that are classified as `negative` in all 3 hashtags.
+
+- `Doublet`: Cells that are expressed in more than 1 hashtag based on the assigned cut-off.
+
+- `Singlet`: Cells that are expressed in only 1 hashtag based on the assigned cut-off.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+sum.table <- table(s.obj.HTO$HTO_classification.global) %>% as.data.frame()
+colnames(sum.table) <- c("assigned_group", "# cells")
+sum.table %>% create_dt()
+
+sum.table.099 <- sum.table
+```
+
+# Quantile 0.95
+## Cell hashtags demultiplexing
+
+### Assigned cut-off 
+```{r echo=FALSE}
+chosen.quantile <- 0.95
+s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quantile)
+```
+
+```{r echo=FALSE}
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+```
+
+### Summary table: Number of cells in each classified hashtag group
+
+We perform a k-medoid clustering on the normalized Hashtag values, which initially separates cells into K(# of samples)+1 clusters. For each hashtag, we use the cluster with the lowest average value as the negative group. (Reference: https://satijalab.org/seurat/articles/hashing_vignette.html#8-hto-dataset-from-human-pbmcs)
+
+- `Negative`: Cells that are classified as `negative` in all 3 hashtags.
+
+- `Doublet`: Cells that are expressed in more than 1 hashtag based on the assigned cut-off.
+
+- `Singlet`: Cells that are expressed in only 1 hashtag based on the assigned cut-off.
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+sum.table <- table(s.obj.HTO$HTO_classification.global) %>% as.data.frame()
+colnames(sum.table) <- c("assigned_group", "# cells")
+sum.table %>% create_dt()
+
+sum.table.095 <- sum.table
+```
+
+
+# Quantile 0.90
+## Cell hashtags demultiplexing
+
+### Assigned cut-off 
+```{r echo=FALSE}
+chosen.quantile <- 0.90
+s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quantile)
+```
+
+```{r echo=FALSE}
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+```
+
+### Summary table: Number of cells in each classified hashtag group
+
+We perform a k-medoid clustering on the normalized Hashtag values, which initially separates cells into K(# of samples)+1 clusters. For each hashtag, we use the cluster with the lowest average value as the negative group. (Reference: https://satijalab.org/seurat/articles/hashing_vignette.html#8-hto-dataset-from-human-pbmcs)
+
+- `Negative`: Cells that are classified as `negative` in all 3 hashtags.
+
+- `Doublet`: Cells that are expressed in more than 1 hashtag based on the assigned cut-off.
+
+- `Singlet`: Cells that are expressed in only 1 hashtag based on the assigned cut-off.
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+sum.table <- table(s.obj.HTO$HTO_classification.global) %>% as.data.frame()
+colnames(sum.table) <- c("assigned_group", "# cells")
+sum.table %>% create_dt()
+
+sum.table.090 <- sum.table
+```
+
+
+# Quantile 0.85
+## Cell hashtags demultiplexing
+
+### Assigned cut-off 
+```{r echo=FALSE}
+chosen.quantile <- 0.85
+s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quantile)
+```
+
+```{r echo=FALSE}
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+```
+
+### Summary table: Number of cells in each classified hashtag group
+
+We perform a k-medoid clustering on the normalized Hashtag values, which initially separates cells into K(# of samples)+1 clusters. For each hashtag, we use the cluster with the lowest average value as the negative group. (Reference: https://satijalab.org/seurat/articles/hashing_vignette.html#8-hto-dataset-from-human-pbmcs)
+
+- `Negative`: Cells that are classified as `negative` in all 3 hashtags.
+
+- `Doublet`: Cells that are expressed in more than 1 hashtag based on the assigned cut-off.
+
+- `Singlet`: Cells that are expressed in only 1 hashtag based on the assigned cut-off.
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+sum.table <- table(s.obj.HTO$HTO_classification.global) %>% as.data.frame()
+colnames(sum.table) <- c("assigned_group", "# cells")
+sum.table %>% create_dt()
+sum.table.085 <- sum.table
+```
+
+
+# Conclusion
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+final.sum <- merge(sum.table.099, sum.table.095, by.x = "assigned_group", by.y = "assigned_group")
+colnames(final.sum) <- c("assigned_group", "qt0.99", "qt0.95")
+final.sum <- merge(final.sum, sum.table.090, by.x = "assigned_group", by.y = "assigned_group")
+colnames(final.sum) <- c("assigned_group", "qt0.99", "qt0.95", "qt0.90")
+final.sum <- merge(final.sum, sum.table.085, by.x = "assigned_group", by.y = "assigned_group")
+colnames(final.sum) <- c("assigned_group", "qt0.99", "qt0.95", "qt0.90", "qt0.85")
+
+final.sum %>% create_dt()
+```

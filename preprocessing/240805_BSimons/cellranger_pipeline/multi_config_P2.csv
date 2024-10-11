@@ -1,0 +1,13 @@
+[gene-expression],,,,
+reference,/media/hieunguyen/HD01/storage/REF/refdata-gex-mm10-2020-A,,,
+expect-cells,1000,,,
+chemistry,SC5P-R2,,,
+[vdj],,,,
+reference,/media/hieunguyen/HD01/storage/REF/refdata-cellranger-vdj-GRCm38-alts-ensembl-7.0.0,,,
+[libraries],,,,
+fastq_id,fastqs,lanes,feature_types,subsample_rate
+GEX_P2,/home/hieunguyen/CRC1382/src_2023/240805_BSimons/HTGNHDRX3/outs/fastq_path/HTGNHDRX3/GEX/P2,any,gene expression,
+VDJ_P2,/home/hieunguyen/CRC1382/src_2023/240805_BSimons/HTGNHDRX3/outs/fastq_path/HTGNHDRX3/VDJ/P2,any,vdj,
+HT_P2,/home/hieunguyen/CRC1382/src_2023/240805_BSimons/HTGNHDRX3/outs/fastq_path/HTGNHDRX3/HT/P2,any,antibody capture,
+[feature],,,,
+reference,/home/hieunguyen/CRC1382/src_2023/240805_BSimons/FB.csv,,,
