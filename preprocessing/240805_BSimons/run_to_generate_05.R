@@ -4,10 +4,8 @@ rm(list = ls())
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
 PROJECT <- "240805_BSimons"
-output.version <- "20240820"
-config.version <- "default"
 
-path.to.main.output <- file.path(outdir, PROJECT, "data_analysis", output.version, config.version)
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 path.to.save.html <- file.path(path.to.main.output, "html_output")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
 
@@ -29,8 +27,6 @@ for (chosen.quantile in all.quantiles){
                       params = list(
                         outdir = outdir, 
                         PROJECT = PROJECT,
-                        output.version = output.version,
-                        config.version = config.version, 
                         integration.case = integration.case,
                         chosen.quantile = chosen.quantile
                       ),

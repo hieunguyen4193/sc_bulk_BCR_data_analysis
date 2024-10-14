@@ -48,7 +48,7 @@ scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipel
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
 source(file.path(path.to.project.src, "hashtag_notes.R"))
 
 PROJECT <- params$PROJECT
@@ -57,7 +57,7 @@ outdir <- params$outdir
 chosen.quantile <- params$chosen.quantile
 
 # outdir <- "/home/hieunguyen/CRC1382/outdir"
-# PROJECT <- "240805_BSimons"
+# PROJECT <- "241002_BSimons"
 # sample.id <- "M1"
 # chosen.quantile <- 0.99
 

@@ -5,17 +5,18 @@ if (packageVersion("Matrix") != "1.5.4.1"){
   install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type = "source", repos = NULL)
   install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.3.tar.gz", type = "source", repos = NULL)
 }
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
-PROJECT <- "240805_BSimons"
+PROJECT <- "241002_BSimons"
 
 path.to.rmd1 <- file.path(path.to.project.src, "03_downstream_analysis_singlet_only.Rmd")
+
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 path.to.save.html <- file.path(path.to.main.output, "html_output")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
 
-all.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
+all.samples <- c("PP3")
 all.quantiles <- c(0.85, 0.99, 0.95, 0.90)
 
 for (chosen.quantile in all.quantiles){

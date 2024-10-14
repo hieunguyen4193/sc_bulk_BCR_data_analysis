@@ -17,8 +17,6 @@ params:
   PROJECT: NA
   sample.id: NA
   outdir: NA
-  output.version: NA
-  config.version: NA
   chosen.quantile: NA
 ---
 
@@ -57,12 +55,12 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 # gc()
 # rm(list = ls())
 
-scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
-path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/bcr_data_analysis/240805_data_analysis"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
 source(file.path(path.to.project.src, "config.R"))
 #####----------------------------------------------------------------------#####
 # CONFIGURATIONS 
@@ -82,8 +80,6 @@ my_random_seed <- 42
 PROJECT <- params$PROJECT
 sample.id <- params$sample.id
 outdir <- params$outdir
-output.version <- params$output.version
-config.version <- params$config.version
 chosen.quantile <- params$chosen.quantile
 
 # outdir <- "/home/hieunguyen/CRC1382/outdir"
@@ -93,13 +89,13 @@ chosen.quantile <- params$chosen.quantile
 # config.version <- "default"
 # chosen.quantile <- 0.95
 
-path.to.main.input <- file.path(outdir, PROJECT, output.version, config.version)
+path.to.main.input <- file.path(outdir, PROJECT)
 
 s.obj <- readRDS(file.path(path.to.main.input, sprintf("%s_round", analysis.round), sprintf("%s_1st_round", sample.id), "s8a_output", sprintf("%s.output.s8a.rds", PROJECT)))
 
 raw.s.obj <- readRDS(file.path(path.to.main.input,sprintf("%s_round", analysis.round), sprintf("%s_1st_round", sample.id), "s1_output", sprintf("%s.output.s1.rds", PROJECT)))
 
-path.to.main.output <- file.path(outdir, PROJECT, "data_analysis", output.version, config.version)
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 
 path.to.01.output <- file.path(path.to.main.output, "01_output")
 path.to.03.output <- file.path(path.to.main.output, "03_output", sprintf("quantile_%s", chosen.quantile), sample.id)
@@ -467,7 +463,7 @@ if ("clusterProfiler" %in% installed.packages() == FALSE){
   remove.packages("clusterProfiler")
   remove.packages("DOSE")
   remove.packages("GOSemSim")
-  path.to.install.dir <- "/media/hieunguyen/HD01/storage/offline_pkgs/clusterProfiler"
+  path.to.install.dir <- "/media/hieunguyen/GSHD_HN01/storage/offline_pkgs/clusterProfiler"
   install.packages(file.path(path.to.install.dir, "HDO.db_0.99.1.tar.gz"), type = "source", repos = NULL)
   install.packages(file.path(path.to.install.dir, "yulab.utils_0.1.4.tar.gz"), type = "source", repos = NULL)
   install.packages(file.path(path.to.install.dir, "GOSemSim_2.28.1.tar.gz"), type = "source", repos = NULL)
@@ -492,7 +488,7 @@ annotate_with_pathway <- function(cluster.id, topN = 20){
       tmpdf <- subset(cluster.markers, cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC)) %>% head(topN)    
   }
 
-  path.to.cellmarker2.0 <- "/media/hieunguyen/HD01/storage/CellMarker2.0"
+  path.to.cellmarker2.0 <- "/media/hieunguyen/GSHD_HN01/storage/CellMarkers_2.0"
   cell_marker_data <- readxl::read_excel(file.path(path.to.cellmarker2.0, "Cell_marker_Mouse.xlsx"))
   
   ## instead of `cellName`, users can use other features (e.g. `cancerType`)

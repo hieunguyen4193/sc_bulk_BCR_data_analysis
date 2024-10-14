@@ -1,0 +1,13 @@
+[gene-expression],,,,
+reference,/media/hieunguyen/HD01/storage/REF/build-mm10-with-YFP/mm10-with-YFP,,,
+expect-cells,1000,,,
+chemistry,SC5P-R2,,,
+[vdj],,,,
+reference,/media/hieunguyen/HD01/storage/REF/refdata-cellranger-vdj-GRCm38-alts-ensembl-7.0.0,,,
+[libraries],,,,
+fastq_id,fastqs,lanes,feature_types,subsample_rate
+GEX_PP3,/home/hieunguyen/CRC1382/outdir/compressed_tar/HTL7MDRX3/outs/fastq_path/HTL7MDRX3/GEX_PP3,any,gene expression,
+VDJ_PP3,/home/hieunguyen/CRC1382/outdir/compressed_tar/HTL7MDRX3/outs/fastq_path/HTL7MDRX3/VDJ_PP3,any,vdj,
+HT_PP3,/home/hieunguyen/CRC1382/outdir/compressed_tar/HTL7MDRX3/outs/fastq_path/HTL7MDRX3/HT_PP3,any,antibody capture,
+[feature],,,,
+reference,/home/hieunguyen/CRC1382/outdir/compressed_tar/FB.csv,,,

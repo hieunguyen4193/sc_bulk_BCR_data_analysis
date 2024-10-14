@@ -43,16 +43,16 @@ scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipel
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
 source(file.path(path.to.project.src, "hashtag_notes.R"))
 
 PROJECT <- params$PROJECT
 sample.id <- params$sample.id
 outdir <- params$outdir
 
-# outdir <- "/home/hieunguyen/CRC1382/outdir"
-# PROJECT <- "240805_BSimons"
-# sample.id <- "M1"
+# outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+# PROJECT <- "241002_BSimons"
+# sample.id <- "PP3"
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}

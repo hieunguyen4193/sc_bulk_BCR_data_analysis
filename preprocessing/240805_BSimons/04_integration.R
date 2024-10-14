@@ -1,12 +1,12 @@
 gc()
 rm(list = ls())
 
-scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
-path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/bcr_data_analysis/240805_data_analysis"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
 source(file.path(path.to.project.src, "config.R"))
 #####----------------------------------------------------------------------#####
 # CONFIGURATIONS 
@@ -32,14 +32,12 @@ all.integration.case <- list(
   mouse3 = c("M3", "P3")
 )
 
-outdir <- "/home/hieunguyen/CRC1382/outdir"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
 PROJECT <- "240805_BSimons"
-output.version <- "20240820"
-config.version <- "default"
 
 for (chosen.quantile in all.quantiles){
-  path.to.main.input <- file.path(outdir, PROJECT, output.version, config.version)
-  path.to.main.output <- file.path(outdir, PROJECT, "data_analysis", output.version, config.version)
+  path.to.main.input <- file.path(outdir, PROJECT)
+  path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
   
   path.to.01.output <- file.path(path.to.main.output, "01_output")
   path.to.04.output <- file.path(path.to.main.output, "04_output", sprintf("quantile_%s", chosen.quantile))

@@ -1,3 +1,14 @@
+new.pkgs <- c("svglite", "ggpubr")
+for (pkg in new.pkgs){
+  if (pkg %in% installed.packages() == FALSE){
+    install.packages(pkg)
+  }   
+}
+if (packageVersion("tidyr") != "1.3.1"){
+  install.packages("tidyr")  
+}
+
+
 library(tidyr)
 library(readr)
 library(stringr)
@@ -15,21 +26,13 @@ library(data.table)
 library(ggtree)
 library(ape)
 library(igraph)
+library(ggpubr)
+library(circlize)
+library(ggalluvial)
 
 `%ni%` = Negate(`%in%`)
 
-new.pkgs <- c("svglite")
-for (pkg in new.pkgs){
-  if (pkg %in% installed.packages() == FALSE){
-    install.packages(pkg)
-  }   
-}
-new.pkgs <- c("msa")
-for (pkg in new.pkgs){
-  if (pkg %in% installed.packages() ==  FALSE){
-    BiocManager::install(pkg, update = FALSE)
-  }
-}
+
 #####----------------------------------------------------------------------#####
 ##### function to create an interactive data table
 #####----------------------------------------------------------------------#####
@@ -158,7 +161,7 @@ run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
     
     new.clonesets <- rbind(new.clonesets, tmpdf)
   }
-  
+  writexl::write_xlsx(new.clonesets, file.path(path.to.02.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
   #####----------------------------------------------------------------------#####
   ##### Create the final clone dataframe
   #####----------------------------------------------------------------------#####

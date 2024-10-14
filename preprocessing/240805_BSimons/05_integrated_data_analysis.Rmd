@@ -16,8 +16,6 @@ output:
 params:
   outdir: NA
   PROJECT: NA
-  config.version: NA
-  output.version: NA
   chosen.quantile: NA
   integration.case: NA
 ---
@@ -56,12 +54,12 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 # gc()
 # rm(list = ls())
 
-scrna_pipeline_src <- "/home/hieunguyen/CRC1382/src_2023/src_pipeline/scRNA_GEX_pipeline/processes_src"
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
-path.to.project.src <- "/home/hieunguyen/CRC1382/src_2023/bcr_data_analysis/240805_data_analysis"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
 source(file.path(path.to.project.src, "config.R"))
 #####----------------------------------------------------------------------#####
 # CONFIGURATIONS 
@@ -98,17 +96,15 @@ all.integration.case <- list(
 
 outdir <- params$outdir
 PROJECT <- params$PROJECT
-output.version <- params$output.version
-config.version <- params$config.version
 chosen.quantile <- params$chosen.quantile
 integration.case <- params$integration.case
 
-path.to.main.input <- file.path(outdir, PROJECT, output.version, config.version)
-path.to.main.output <- file.path(outdir, PROJECT, "data_analysis", output.version, config.version)
+path.to.main.input <- file.path(outdir, PROJECT)
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 
 path.to.01.output <- file.path(path.to.main.output, "01_output")
-path.to.04.output <- file.path(path.to.main.output, "04_output", output.version, config.version, sprintf("quantile_%s", chosen.quantile))
-path.to.05.output <- file.path(path.to.main.output, "05_output", output.version, config.version, sprintf("quantile_%s", chosen.quantile), integration.case)
+path.to.04.output <- file.path(path.to.main.output, "04_output", sprintf("quantile_%s", chosen.quantile))
+path.to.05.output <- file.path(path.to.main.output, "05_output", sprintf("quantile_%s", chosen.quantile), integration.case)
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 
 path.to.input.s.obj <- file.path(path.to.04.output, integration.case, "s8_output", sprintf("%s.output.s8.rds", PROJECT))
