@@ -181,3 +181,49 @@ run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
   
   writexl::write_xlsx(clonedf, file.path(path.to.02.output, sprintf("%s.clonedf.xlsx", PROJECT)))
 }
+
+#####----------------------------------------------------------------------#####
+##### FUNCTIONS to preprocess the single cell VDJ data
+#####----------------------------------------------------------------------#####
+run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
+  path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
+  path.to.save.output <- file.path(path.to.VDJ.output, "preprocessed_files")
+  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
+  
+  all.VDJ.files <- Sys.glob(file.path(path.to.save.output, "*.xlsx"))
+  names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
+    str_replace(basename(x), ".xlsx", "")
+  }))
+  all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
+  path.to.fasta <- file.path(path.to.main.src, "FASTA", ref.gene, "V_J_genes")
+  
+  #####----------------------------------------------------------------------#####
+  ##### pre-processing steps for the input VDJ files
+  #####----------------------------------------------------------------------#####
+  all.clonedf <- data.frame()
+  for (file in all.VDJ.files){
+    tmpdf <- readxl::read_xlsx(file)  
+    all.clonedf <- rbind(all.clonedf, tmpdf)
+  }
+  
+  # Keep IGH chain only, to compare with the BULK data
+  all.clonedf <- subset(all.clonedf, all.clonedf$chain == "IGH") %>%
+    rowwise() %>%
+    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt))
+  
+  new.all.clonedf <- data.frame(
+    VJseq.combi.tmp = unique(all.clonedf$VJseq.combi)) %>%
+    rowwise() %>%
+    mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
+    mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
+    mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
+    mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
+    mutate(cloneSize = nrow(subset(all.clonedf, all.clonedf$VJseq.combi == VJseq.combi.tmp))) %>% 
+    mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
+    mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
+    mutate(samples = paste(unique(subset(all.clonedf, all.clonedf$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")
+    )
+  
+  new.all.clonedf <- subset(new.all.clonedf, select = -c(VJseq.combi.tmp))
+  writexl::write_xlsx(new.all.clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+}
