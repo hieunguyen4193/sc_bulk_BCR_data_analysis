@@ -8,7 +8,6 @@ if (packageVersion("tidyr") != "1.3.1"){
   install.packages("tidyr")  
 }
 
-
 library(tidyr)
 library(readr)
 library(stringr)
@@ -31,7 +30,6 @@ library(circlize)
 library(ggalluvial)
 
 `%ni%` = Negate(`%in%`)
-
 
 #####----------------------------------------------------------------------#####
 ##### function to create an interactive data table
@@ -92,6 +90,7 @@ assign_clusters_to_sequences <- function(seqs, threshold = 0.15){
 #####----------------------------------------------------------------------#####
 formatBulkVDJtable <- function(cloneset_files, 
                                PROJECT,
+                               thres,
                                savefile, 
                                path.to.save.output){
   clonesets <- read_tsv(cloneset_files, id="fileName") %>% 
@@ -195,35 +194,66 @@ run_preprocessing_all_bulk_VDJ_data <- function(outdir,
 #####----------------------------------------------------------------------#####
 formatScVDJtable <- function(all.VDJ.files,
                              PROJECT, 
+                             thres,
                              savefile, 
                              path.to.save.output){
-  all.clonedf <- data.frame()
+  clonesets <- data.frame()
   for (file in all.VDJ.files){
+    sampleid <- basename(file) %>% str_replace(".xlsx", "")
     tmpdf <- readxl::read_xlsx(file)  
-    all.clonedf <- rbind(all.clonedf, tmpdf)
+    tmpdf$id <- sampleid
+    clonesets <- rbind(clonesets, tmpdf)
   }
   
   # Keep IGH chain only, to compare with the BULK data
-  all.clonedf <- subset(all.clonedf, all.clonedf$chain == "IGH") %>%
+  clonesets <- subset(clonesets, clonesets$chain == "IGH") %>%
     rowwise() %>%
-    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt))
+    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt)) %>%
+    mutate(V.gene = v_gene) %>%
+    mutate(J.gene = j_gene) %>%
+    mutate(D.gene = d_gene) %>% 
+    mutate(aaSeqCDR3 = cdr3) %>%
+    mutate(nSeqCDR3 = cdr3_nt) %>%
+    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
+    mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
+    mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
   
-  new.all.clonedf <- data.frame(
-    VJseq.combi.tmp = unique(all.clonedf$VJseq.combi)) %>%
+  #####----------------------------------------------------------------------#####
+  ##### Group sequences + Gene usages to clones
+  #####----------------------------------------------------------------------#####
+  new.clonesets <- data.frame()
+  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+    seqs <- unique(tmpdf$aaSeqCDR3)
+    if (length(seqs) >= 2){
+      cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+        tmpdf$aaSeqCDR3, function(x){
+          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+        }
+      ))    
+    } else {
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    }
+    new.clonesets <- rbind(new.clonesets, tmpdf)
+  }
+  
+  clonedf <- data.frame(
+    VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
     rowwise() %>%
     mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
     mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
     mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
     mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
-    mutate(cloneSize = nrow(subset(all.clonedf, all.clonedf$VJseq.combi == VJseq.combi.tmp))) %>% 
+    mutate(cloneSize = nrow(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp))) %>% 
     mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
     mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
-    mutate(samples = paste(unique(subset(all.clonedf, all.clonedf$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")
+    mutate(samples = paste(unique(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")
     )
   
-  new.all.clonedf <- subset(new.all.clonedf, select = -c(VJseq.combi.tmp))
+  clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
   if (savefile == TRUE){
-    writexl::write_xlsx(new.all.clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+    writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
   }    
 }
 
@@ -247,6 +277,6 @@ run_preprocessing_all_sc_data <- function(outdir,
   #####----------------------------------------------------------------------#####
   ##### pre-processing steps for the input VDJ files
   #####----------------------------------------------------------------------#####
-  output <- formatBulkVDJtable(all.VDJ.files, savefile, path.to.save.output)
+  output <- formatScVDJtable(all.VDJ.files, savefile, path.to.save.output)
   return(output)
 }
