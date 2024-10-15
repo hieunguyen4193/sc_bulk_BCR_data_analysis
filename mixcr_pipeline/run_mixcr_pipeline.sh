@@ -1,9 +1,8 @@
-
-##### batch 1
+##### batch 1: 220701_etc_biopsies
 # path_to_input="/mnt/storage/data/local/mol_med/bcr/220701_etc_biopsies/samples";
 ##### batch 2:
 # path_to_input="/home/hieu/storage/240826_Simons_pabst_MolMedcine_AmpliSeq/Fastq";
-#####
+#####: 240826_BSimons dataset
 
 while getopts "i:o:t:r:" opt; do
   case ${opt} in

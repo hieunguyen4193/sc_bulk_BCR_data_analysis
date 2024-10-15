@@ -90,40 +90,10 @@ assign_clusters_to_sequences <- function(seqs, threshold = 0.15){
 #####----------------------------------------------------------------------#####
 ##### FUNCTIONS to preprocess the bulk VDJ data
 #####----------------------------------------------------------------------#####
-run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
-  path.to.02.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-  dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
-  path.to.fasta <- file.path(path.to.main.src, "FASTA", ref.gene, "V_J_genes")
-  path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
-  
-  # input files from mixcr pipeline output, stored in storage.
-  path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output", "mid_based_output")
-  
-  all.clones.tables <- Sys.glob(file.path(path.to.mid.output, "*", "*.reassigned_IGH.tsv"))
-  names(all.clones.tables) <- unlist(lapply(
-    basename(all.clones.tables), function(x){
-      return(str_replace(x, ".reassigned_IGH.tsv", ""))
-    }
-  ))
-  
-  #####----------------------------------------------------------------------#####
-  ##### read REFERENCE GENES
-  #####----------------------------------------------------------------------#####
-  s.V.genes <- readDNAStringSet(file.path(path.to.fasta, "IGHV.fasta")) 
-  names(s.V.genes) <- lapply(names(s.V.genes), function(x){
-    str_split(x, "[|]")[[1]][[2]]
-  })
-  
-  s.J.genes <- readDNAStringSet(file.path(path.to.fasta, "IGHJ.fasta")) 
-  names(s.J.genes) <- lapply(names(s.J.genes), function(x){
-    str_split(x, "[|]")[[1]][[2]]
-  })
-  
-  #####----------------------------------------------------------------------#####
-  ##### READ DATA FROM ALL CLONE TABLES IN THE INPUT DIR
-  #####----------------------------------------------------------------------#####
-  cloneset_files <- all.clones.tables
-  
+formatBulkVDJtable <- function(cloneset_files, 
+                               PROJECT,
+                               savefile, 
+                               path.to.save.output){
   clonesets <- read_tsv(cloneset_files, id="fileName") %>% 
     mutate(id=str_remove_all(fileName,".*\\/|.reassigned_IGH.tsv"),
            isotype=str_remove(allCHitsWithScore, "\\*.*")) 
@@ -158,10 +128,9 @@ run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
     } else {
       tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
     }
-    
     new.clonesets <- rbind(new.clonesets, tmpdf)
   }
-  writexl::write_xlsx(new.clonesets, file.path(path.to.02.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
+  
   #####----------------------------------------------------------------------#####
   ##### Create the final clone dataframe
   #####----------------------------------------------------------------------#####
@@ -178,28 +147,56 @@ run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
     mutate(uniqueMoleculeCount = subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$uniqueMoleculeCount %>% sum()) %>%
     arrange(desc(cloneSize))
   clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
+  if (savefile == TRUE){
+    writexl::write_xlsx(new.clonesets, file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))  
+    writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))    
+  }
+  output = list(
+    clonedf = clonedf, 
+    clonesets = new.clonesets
+  )
+  return(output)
+}
+
+#####
+
+run_preprocessing_all_bulk_VDJ_data <- function(outdir, 
+                                                PROJECT, 
+                                                thres, 
+                                                ref.gene, 
+                                                savefile = TRUE){
+  path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
+  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
+  path.to.fasta <- file.path(path.to.main.src, "FASTA", ref.gene, "V_J_genes")
+  path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
   
-  writexl::write_xlsx(clonedf, file.path(path.to.02.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+  # input files from mixcr pipeline output, stored in storage.
+  path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output", "mid_based_output")
+  
+  all.clones.tables <- Sys.glob(file.path(path.to.mid.output, "*", "*.reassigned_IGH.tsv"))
+  names(all.clones.tables) <- unlist(lapply(
+    basename(all.clones.tables), function(x){
+      return(str_replace(x, ".reassigned_IGH.tsv", ""))
+    }
+  ))
+  #####----------------------------------------------------------------------#####
+  ##### READ DATA FROM ALL CLONE TABLES IN THE INPUT DIR
+  #####----------------------------------------------------------------------#####
+  #> by running this function, we read all the clone table "*.reassigned_IGH.tsv"
+  #> from the input path.to.storage, path.to.mid.output and preprocess them all.
+  #> Generate one final big VDJ data table containing all clones from all samples / all MIDs
+  #> and all mice
+  output <- formatBulkVDJtable(all.clones.tables, savefile, path.to.save.output)
+  return(output)
 }
 
 #####----------------------------------------------------------------------#####
 ##### FUNCTIONS to preprocess the single cell VDJ data
 #####----------------------------------------------------------------------#####
-run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
-  path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
-  path.to.save.output <- file.path(path.to.VDJ.output, "preprocessed_files")
-  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
-  
-  all.VDJ.files <- Sys.glob(file.path(path.to.save.output, "*.xlsx"))
-  names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
-    str_replace(basename(x), ".xlsx", "")
-  }))
-  all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
-  path.to.fasta <- file.path(path.to.main.src, "FASTA", ref.gene, "V_J_genes")
-  
-  #####----------------------------------------------------------------------#####
-  ##### pre-processing steps for the input VDJ files
-  #####----------------------------------------------------------------------#####
+formatScVDJtable <- function(all.VDJ.files,
+                             PROJECT, 
+                             savefile, 
+                             path.to.save.output){
   all.clonedf <- data.frame()
   for (file in all.VDJ.files){
     tmpdf <- readxl::read_xlsx(file)  
@@ -225,5 +222,31 @@ run_preprocessing_bulk_VDJ_data <- function(outdir, PROJECT, thres, ref.gene){
     )
   
   new.all.clonedf <- subset(new.all.clonedf, select = -c(VJseq.combi.tmp))
-  writexl::write_xlsx(new.all.clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+  if (savefile == TRUE){
+    writexl::write_xlsx(new.all.clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+  }    
+}
+
+#####
+
+run_preprocessing_all_sc_data <- function(outdir, 
+                                          PROJECT, 
+                                          thres, 
+                                          ref.gene, 
+                                          savefile = TRUE){
+  path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
+  path.to.save.output <- file.path(path.to.VDJ.output, "preprocessed_files")
+  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
+  
+  all.VDJ.files <- Sys.glob(file.path(path.to.save.output, "*.xlsx"))
+  names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
+    str_replace(basename(x), ".xlsx", "")
+  }))
+  all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
+  
+  #####----------------------------------------------------------------------#####
+  ##### pre-processing steps for the input VDJ files
+  #####----------------------------------------------------------------------#####
+  output <- formatBulkVDJtable(all.VDJ.files, savefile, path.to.save.output)
+  return(output)
 }
