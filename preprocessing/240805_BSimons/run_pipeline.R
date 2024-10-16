@@ -19,7 +19,7 @@ source("/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_VDJ_pipeline/main_VDJ_pi
 
 path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 thres <- 0.85
 

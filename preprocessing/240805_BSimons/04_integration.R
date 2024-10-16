@@ -32,7 +32,7 @@ all.integration.case <- list(
   mouse3 = c("M3", "P3")
 )
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 
 for (chosen.quantile in all.quantiles){

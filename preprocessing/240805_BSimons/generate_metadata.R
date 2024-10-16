@@ -15,7 +15,7 @@ source(file.path(scrna_pipeline_src, "helper_functions.R"))
 #####----------------------------------------------------------------------#####
 # CONFIGURATIONS AND PREPRATIONS
 #####----------------------------------------------------------------------#####
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")

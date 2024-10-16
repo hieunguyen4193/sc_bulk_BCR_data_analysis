@@ -9,7 +9,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
 library("Biostrings")
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "241002_BSimons"
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 thres <- 0.85

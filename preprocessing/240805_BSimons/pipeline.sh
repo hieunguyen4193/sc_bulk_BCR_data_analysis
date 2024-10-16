@@ -6,5 +6,7 @@ Rscript "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/24
 
 Rscript "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons/run_to_generate_03.R"
 
+Rscript "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons/04_integration.R"
+
 Rscript "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons/run_to_generate_05.R"
 

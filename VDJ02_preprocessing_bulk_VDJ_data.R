@@ -16,20 +16,24 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 #####----------------------------------------------------------------------#####
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 
-run_preprocessing_bulk_VDJ_data(outdir = outdir, PROJECT = "220701_etc_biopsies", thres = 0.85, ref.gene = "IMGT")
-run_preprocessing_bulk_VDJ_data(outdir = outdir, PROJECT = "240826_BSimons", thres = 0.85, ref.gene = "IMGT")
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+thres <- 0.85
 
-#####----------------------------------------------------------------------#####
-##### read REFERENCE GENES
-#####----------------------------------------------------------------------#####
-# s.V.genes <- readDNAStringSet(file.path(path.to.fasta, "IGHV.fasta")) 
-# names(s.V.genes) <- lapply(names(s.V.genes), function(x){
-#   str_split(x, "[|]")[[1]][[2]]
-# })
-# 
-# s.J.genes <- readDNAStringSet(file.path(path.to.fasta, "IGHJ.fasta")) 
-# names(s.J.genes) <- lapply(names(s.J.genes), function(x){
-#   str_split(x, "[|]")[[1]][[2]]
-# })
+output <- list()
+for (PROJECT in c("220701_etc_biopsies", 
+                  "240826_BSimons")){
+  print("#####----------------------------------#####")
+  print(sprintf("Working on project %s", PROJECT))
+  print("#####----------------------------------#####")
+  path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output/v0.2/mid_based_output")
+  path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
+  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
+  output[[PROJECT]] <- run_preprocessing_all_bulk_VDJ_data(path.to.mid.output = path.to.mid.output, 
+                                                           path.to.save.output = path.to.save.output,
+                                                           thres = thres,
+                                                           PROJECT = PROJECT)  
+}
+
+

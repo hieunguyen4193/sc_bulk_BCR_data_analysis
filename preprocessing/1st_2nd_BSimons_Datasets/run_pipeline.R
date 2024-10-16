@@ -18,7 +18,7 @@ if (packageVersion("scRepertoire") != "1.11.0"){
 library("scRepertoire")
 # __________VDJ DATA ANYLYSIS PIPELINE__________
 path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "1st_2nd_BSimons_Datasets"
 thres <- 0.85
 

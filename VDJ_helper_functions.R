@@ -6,6 +6,7 @@ for (pkg in new.pkgs){
 }
 if (packageVersion("tidyr") != "1.3.1"){
   install.packages("tidyr")  
+  library(tidyr)
 }
 
 library(tidyr)
@@ -99,10 +100,8 @@ formatBulkVDJtable <- function(cloneset_files,
   
   clonesets <- clonesets %>% rowwise() %>%
     mutate(V.gene = str_split(str_split(allVHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
-    # mutate(V.gene = str_split(V.gene, "[*]")[[1]][[1]]) %>% # do not remove * <<<<<
     mutate(V.gene = paste(str_split(V.gene, "-")[[1]][1:2], collapse = "-")) %>% 
     mutate(J.gene = str_split(str_split(allJHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
-    # mutate(J.gene = str_split(J.gene, "[*]")[[1]][[1]]) %>% # do not remove * <<<<<
     mutate(J.gene = str_split(J.gene, "-")[[1]][[1]]) %>%
     mutate(D.gene = str_split(str_split(allDHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
     mutate(D.gene = paste(str_split(D.gene, "-")[[1]][1:2], collapse = "-")) %>% 
@@ -110,9 +109,7 @@ formatBulkVDJtable <- function(cloneset_files,
     mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
     mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
   
-  #####----------------------------------------------------------------------#####
   ##### Group sequences + Gene usages to clones
-  #####----------------------------------------------------------------------#####
   new.clonesets <- data.frame()
   for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
     tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
@@ -130,9 +127,7 @@ formatBulkVDJtable <- function(cloneset_files,
     new.clonesets <- rbind(new.clonesets, tmpdf)
   }
   
-  #####----------------------------------------------------------------------#####
   ##### Create the final clone dataframe
-  #####----------------------------------------------------------------------#####
   clonedf <- data.frame(VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
     rowwise() %>%
     mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
@@ -157,35 +152,47 @@ formatBulkVDJtable <- function(cloneset_files,
   return(output)
 }
 
-#####
-
-run_preprocessing_all_bulk_VDJ_data <- function(outdir, 
-                                                PROJECT, 
+#####----------------------------------------------------------------------#####
+##### get all *.reassigned_IGH.tsv from preprocessed_files folder, format tables
+#####----------------------------------------------------------------------#####
+run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
+                                                path.to.save.output,
+                                                PROJECT,
                                                 thres, 
-                                                ref.gene, 
-                                                savefile = TRUE){
-  path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-  dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
-  path.to.fasta <- file.path(path.to.main.src, "FASTA", ref.gene, "V_J_genes")
-  path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
-  
-  # input files from mixcr pipeline output, stored in storage.
-  path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output", "mid_based_output")
-  
+                                                savefile = TRUE,
+                                                verbose = TRUE){
+  if (verbose == TRUE){
+    print(sprintf("Output will be saved at %s", path.to.save.output))
+  }
+  if (verbose == TRUE){
+    print(sprintf("fetching files *.reassigned_IGH.tsv from %s", path.to.mid.output)) 
+  }
   all.clones.tables <- Sys.glob(file.path(path.to.mid.output, "*", "*.reassigned_IGH.tsv"))
+  if (verbose == TRUE){
+    print("reading and processing all clone tables ...") 
+    print(sprintf("Number of files in the input path %s, %s", path.to.mid.output, length(all.clones.tables)))
+  }
   names(all.clones.tables) <- unlist(lapply(
     basename(all.clones.tables), function(x){
       return(str_replace(x, ".reassigned_IGH.tsv", ""))
     }
   ))
-  #####----------------------------------------------------------------------#####
-  ##### READ DATA FROM ALL CLONE TABLES IN THE INPUT DIR
-  #####----------------------------------------------------------------------#####
   #> by running this function, we read all the clone table "*.reassigned_IGH.tsv"
   #> from the input path.to.storage, path.to.mid.output and preprocess them all.
   #> Generate one final big VDJ data table containing all clones from all samples / all MIDs
   #> and all mice
-  output <- formatBulkVDJtable(all.clones.tables, savefile, path.to.save.output)
+  if (verbose == TRUE){
+    print("format the table to the unified VDJ table format...") 
+  }
+  output <- formatBulkVDJtable(cloneset_files = all.clones.tables, 
+                               PROJECT = PROJECT,
+                               thres = thres,
+                               savefile = savefile,
+                               path.to.save.output = path.to.save.output
+                               )
+  if (verbose == TRUE){
+   print("Finished!") 
+  }
   return(output)
 }
 
@@ -218,9 +225,7 @@ formatScVDJtable <- function(all.VDJ.files,
     mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
     mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
   
-  #####----------------------------------------------------------------------#####
   ##### Group sequences + Gene usages to clones
-  #####----------------------------------------------------------------------#####
   new.clonesets <- data.frame()
   for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
     tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
@@ -255,28 +260,122 @@ formatScVDJtable <- function(all.VDJ.files,
   if (savefile == TRUE){
     writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
   }    
+  output = list(
+    clonedf = clonedf, 
+    clonesets = new.clonesets
+  )
+  return(output)
 }
 
-#####
-
-run_preprocessing_all_sc_data <- function(outdir, 
-                                          PROJECT, 
+#####----------------------------------------------------------------------#####
+##### Function to get all VDJ input files and format them all into VDJ tables
+#####----------------------------------------------------------------------#####
+run_preprocessing_all_sc_data <- function(path.to.VDJ.output, 
+                                          path.to.save.output, 
+                                          PROJECT,
                                           thres, 
-                                          ref.gene, 
                                           savefile = TRUE){
-  path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
-  path.to.save.output <- file.path(path.to.VDJ.output, "preprocessed_files")
   dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
-  
   all.VDJ.files <- Sys.glob(file.path(path.to.save.output, "*.xlsx"))
   names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
     str_replace(basename(x), ".xlsx", "")
   }))
+  # temp remove 
   all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
   
-  #####----------------------------------------------------------------------#####
-  ##### pre-processing steps for the input VDJ files
-  #####----------------------------------------------------------------------#####
-  output <- formatScVDJtable(all.VDJ.files, savefile, path.to.save.output)
+  output <- formatScVDJtable(all.VDJ.files = all.VDJ.files,
+                             PROJECT = PROJECT, 
+                             thres = thres,
+                             savefile = savefile, 
+                             path.to.save.output = path.to.save.output)
+  return(output)
+}
+
+#####----------------------------------------------------------------------#####
+##### Generate FASTA files from clonesets
+#####----------------------------------------------------------------------#####
+generate_fasta <- function(clonesets, 
+                           path.to.output.fasta, 
+                           ref.gene, 
+                           ref.gene.config,
+                           save_fasta = TRUE){
+  source(ref.gene.config) # path to the configuration file for the input BCR reference genes
+  if (ref.gene == "10x"){
+    ref.fasta <- readDNAStringSet(ref.genes$`10x`)
+  } else if (ref.gene == "IMGT"){
+    s.V.genes <- readDNAStringSet(ref.genes$IMGT$V.gene)
+    names(s.V.genes) <- lapply(names(s.V.genes), function(x){
+      str_split(x, "[|]")[[1]][[2]]
+    })
+    s.J.genes <- readDNAStringSet(ref.genes$J.gene)
+    names(s.J.genes) <- lapply(names(s.J.genes), function(x){
+      str_split(x, "[|]")[[1]][[2]]
+    })
+  }
+  for (input.VJ.combi in unique(clonesets[[sprintf("VJcombi_CDR3_%s", thres)]])){
+    V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
+    J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
+    CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
+    # remove the * sign in the file name
+    # path.to.output.fasta <- file.path(path.to.02.output, mouse.id, sprintf("%s_%s.aln.fasta", 
+    #                                                                        mouse.id, 
+    #                                                                        str_replace_all(input.VJ.combi, "[*]", "-")))
+    if (file.exists(path.to.output.fasta) == FALSE){
+      fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", "uniqueMoleculeCount", "V.gene", "D.gene", "J.gene", "id", "aaSeqCDR3", "nSeqCDR3")]
+      colnames(fasta.output) <- c("seq", "abundance", "V.gene", "D.gene", "J.gene", "SampleID", "CDR3aa", "CDR3nt")
+      
+      ##### get germline sequences and merge with the real data sequences
+      if (ref.gene == "IMGT"){
+        GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
+        GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
+      } else if (ref.gene == "10x"){
+        GL.V.gene <- ref.fasta[[V.gene]] %>% as.character()
+        GL.J.gene <- ref.fasta[[J.gene]] %>% as.character()
+      }
+
+      repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
+      GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
+      # merge the clone sequences with the reference sequence. 
+      all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
+      
+      if (nrow(fasta.output) > 1){
+        ##### multiple alignment sequences, package MSA. 
+        MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
+        msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
+        if (save_fasta == TRUE){
+          sink(path.to.output.fasta)
+          for (i in seq(1, length(all.seqs))){
+            if (i == length(all.seqs)){
+              output.info <- ">GL"
+            } else {
+              sample.id <- fasta.output[i, ]$SampleID
+              cdr3aa <- fasta.output[i, ]$CDR3aa
+              cdr3nt <- fasta.output[i, ]$CDR3nt
+              abundance <- fasta.output[i, ]$abundance
+              output.info <- sprintf(">Sample:%s|Mouse:%s|CDR3aa:%s|CDR3nt:%s|Index:%s|Abundance:%s", 
+                                     sample.id, 
+                                     mouse.id,
+                                     cdr3aa,
+                                     cdr3nt,
+                                     i,
+                                     abundance)            
+            }
+            output.seq <- toString(unmasked(msaMiXCRtreeVDJ)[[i]])  
+            # print(nchar(output.seq))
+            cat(output.info)
+            cat("\n")
+            cat(output.seq)
+            cat("\n")
+          }
+          sink()
+        }
+      }
+    }
+    output[[input.VJ.combi]] <- list(
+      MiXCRtreeVDJ = MiXCRtreeVDJ,
+      msaMiXCRtreeVDJ = msaMiXCRtreeVDJ,
+      all.seqs = all.seqs
+    )
+  }
   return(output)
 }

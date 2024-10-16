@@ -8,7 +8,7 @@ if (packageVersion("Matrix") != "1.5.4.1"){
 }
 
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "241002_BSimons"
 
 path.to.rmd1 <- file.path(path.to.project.src, "01_hashtag_antibodies.Rmd")
