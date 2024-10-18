@@ -7,7 +7,6 @@ rm(list = ls())
 path.to.main.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "VDJ_helper_functions.R"))
 
-source("/media/hieunguyen/HNSD01/src/bcr_data_analysis/1st_2nd_datasets/00_helper_functions.R")
 scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
@@ -22,8 +21,9 @@ outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 
 output <- list()
-for (PROJECT in c("220701_etc_biopsies", 
+for (PROJECT in c("220701_etc_biopsies",
                   "240826_BSimons")){
+# for (PROJECT in c("240826_BSimons")){
   print("#####----------------------------------#####")
   print(sprintf("Working on project %s", PROJECT))
   print("#####----------------------------------#####")

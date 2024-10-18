@@ -10,7 +10,7 @@ if (packageVersion("Matrix") != "1.5.4.1"){
   install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type =  "source", repos = NULL)  
 }
 if (packageVersion("scRepertoire") != "1.11.0"){
-  devtools::install_github("ncborcherding/scRepertoire@v1")
+  devtools::install_github("ncborcherding/scRepertoire@v1", upgrade = FALSE)
 }
 
 source("/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_VDJ_pipeline/main_VDJ_pipeline.R")

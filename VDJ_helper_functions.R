@@ -94,57 +94,66 @@ formatBulkVDJtable <- function(cloneset_files,
                                thres,
                                savefile, 
                                path.to.save.output){
-  clonesets <- read_tsv(cloneset_files, id="fileName") %>% 
-    mutate(id=str_remove_all(fileName,".*\\/|.reassigned_IGH.tsv"),
-           isotype=str_remove(allCHitsWithScore, "\\*.*")) 
-  
-  clonesets <- clonesets %>% rowwise() %>%
-    mutate(V.gene = str_split(str_split(allVHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
-    mutate(V.gene = paste(str_split(V.gene, "-")[[1]][1:2], collapse = "-")) %>% 
-    mutate(J.gene = str_split(str_split(allJHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
-    mutate(J.gene = str_split(J.gene, "-")[[1]][[1]]) %>%
-    mutate(D.gene = str_split(str_split(allDHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
-    mutate(D.gene = paste(str_split(D.gene, "-")[[1]][1:2], collapse = "-")) %>% 
-    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
-    mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
-    mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
-  
-  ##### Group sequences + Gene usages to clones
-  new.clonesets <- data.frame()
-  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
-    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
-    seqs <- unique(tmpdf$aaSeqCDR3)
-    if (length(seqs) >= 2){
-      cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
-      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-        tmpdf$aaSeqCDR3, function(x){
-          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-        }
-      ))    
-    } else {
-      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
+      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE){
+    print("Generate File clonedf.xlsx and flie split_clones.xlsx ...")
+    clonesets <- read_tsv(cloneset_files, id="fileName") %>% 
+      mutate(id=str_remove_all(fileName,".*\\/|.reassigned_IGH.tsv"),
+             isotype=str_remove(allCHitsWithScore, "\\*.*")) 
+    
+    clonesets <- clonesets %>% rowwise() %>%
+      mutate(V.gene = str_split(str_split(allVHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
+      mutate(V.gene = paste(str_split(V.gene, "-")[[1]][1:2], collapse = "-")) %>% 
+      mutate(J.gene = str_split(str_split(allJHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
+      mutate(J.gene = str_split(J.gene, "-")[[1]][[1]]) %>%
+      mutate(D.gene = str_split(str_split(allDHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
+      mutate(D.gene = paste(str_split(D.gene, "-")[[1]][1:2], collapse = "-")) %>% 
+      mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
+      mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
+      mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
+    
+    ##### Group sequences + Gene usages to clones
+    new.clonesets <- data.frame()
+    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+      seqs <- unique(tmpdf$aaSeqCDR3)
+      if (length(seqs) >= 2){
+        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+          tmpdf$aaSeqCDR3, function(x){
+            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+          }
+        ))    
+      } else {
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+      }
+      new.clonesets <- rbind(new.clonesets, tmpdf)
     }
-    new.clonesets <- rbind(new.clonesets, tmpdf)
+    
+    ##### Create the final clone dataframe
+    clonedf <- data.frame(VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
+      rowwise() %>%
+      mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
+      mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
+      mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
+      mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
+      mutate(cloneSize = nrow(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp))) %>% 
+      mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
+      mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
+      mutate(samples = paste(unique(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")) %>%
+      mutate(uniqueMoleculeCount = subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$uniqueMoleculeCount %>% sum()) %>%
+      arrange(desc(cloneSize))
+    clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
+    if (savefile == TRUE){
+      clonedf <- writexl::write_excel(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+      new.clonesets <- writexl::write_excel(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))    
+    }
+  } else {
+    print("File clonedf.xlsx and flie split_clones.xlsx exist, reading in ...")
+    clonedf <- readxl::read_excel(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+    new.clonesets <- readxl::read_excel(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) 
   }
   
-  ##### Create the final clone dataframe
-  clonedf <- data.frame(VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
-    rowwise() %>%
-    mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
-    mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
-    mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
-    mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
-    mutate(cloneSize = nrow(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp))) %>% 
-    mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
-    mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
-    mutate(samples = paste(unique(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")) %>%
-    mutate(uniqueMoleculeCount = subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$uniqueMoleculeCount %>% sum()) %>%
-    arrange(desc(cloneSize))
-  clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
-  if (savefile == TRUE){
-    writexl::write_xlsx(new.clonesets, file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))  
-    writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))    
-  }
   output = list(
     clonedf = clonedf, 
     clonesets = new.clonesets
@@ -177,19 +186,23 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
       return(str_replace(x, ".reassigned_IGH.tsv", ""))
     }
   ))
-  #> by running this function, we read all the clone table "*.reassigned_IGH.tsv"
-  #> from the input path.to.storage, path.to.mid.output and preprocess them all.
-  #> Generate one final big VDJ data table containing all clones from all samples / all MIDs
-  #> and all mice
-  if (verbose == TRUE){
-    print("format the table to the unified VDJ table format...") 
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE){
+    #> by running this function, we read all the clone table "*.reassigned_IGH.tsv"
+    #> from the input path.to.storage, path.to.mid.output and preprocess them all.
+    #> Generate one final big VDJ data table containing all clones from all samples / all MIDs
+    #> and all mice
+    if (verbose == TRUE){
+      print("format the table to the unified VDJ table format...") 
+    }
+    output <- formatBulkVDJtable(cloneset_files = all.clones.tables, 
+                                 PROJECT = PROJECT,
+                                 thres = thres,
+                                 savefile = savefile,
+                                 path.to.save.output = path.to.save.output)
+    saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
+  } else {
+    output <- readRDS(file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   }
-  output <- formatBulkVDJtable(cloneset_files = all.clones.tables, 
-                               PROJECT = PROJECT,
-                               thres = thres,
-                               savefile = savefile,
-                               path.to.save.output = path.to.save.output
-                               )
   if (verbose == TRUE){
    print("Finished!") 
   }
@@ -204,62 +217,72 @@ formatScVDJtable <- function(all.VDJ.files,
                              thres,
                              savefile, 
                              path.to.save.output){
-  clonesets <- data.frame()
-  for (file in all.VDJ.files){
-    sampleid <- basename(file) %>% str_replace(".xlsx", "")
-    tmpdf <- readxl::read_xlsx(file)  
-    tmpdf$id <- sampleid
-    clonesets <- rbind(clonesets, tmpdf)
-  }
-  
-  # Keep IGH chain only, to compare with the BULK data
-  clonesets <- subset(clonesets, clonesets$chain == "IGH") %>%
-    rowwise() %>%
-    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt)) %>%
-    mutate(V.gene = v_gene) %>%
-    mutate(J.gene = j_gene) %>%
-    mutate(D.gene = d_gene) %>% 
-    mutate(aaSeqCDR3 = cdr3) %>%
-    mutate(nSeqCDR3 = cdr3_nt) %>%
-    mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
-    mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
-    mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
-  
-  ##### Group sequences + Gene usages to clones
-  new.clonesets <- data.frame()
-  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
-    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
-    seqs <- unique(tmpdf$aaSeqCDR3)
-    if (length(seqs) >= 2){
-      cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
-      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-        tmpdf$aaSeqCDR3, function(x){
-          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-        }
-      ))    
-    } else {
-      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
+      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE){
+    print("Generate File clonedf.xlsx and flie split_clones.xlsx ...")
+    clonesets <- data.frame()
+    for (file in all.VDJ.files){
+      print(file)
+      sampleid <- basename(file) %>% str_replace(".xlsx", "")
+      tmpdf <- readxl::read_xlsx(file)  
+      tmpdf$id <- sampleid
+      clonesets <- rbind(clonesets, tmpdf)
     }
-    new.clonesets <- rbind(new.clonesets, tmpdf)
+    
+    # Keep IGH chain only, to compare with the BULK data
+    clonesets <- subset(clonesets, clonesets$chain == "IGH") %>%
+      rowwise() %>%
+      mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt)) %>%
+      mutate(V.gene = v_gene) %>%
+      mutate(J.gene = j_gene) %>%
+      mutate(D.gene = d_gene) %>% 
+      mutate(aaSeqCDR3 = cdr3) %>%
+      mutate(nSeqCDR3 = cdr3_nt) %>%
+      mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
+      mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
+      mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
+    
+    ##### Group sequences + Gene usages to clones
+    new.clonesets <- data.frame()
+    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+      seqs <- unique(tmpdf$aaSeqCDR3)
+      if (length(seqs) >= 2){
+        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+          tmpdf$aaSeqCDR3, function(x){
+            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+          }
+        ))    
+      } else {
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+      }
+      new.clonesets <- rbind(new.clonesets, tmpdf)
+    }
+    
+    clonedf <- data.frame(
+      VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
+      rowwise() %>%
+      mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
+      mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
+      mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
+      mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
+      mutate(cloneSize = nrow(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp))) %>% 
+      mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
+      mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
+      mutate(samples = paste(unique(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")
+      )
+    
+    clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
+    if (savefile == TRUE){
+      writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+      writexl::write_xlsx(new.clonesets, file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
+    }    
+  } else {
+    print("File clonedf.xlsx and flie split_clones.xlsx exist, reading in ...")
+    clonedf <- readxl::read_excel(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+    new.clonesets <- readxl::read_excel(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
   }
-  
-  clonedf <- data.frame(
-    VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
-    rowwise() %>%
-    mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
-    mutate(V.gene = str_split(VJseq.combi.tmp, "_")[[1]][[1]]) %>%
-    mutate(J.gene = str_split(VJseq.combi.tmp, "_")[[1]][[2]]) %>%
-    mutate(CDR3nt = str_split(VJseq.combi.tmp, "_")[[1]][[4]]) %>%
-    mutate(cloneSize = nrow(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp))) %>% 
-    mutate(CDR3aa.length = nchar(CDR3aa)) %>% 
-    mutate(CDR3nt.length = nchar(CDR3nt)) %>% 
-    mutate(samples = paste(unique(subset(new.clonesets, new.clonesets$VJseq.combi == VJseq.combi.tmp)$id), collapse = ",")
-    )
-  
-  clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
-  if (savefile == TRUE){
-    writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
-  }    
   output = list(
     clonedf = clonedf, 
     clonesets = new.clonesets
@@ -276,18 +299,23 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
                                           thres, 
                                           savefile = TRUE){
   dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
-  all.VDJ.files <- Sys.glob(file.path(path.to.save.output, "*.xlsx"))
+  all.VDJ.files <- Sys.glob(file.path(path.to.VDJ.output, "*.xlsx"))
   names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
     str_replace(basename(x), ".xlsx", "")
   }))
   # temp remove 
   all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
-  
-  output <- formatScVDJtable(all.VDJ.files = all.VDJ.files,
-                             PROJECT = PROJECT, 
-                             thres = thres,
-                             savefile = savefile, 
-                             path.to.save.output = path.to.save.output)
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE){
+    print(sprintf("Generating file %s", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))
+    output <- formatScVDJtable(all.VDJ.files = all.VDJ.files,
+                               PROJECT = PROJECT, 
+                               thres = thres,
+                               savefile = savefile, 
+                               path.to.save.output = path.to.save.output)
+    saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
+  } else { 
+    print(sprintf("File %s exists", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))
+  }
   return(output)
 }
 
@@ -295,10 +323,38 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
 ##### Generate FASTA files from clonesets
 #####----------------------------------------------------------------------#####
 generate_fasta <- function(clonesets, 
-                           path.to.output.fasta, 
+                           path.to.save.output, 
                            ref.gene, 
                            ref.gene.config,
+                           mouse.id,
                            save_fasta = TRUE){
+  if (re_define_clone_cluster == TRUE){
+    print(sprintf("Rename the column %s to %s", 
+                  sprintf("VJcombi_CDR3_%s", thres),
+                  sprintf("VJcombi_CDR3_%s_prev", thres)))
+    print(sprintf("Remove the column %s", sprintf("VJcombi_CDR3_%s", thres)))
+    clonesets[[sprintf("VJcombi_CDR3_%s_prev", thres)]] <- clonesets[[sprintf("VJcombi_CDR3_%s", thres)]]
+    clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] <- NULL
+    ##### Group sequences + Gene usages to clones
+    new.clonesets <- data.frame()
+    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+      seqs <- unique(tmpdf$aaSeqCDR3)
+      if (length(seqs) >= 2){
+        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+          tmpdf$aaSeqCDR3, function(x){
+            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+          }
+        ))    
+      } else {
+        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+      }
+      new.clonesets <- rbind(new.clonesets, tmpdf)
+    }
+    clonesets <- new.clonesets
+    print("IMPORTANT NOTE: THE CLONE CLUSTERS ARE GENERATED BASED ON SAMPLES/MIDS IN THIS SELECTED MOUSE/SAMPLE ONLY; NOT THE AGGREGATED TABLE.")
+  }
   source(ref.gene.config) # path to the configuration file for the input BCR reference genes
   if (ref.gene == "10x"){
     ref.fasta <- readDNAStringSet(ref.genes$`10x`)
@@ -317,12 +373,28 @@ generate_fasta <- function(clonesets,
     J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
     CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
     # remove the * sign in the file name
-    # path.to.output.fasta <- file.path(path.to.02.output, mouse.id, sprintf("%s_%s.aln.fasta", 
-    #                                                                        mouse.id, 
-    #                                                                        str_replace_all(input.VJ.combi, "[*]", "-")))
+    path.to.output.fasta <- file.path(path.to.save.output,
+                                      mouse.id, 
+                                      sprintf("%s_%s.aln.fasta",
+                                              mouse.id,
+                                              str_replace_all(input.VJ.combi, "[*]", "-")))
     if (file.exists(path.to.output.fasta) == FALSE){
-      fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", "uniqueMoleculeCount", "V.gene", "D.gene", "J.gene", "id", "aaSeqCDR3", "nSeqCDR3")]
-      colnames(fasta.output) <- c("seq", "abundance", "V.gene", "D.gene", "J.gene", "SampleID", "CDR3aa", "CDR3nt")
+      fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
+                                                                                                              "uniqueMoleculeCount", 
+                                                                                                              "V.gene", 
+                                                                                                              "D.gene", 
+                                                                                                              "J.gene", 
+                                                                                                              "id", 
+                                                                                                              "aaSeqCDR3", 
+                                                                                                              "nSeqCDR3")]
+      colnames(fasta.output) <- c("seq", 
+                                  "abundance", 
+                                  "V.gene", 
+                                  "D.gene", 
+                                  "J.gene", 
+                                  "SampleID",
+                                  "CDR3aa", 
+                                  "CDR3nt")
       
       ##### get germline sequences and merge with the real data sequences
       if (ref.gene == "IMGT"){
