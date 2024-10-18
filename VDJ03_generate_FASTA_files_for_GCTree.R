@@ -34,6 +34,11 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
   PROJECT = PROJECT)  
 
 clonesets <- clone.output$clonesets
-input.clone <- "IGHV14-3*01_IGHJ2*01_36_1"
 ref.gene <- "10x"
 ref.gene.config <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/ref_gene_config.R"
+
+generate_fasta(clonesets = clonesets, 
+               path.to.save.output = path.to.save.fasta,
+               ref.gene = ref.gene,
+               ref.gene.config = ref.gene.config,
+               mouse.id = "test")

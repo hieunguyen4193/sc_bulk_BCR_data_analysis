@@ -327,127 +327,144 @@ generate_fasta <- function(clonesets,
                            ref.gene, 
                            ref.gene.config,
                            mouse.id,
-                           save_fasta = TRUE){
-  if (re_define_clone_cluster == TRUE){
-    print(sprintf("Rename the column %s to %s", 
-                  sprintf("VJcombi_CDR3_%s", thres),
-                  sprintf("VJcombi_CDR3_%s_prev", thres)))
-    print(sprintf("Remove the column %s", sprintf("VJcombi_CDR3_%s", thres)))
-    clonesets[[sprintf("VJcombi_CDR3_%s_prev", thres)]] <- clonesets[[sprintf("VJcombi_CDR3_%s", thres)]]
-    clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] <- NULL
-    ##### Group sequences + Gene usages to clones
-    new.clonesets <- data.frame()
-    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
-      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
-      seqs <- unique(tmpdf$aaSeqCDR3)
-      if (length(seqs) >= 2){
-        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-          tmpdf$aaSeqCDR3, function(x){
-            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-          }
-        ))    
-      } else {
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
-      }
-      new.clonesets <- rbind(new.clonesets, tmpdf)
-    }
-    clonesets <- new.clonesets
-    print("IMPORTANT NOTE: THE CLONE CLUSTERS ARE GENERATED BASED ON SAMPLES/MIDS IN THIS SELECTED MOUSE/SAMPLE ONLY; NOT THE AGGREGATED TABLE.")
-  }
-  source(ref.gene.config) # path to the configuration file for the input BCR reference genes
-  if (ref.gene == "10x"){
-    ref.fasta <- readDNAStringSet(ref.genes$`10x`)
-  } else if (ref.gene == "IMGT"){
-    s.V.genes <- readDNAStringSet(ref.genes$IMGT$V.gene)
-    names(s.V.genes) <- lapply(names(s.V.genes), function(x){
-      str_split(x, "[|]")[[1]][[2]]
-    })
-    s.J.genes <- readDNAStringSet(ref.genes$J.gene)
-    names(s.J.genes) <- lapply(names(s.J.genes), function(x){
-      str_split(x, "[|]")[[1]][[2]]
-    })
-  }
-  for (input.VJ.combi in unique(clonesets[[sprintf("VJcombi_CDR3_%s", thres)]])){
-    V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
-    J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
-    CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
-    # remove the * sign in the file name
-    path.to.output.fasta <- file.path(path.to.save.output,
-                                      mouse.id, 
-                                      sprintf("%s_%s.aln.fasta",
-                                              mouse.id,
-                                              str_replace_all(input.VJ.combi, "[*]", "-")))
-    if (file.exists(path.to.output.fasta) == FALSE){
-      fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
-                                                                                                              "uniqueMoleculeCount", 
-                                                                                                              "V.gene", 
-                                                                                                              "D.gene", 
-                                                                                                              "J.gene", 
-                                                                                                              "id", 
-                                                                                                              "aaSeqCDR3", 
-                                                                                                              "nSeqCDR3")]
-      colnames(fasta.output) <- c("seq", 
-                                  "abundance", 
-                                  "V.gene", 
-                                  "D.gene", 
-                                  "J.gene", 
-                                  "SampleID",
-                                  "CDR3aa", 
-                                  "CDR3nt")
+                           PROJECT,
+                           save_fasta = TRUE,
+                           re_define_clone_cluster = FALSE){
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT))) == FALSE){
+    dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
+    if (re_define_clone_cluster == TRUE){
+      print("RE-DEFINE THE CLONE CLUSTERS BASED ON CDR3 SEQUENCE SIMILARITY AND V-J GENE USAGES ON SELECTED SAMPLES/MIDS ONLY")
+      print(sprintf("Rename the column %s to %s", 
+                    sprintf("VJcombi_CDR3_%s", thres),
+                    sprintf("VJcombi_CDR3_%s_prev", thres)))
+      print(sprintf("Remove the column %s", sprintf("VJcombi_CDR3_%s", thres)))
+      clonesets[[sprintf("VJcombi_CDR3_%s_prev", thres)]] <- clonesets[[sprintf("VJcombi_CDR3_%s", thres)]]
+      clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] <- NULL
       
-      ##### get germline sequences and merge with the real data sequences
-      if (ref.gene == "IMGT"){
-        GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
-        GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
-      } else if (ref.gene == "10x"){
-        GL.V.gene <- ref.fasta[[V.gene]] %>% as.character()
-        GL.J.gene <- ref.fasta[[J.gene]] %>% as.character()
-      }
-
-      repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
-      GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
-      # merge the clone sequences with the reference sequence. 
-      all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
-      
-      if (nrow(fasta.output) > 1){
-        ##### multiple alignment sequences, package MSA. 
-        MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
-        msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
-        if (save_fasta == TRUE){
-          sink(path.to.output.fasta)
-          for (i in seq(1, length(all.seqs))){
-            if (i == length(all.seqs)){
-              output.info <- ">GL"
-            } else {
-              sample.id <- fasta.output[i, ]$SampleID
-              cdr3aa <- fasta.output[i, ]$CDR3aa
-              cdr3nt <- fasta.output[i, ]$CDR3nt
-              abundance <- fasta.output[i, ]$abundance
-              output.info <- sprintf(">Sample:%s|Mouse:%s|CDR3aa:%s|CDR3nt:%s|Index:%s|Abundance:%s", 
-                                     sample.id, 
-                                     mouse.id,
-                                     cdr3aa,
-                                     cdr3nt,
-                                     i,
-                                     abundance)            
+      ##### Group sequences + Gene usages to clones
+      new.clonesets <- data.frame()
+      for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+        tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+        seqs <- unique(tmpdf$aaSeqCDR3)
+        if (length(seqs) >= 2){
+          cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+            tmpdf$aaSeqCDR3, function(x){
+              return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
             }
-            output.seq <- toString(unmasked(msaMiXCRtreeVDJ)[[i]])  
-            # print(nchar(output.seq))
-            cat(output.info)
-            cat("\n")
-            cat(output.seq)
-            cat("\n")
+          ))    
+        } else {
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+        }
+        new.clonesets <- rbind(new.clonesets, tmpdf)
+      }
+      clonesets <- new.clonesets
+      print("IMPORTANT NOTE: THE CLONE CLUSTERS ARE GENERATED BASED ON SAMPLES/MIDS IN THIS SELECTED MOUSE/SAMPLE ONLY; NOT THE AGGREGATED TABLE.")
+    }
+    
+    source(ref.gene.config) # path to the configuration file for the input BCR reference genes
+    if (ref.gene == "10x"){
+      ref.fasta <- readDNAStringSet(ref.genes$`10x`)
+    } else if (ref.gene == "IMGT"){
+      s.V.genes <- readDNAStringSet(ref.genes$IMGT$V.gene)
+      names(s.V.genes) <- lapply(names(s.V.genes), function(x){
+        str_split(x, "[|]")[[1]][[2]]
+      })
+      s.J.genes <- readDNAStringSet(ref.genes$J.gene)
+      names(s.J.genes) <- lapply(names(s.J.genes), function(x){
+        str_split(x, "[|]")[[1]][[2]]
+      })
+    }
+    for (input.VJ.combi in unique(clonesets[[sprintf("VJcombi_CDR3_%s", thres)]])){
+      V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
+      J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
+      CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
+      # remove the * sign in the file name
+      dir.create(file.path(path.to.save.output,
+                           PROJECT,
+                           mouse.id), 
+                 showWarnings = FALSE, 
+                 recursive = TRUE)
+      path.to.output.fasta <- file.path(path.to.save.output,
+                                        PROJECT,
+                                        mouse.id, 
+                                        sprintf("%s_%s.aln.fasta",
+                                                mouse.id,
+                                                str_replace_all(input.VJ.combi, "[*]", "-")))
+      if (file.exists(path.to.output.fasta) == FALSE){
+        fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
+                                                                                                                "uniqueMoleculeCount", 
+                                                                                                                "V.gene", 
+                                                                                                                "D.gene", 
+                                                                                                                "J.gene", 
+                                                                                                                "id", 
+                                                                                                                "aaSeqCDR3", 
+                                                                                                                "nSeqCDR3")]
+        colnames(fasta.output) <- c("seq", 
+                                    "abundance", 
+                                    "V.gene", 
+                                    "D.gene", 
+                                    "J.gene", 
+                                    "SampleID",
+                                    "CDR3aa", 
+                                    "CDR3nt")
+        
+        ##### get germline sequences and merge with the real data sequences
+        if (ref.gene == "IMGT"){
+          GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
+          GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
+        } else if (ref.gene == "10x"){
+          GL.V.gene <- ref.fasta[[V.gene]] %>% as.character()
+          GL.J.gene <- ref.fasta[[J.gene]] %>% as.character()
+        }
+        
+        repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
+        GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
+        # merge the clone sequences with the reference sequence. 
+        all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
+        
+        if (nrow(fasta.output) > 1){
+          ##### multiple alignment sequences, package MSA. 
+          MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
+          msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
+          if (save_fasta == TRUE){
+            sink(path.to.output.fasta)
+            for (i in seq(1, length(all.seqs))){
+              if (i == length(all.seqs)){
+                output.info <- ">GL"
+              } else {
+                sample.id <- fasta.output[i, ]$SampleID
+                cdr3aa <- fasta.output[i, ]$CDR3aa
+                cdr3nt <- fasta.output[i, ]$CDR3nt
+                abundance <- fasta.output[i, ]$abundance
+                output.info <- sprintf(">Sample:%s|Mouse:%s|CDR3aa:%s|CDR3nt:%s|Index:%s|Abundance:%s", 
+                                       sample.id, 
+                                       mouse.id,
+                                       cdr3aa,
+                                       cdr3nt,
+                                       i,
+                                       abundance)            
+              }
+              output.seq <- toString(unmasked(msaMiXCRtreeVDJ)[[i]])  
+              # print(nchar(output.seq))
+              cat(output.info)
+              cat("\n")
+              cat(output.seq)
+              cat("\n")
+            }
+            sink()
           }
-          sink()
         }
       }
+      output[[input.VJ.combi]] <- list(
+        MiXCRtreeVDJ = MiXCRtreeVDJ,
+        msaMiXCRtreeVDJ = msaMiXCRtreeVDJ,
+        all.seqs = all.seqs
+      )
     }
-    output[[input.VJ.combi]] <- list(
-      MiXCRtreeVDJ = MiXCRtreeVDJ,
-      msaMiXCRtreeVDJ = msaMiXCRtreeVDJ,
-      all.seqs = all.seqs
-    )
+    saveRDS(output, file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT)))
+  } else {
+    output <- readRDS(file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT)))
   }
   return(output)
 }
