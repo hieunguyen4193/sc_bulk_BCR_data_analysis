@@ -4,11 +4,18 @@ for (pkg in new.pkgs){
     install.packages(pkg)
   }   
 }
-if (packageVersion("tidyr") != "1.3.1"){
-  install.packages("tidyr")  
-  library(tidyr)
+
+if (packageVersion("Matrix") != "1.5.4.1" | packageVersion("ggplot2") != "3.4.4"){
+  install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type = "source", repos = NULL)
+  install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)  
 }
 
+
+if (packageVersion("tidyr") != "1.3.1"){
+  install.packages("tidyr")  
+  install.packages("tidyselect")
+  library(tidyr)
+}
 library(tidyr)
 library(readr)
 library(stringr)
@@ -113,6 +120,8 @@ formatBulkVDJtable <- function(cloneset_files,
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
     
     ##### Group sequences + Gene usages to clones
+    ##### Definition: A clone = V + J gene, length of the CDR3 sequence.
+    ##### use similarity distance to define sequences in a clone. 
     new.clonesets <- data.frame()
     for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
       tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
@@ -131,6 +140,7 @@ formatBulkVDJtable <- function(cloneset_files,
     }
     
     ##### Create the final clone dataframe
+    ##### definition: A clone = V + J gene + Sequence. 
     clonedf <- data.frame(VJseq.combi.tmp = unique(new.clonesets$VJseq.combi)) %>%
       rowwise() %>%
       mutate(CDR3aa = str_split(VJseq.combi.tmp, "_")[[1]][[3]]) %>%
