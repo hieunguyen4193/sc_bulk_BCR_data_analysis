@@ -9,7 +9,7 @@ path.to.rmd1 <- file.path(path.to.project.src, "01_hashtag_antibodies.Rmd")
 path.to.rmd2 <- file.path(path.to.project.src, "01_comparing_different_quantile.Rmd")
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
-path.to.save.html <- file.path(path.to.main.output, "html_output")
+path.to.save.html <- file.path(path.to.main.output, "html_output", "01_output")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
 
 all.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")

@@ -86,15 +86,15 @@ all.integration.case <- list(
 #####----------------------------------------------------------------------#####
 ##### input arguments
 #####----------------------------------------------------------------------#####
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-PROJECT <- "240805_BSimons"
-chosen.quantile <- 0.85
-integration.case <- "mouse1"
+# outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+# PROJECT <- "240805_BSimons"
+# chosen.quantile <- 0.85
+# integration.case <- "all_samples"
 
-# outdir <- params$outdir
-# PROJECT <- params$PROJECT
-# chosen.quantile <- params$chosen.quantile
-# integration.case <- params$integration.case
+outdir <- params$outdir
+PROJECT <- params$PROJECT
+chosen.quantile <- params$chosen.quantile
+integration.case <- params$integration.case
 
 path.to.main.input <- file.path(outdir, PROJECT)
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
@@ -350,12 +350,12 @@ print(sprintf("Number of clones that are unique in only ONE sample: %s", nrow(su
 # Visualization
 ## Circos plot
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-clone.sampledf <- data.frame(SampleID = unique(clonedf$name))
-for (sample2 in unique(clonedf$name)){
+clone.sampledf <- data.frame(SampleID = unique(clonedf$MID))
+for (sample2 in unique(clonedf$MID)){
   clone.sampledf[[sample2]] <- unlist(
     lapply(
       clone.sampledf$SampleID, function(sample1){
-        return(length(unique(intersect(subset(clonedf, clonedf$name == sample1)$VJcombi_CDR3_0.85, subset(clonedf, clonedf$name == sample2)$VJcombi_CDR3_0.85))))
+        return(length(unique(intersect(subset(clonedf, clonedf$MID == sample1)$VJcombi_CDR3_0.85, subset(clonedf, clonedf$MID == sample2)$VJcombi_CDR3_0.85))))
       }
     )
   )

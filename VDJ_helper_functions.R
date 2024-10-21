@@ -246,8 +246,20 @@ formatScVDJtable <- function(all.VDJ.files,
       mutate(V.gene = v_gene) %>%
       mutate(J.gene = j_gene) %>%
       mutate(D.gene = d_gene) %>% 
-      mutate(aaSeqCDR3 = cdr3) %>%
+      mutate(nSeqCDR1 = cdr1_nt) %>%
+      mutate(nSeqCDR2 = cdr2_nt) %>%
       mutate(nSeqCDR3 = cdr3_nt) %>%
+      mutate(aaSeqCDR1 = cdr1) %>%
+      mutate(aaSeqCDR2 = cdr2) %>%
+      mutate(aaSeqCDR3 = cdr3) %>%
+      mutate(nSeqFR1 = fwr1_nt) %>%
+      mutate(nSeqFR2 = fwr2_nt) %>%
+      mutate(nSeqFR3 = fwr3_nt) %>%
+      mutate(nSeqFR4 = fwr4_nt) %>%
+      mutate(aaSeqFR1 = fwr1) %>%
+      mutate(aaSeqFR2 = fwr2) %>%
+      mutate(aaSeqFR3 = fwr3) %>%
+      mutate(aaSeqFR4 = fwr4) %>%
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
       mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
@@ -380,7 +392,7 @@ generate_fasta <- function(clonesets,
       names(s.V.genes) <- lapply(names(s.V.genes), function(x){
         str_split(x, "[|]")[[1]][[2]]
       })
-      s.J.genes <- readDNAStringSet(ref.genes$J.gene)
+      s.J.genes <- readDNAStringSet(ref.genes$IMGT$J.gene)
       names(s.J.genes) <- lapply(names(s.J.genes), function(x){
         str_split(x, "[|]")[[1]][[2]]
       })

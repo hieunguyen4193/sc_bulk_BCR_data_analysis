@@ -8,7 +8,7 @@ PROJECT <- "240805_BSimons"
 path.to.rmd1 <- file.path(path.to.project.src, "02_downstream_analysis_all_cells.Rmd")
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
-path.to.save.html <- file.path(path.to.main.output, "html_output")
+path.to.save.html <- file.path(path.to.main.output, "html_output", "02_output")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
 
 all.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")

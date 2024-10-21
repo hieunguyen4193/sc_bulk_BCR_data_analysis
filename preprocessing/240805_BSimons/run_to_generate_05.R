@@ -6,7 +6,7 @@ outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
-path.to.save.html <- file.path(path.to.main.output, "html_output")
+path.to.save.html <- file.path(path.to.main.output, "html_output", "05_output")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
 
 all.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")

@@ -172,7 +172,7 @@ DimPlot(object = s.obj, label = TRUE, label.size = 8, reduction = "RNA_UMAP", la
 
 ## UMAP: all cells, grouped by samples
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-DimPlot(object = s.obj, label = TRUE, label.size = 8, reduction = "INTE_UMAP", label.box = TRUE, group.by = "name")
+DimPlot(object = s.obj, label = TRUE, label.size = 8, reduction = "RNA_UMAP", label.box = TRUE, group.by = "name")
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
@@ -183,7 +183,7 @@ for (sample.id in unique(s.obj$name)){
   all.available.ht[[sample.id]] <- unique(subset(s.obj, name == sample.id)$HTO_classification)  %>% sort()
 }
 
-if (file.exists(file.path(path.to.04.output, sprintf("clone_Table_%s.xlsx", integration.case))) == FALSE){
+if (file.exists(file.path(path.to.04.output, "clone_Table.xlsx")) == FALSE){
   meta.data <- s.obj@meta.data
   count.clones <- table(meta.data$CTstrict)
   
@@ -203,15 +203,15 @@ if (file.exists(file.path(path.to.04.output, sprintf("clone_Table_%s.xlsx", inte
       })) 
     }
   }
-  writexl::write_xlsx(clonedf, file.path(path.to.04.output, sprintf("clone_Table_%s.xlsx", integration.case)))
+  writexl::write_xlsx(clonedf, file.path(path.to.04.output, "clone_Table.xlsx"))
 } else {
-  clonedf <- readxl::read_excel(file.path(path.to.04.output, sprintf("clone_Table_%s.xlsx", integration.case)))
+  clonedf <- readxl::read_excel(file.path(path.to.04.output, "clone_Table.xlsx"))
 }
 ```
 
 ## UMAP clone size
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-DimPlot(object = s.obj, reduction = "INTE_UMAP", group.by = "cloneSize")
+DimPlot(object = s.obj, reduction = "RNA_UMAP", group.by = "cloneSize")
 ```
 
 # Table: All clones in the dataset
@@ -230,8 +230,6 @@ for (i in setdiff(colnames(clonedf), c("CTstrict", "count"))){
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-for (sample.id in all.integration.case[[integration.case]]){
-  cat(sprintf("## Sample %s {.tabset} \n", sample.id))
   tmp.s.obj <- subset(s.obj, name == sample.id)
   tmp.metadata <- tmp.s.obj@meta.data
   clone.barcodes <- lapply(top6.clones[[sample.id]], function(x){
@@ -240,13 +238,11 @@ for (sample.id in all.integration.case[[integration.case]]){
   names(clone.barcodes) <- top6.clones[[sample.id]]
   for (clone in names(clone.barcodes)){
     cat(sprintf("### Clone %s \n", clone))
-    p <- DimPlot(object = tmp.s.obj, reduction = "INTE_UMAP", cells.highlight = clone.barcodes[[clone]]) +
+    p <- DimPlot(object = tmp.s.obj, reduction = "RNA_UMAP", cells.highlight = clone.barcodes[[clone]]) +
       theme(legend.position = "none")
     print(p)
     cat("\n \n")  
   }
-  cat("\n \n")
-}
 ```
 
 # Basic clonal analysis
