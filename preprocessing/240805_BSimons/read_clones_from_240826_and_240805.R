@@ -18,6 +18,8 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/bcr_data_analysis/240805_da
 source(file.path(path.to.project.src, "config.R"))
 
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
+sample.metadata <- readxl::read_excel(file.path(path.to.project.src, "240829 sample sheet.xlsx"))
+
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 PROJECT.bulk <- "240826_BSimons"
@@ -34,6 +36,31 @@ all.integration.case <- list(
   mouse3 = c("M3", "P3")
 )
 
+all.bulk.mouses <- list(
+  all_samples = c("m1", "m2", "m3"),
+  mouse1 = c("m1"),
+  mouse2 = c("m2"),
+  mouse3 = c("m3")
+)
+
+#####----------------------------------------------------------------------#####
+##### GENERATE LABEL (ORGANS) FOR ALL BULK AND SC SAMPLES
+#####----------------------------------------------------------------------#####
+convert.label <- list()
+for (mid in unique(sample.metadata$MID)){
+  organ <- subset(sample.metadata, sample.metadata$MID == mid)$sample
+  organ <- paste(str_split(organ, " ")[[1]][2:3], collapse = "_")
+  organ <- str_replace(organ, "_NA", "")
+  convert.label[[mid]] <- organ
+}
+for (mid in c("M1", "M2", "M3", "P1", "P2", "P3")){
+  if (grepl("M", mid) == TRUE){
+    convert.label[[mid]] <- "MLN"
+  } else {
+    convert.label[[mid]] <- "PP"
+  }
+}
+
 for (integration.case in names(all.integration.case)){
   path.to.main.input <- file.path(outdir, PROJECT)
   path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
@@ -46,18 +73,22 @@ for (integration.case in names(all.integration.case)){
   
   if (file.exists(file.path(path.to.06.output, "combine_clonedf.xlsx")) == FALSE){
     if (file.exists(file.path(path.to.06.output, "sc_clones.xlsx")) == FALSE){
-      all.clone.files <- Sys.glob(file.path(outdir, "VDJ_output", PROJECT.bulk, sprintf("VDJ_output_%s", thres), "preprocessed_files", "clonesets_*.xlsx"))
-      # all.clone.files <- all.clone.files[grepl("split", all.clone.files) == FALSE]
-      names(all.clone.files) <- to_vec(for (item in basename(all.clone.files)) str_replace(str_replace(item, "clonesets_", ""), ".xlsx", ""))
+      #####----------------------------------------------------------------#####
+      ##### PROCESS bulk clone data frames
+      #####----------------------------------------------------------------#####
+      all.clone.files <- Sys.glob(file.path(outdir, 
+                                            "VDJ_output", 
+                                            PROJECT.bulk, 
+                                            sprintf("VDJ_output_%s", thres), 
+                                            "preprocessed_files", 
+                                            "clonesets_*.xlsx"))
+      names(all.clone.files) <- to_vec(
+          for (item in basename(all.clone.files)) 
+          str_replace(str_replace(item, "clonesets_", ""), ".xlsx", "")
+        )
+      selected.MIDs <- subset(sample.metadata, 
+                              sample.metadata$mouse %in% all.bulk.mouses[[integration.case]])$MID
       
-      path.to.sc.data <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
-      all.vdj.outputs <- Sys.glob(file.path(path.to.sc.data, "annotated_contigs_clonaltype*.csv"))
-      names(all.vdj.outputs) <- to_vec(
-        for (item in all.vdj.outputs){
-          str_replace(str_replace(basename(item), "annotated_contigs_clonaltype_", ""), ".csv", "")
-        }
-      )
-      all.vdj.outputs <- all.vdj.outputs[all.integration.case[[integration.case]] ]
       bulkdf <- data.frame()
       for (i in names(all.clone.files)){
         file <- all.clone.files[[i]]
@@ -65,8 +96,15 @@ for (integration.case in names(all.integration.case)){
         bulkdf <- rbind(bulkdf, tmpdf)
       }
       bulkdf$MID <- bulkdf$id
+      
+      ##### keep sequences/clones in selected MIDs only
+      bulkdf <- subset(bulkdf, bulkdf$MID %in% selected.MIDs)
+      print(sprintf("Selected MIDs in this analysis: %s", paste(selected.MIDs, collapse = ", ")))
+      print(sprintf("Selected mice in this analysis: %s", paste(all.bulk.mouses[[integration.case]], collapse = ", ")))
       bulk.selected.cols <- c("V.gene", "J.gene", "nSeqCDR3", "aaSeqCDR3", "MID", "name")
       bulkdf.raw <- bulkdf
+      
+      ##### remove * in V J gene name, to match single cell gene annotation
       bulkdf$V.gene <- unlist(lapply(bulkdf$V.gene, function(x){
         str_split(x, "[*]")[[1]][[1]]
       }))
@@ -75,7 +113,22 @@ for (integration.case in names(all.integration.case)){
       }))
       bulkdf$name <- bulkdf$MID
       bulkdf <- bulkdf[, bulk.selected.cols]
+      # generate pseudo barcode for the sequence in bulkdf
+      bulkdf$barcode <- to_vec( for(item in seq(1, nrow(bulkdf))) sprintf("seq%s", item) )
       
+      #####----------------------------------------------------------------#####
+      ##### PROCESS single cell clones data frames
+      #####----------------------------------------------------------------#####
+      path.to.sc.data <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
+      all.vdj.outputs <- Sys.glob(file.path(path.to.sc.data, "annotated_contigs_clonaltype*.csv"))
+      names(all.vdj.outputs) <- to_vec(
+        for (item in all.vdj.outputs){
+          str_replace(str_replace(basename(item), "annotated_contigs_clonaltype_", ""), ".csv", "")
+        }
+      )
+      # keep only samples in selected mouse/mice
+      all.vdj.outputs <- all.vdj.outputs[all.integration.case[[integration.case]] ]
+      print(sprintf("Getting clone information from samples %s", paste(names(all.vdj.outputs), collapse = ", ")))
       scdf <- data.frame()
       for (file in all.vdj.outputs){
         sample.id <- str_replace(str_replace(basename(file), "annotated_contigs_clonaltype_", ""), ".csv", "")
@@ -84,29 +137,23 @@ for (integration.case in names(all.integration.case)){
         scdf <- rbind(scdf, tmpdf)
       }
       scdf.raw <- scdf
-      
       scdf <- subset(scdf, select = -c(X))
       selected.cols <- c("barcode", "name", "IGH", "cdr3_aa1", "cdr3_nt1")
       scdf <- scdf[, selected.cols]
-      
       # remove NA clones
       scdf <- subset(scdf, is.na(scdf$IGH) == FALSE)
-      
       ##### convert scdf to match bulkdf
       scdf$MID <- scdf$name
       scdf$nSeqCDR3 <- scdf$cdr3_nt1
       scdf$aaSeqCDR3 <- scdf$cdr3_aa1
-      
       scdf$V.gene <- unlist(lapply(scdf$IGH, function(x){
         str_split(x, "[.]")[[1]][[1]]
       }))
       scdf$J.gene <- unlist(lapply(scdf$IGH, function(x){
         str_split(x, "[.]")[[1]][[3]]
       }))
-      
       scdf <- scdf[, c("barcode", bulk.selected.cols)]
       
-      bulkdf$barcode <- to_vec( for(item in seq(1, nrow(bulkdf))) sprintf("seq%s", item) )
       writexl::write_xlsx(scdf, file.path(path.to.06.output, "sc_clones.xlsx"))
       writexl::write_xlsx(bulkdf, file.path(path.to.06.output, "bulk_clones.xlsx"))
     } else {
@@ -114,36 +161,25 @@ for (integration.case in names(all.integration.case)){
       bulkdf <- readxl::read_excel(file.path(path.to.06.output, "bulk_clones.xlsx"))
     }
     
+    #####------------------------------------------------------------------#####
+    ##### merge dataframes: scdf and bulkdf
+    #####------------------------------------------------------------------#####
     scdf$origin <- "single-cell"
     bulkdf$origin <- "bulk"
-    
     clonedf <- rbind(scdf, bulkdf[, colnames(scdf)])
     
     ##### add some more information on the sequences
     clonedf <- clonedf %>% rowwise() %>% 
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)) )
     
-    sample.metadata <- readxl::read_excel(file.path(path.to.project.src, "240829 sample sheet.xlsx"))
-    convert.label <- list()
-    for (mid in unique(sample.metadata$MID)){
-      organ <- subset(sample.metadata, sample.metadata$MID == mid)$sample
-      organ <- paste(str_split(organ, " ")[[1]][2:3], collapse = "_")
-      organ <- str_replace(organ, "_NA", "")
-      convert.label[[mid]] <- organ
-    }
-    for (mid in c("M1", "M2", "M3", "P1", "P2", "P3")){
-      if (grepl("M", mid) == TRUE){
-        convert.label[[mid]] <- "MLN"
-      } else {
-        convert.label[[mid]] <- "PP"
-      }
-    }
-    
+    ##### add organ information on each sample
     clonedf$organ <- unlist(lapply(
       clonedf$name, function(x){
         return(convert.label[[x]])
       }
     ))
+    
+    ##### unify mouse ID
     clonedf$mouseid <- unlist(lapply(
       clonedf$MID, function(x){
         if (x %in% c(unique(scdf$name))){
@@ -159,16 +195,21 @@ for (integration.case in names(all.integration.case)){
     scdf <- readxl::read_excel(file.path(path.to.06.output, "sc_clones.xlsx"))
     bulkdf <- readxl::read_excel(file.path(path.to.06.output, "bulk_clones.xlsx"))
   }
-  
+  #####--------------------------------------------------------------------#####
+  ##### ASSIGN CLONES FROM BULK AND SC DATA TO GROUPS BASED ON THEIR SIMILARITY
+  ##### OF THE CDR3 SEQUENCE.
+  #####--------------------------------------------------------------------#####
   clonedf <- clonedf %>% rowwise() %>% 
     mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)) )
   
-  # Group clone by sequence similarity and V-J genes
+  ##### Group clone based on V-J genes and CDR3 sequence length
   source(file.path(path.to.project.src, "helper_functions.R"))
   clonedf <- clonedf %>% rowwise() %>% 
     mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)) )
   
+  #####--------------------------------------------------------------------#####
   ##### Assign clones to clusters
+  #####--------------------------------------------------------------------#####
   if (file.exists(file.path(path.to.06.output, "full_clonedf.xlsx")) == FALSE){
     new.clonedf <- data.frame()
     for (input.VJ.combi in unique(clonedf$VJ.len.combi)){
@@ -188,6 +229,12 @@ for (integration.case in names(all.integration.case)){
     }
     writexl::write_xlsx(new.clonedf, file.path(path.to.06.output, "full_clonedf.xlsx"))
     
+    #####--------------------------------------------------------------------#####
+    #####> This is the final dataframe containing all clones from the selected
+    #####> bulk and single cell mouse / mice. 
+    #####> Clones are grouped based on V, J genes and the thres% similarity of 
+    #####> the CDR3 sequences. 
+    #####--------------------------------------------------------------------#####
     cloneCluster.summary <- data.frame(clone = unique(new.clonedf[[sprintf("VJcombi_CDR3_%s", thres)]])) %>% 
       rowwise() %>%
       mutate(num_samples = length(unique(subset(new.clonedf, new.clonedf[[sprintf("VJcombi_CDR3_%s", thres)]] == clone)$name))) %>%
@@ -195,7 +242,6 @@ for (integration.case in names(all.integration.case)){
       mutate(num_unique_seq = length(unique(subset(new.clonedf, new.clonedf[[sprintf("VJcombi_CDR3_%s", thres)]] == clone)$nSeqCDR3))) %>%
       arrange(desc(num_total_seq))
     writexl::write_xlsx(cloneCluster.summary, file.path(path.to.06.output, "cloneCluster_summary.xlsx"))
-    
   } else {
     new.clonedf <- readxl::read_excel(file.path(path.to.06.output, "full_clonedf.xlsx"))
   }

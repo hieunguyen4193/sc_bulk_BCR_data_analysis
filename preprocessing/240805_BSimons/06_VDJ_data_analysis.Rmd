@@ -86,15 +86,15 @@ all.integration.case <- list(
 #####----------------------------------------------------------------------#####
 ##### input arguments
 #####----------------------------------------------------------------------#####
-# outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-# PROJECT <- "240805_BSimons"
-# chosen.quantile <- 0.85
-# integration.case <- "all_samples"
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "240805_BSimons"
+chosen.quantile <- 0.85
+integration.case <- "mouse1"
 
-outdir <- params$outdir
-PROJECT <- params$PROJECT
-chosen.quantile <- params$chosen.quantile
-integration.case <- params$integration.case
+# outdir <- params$outdir
+# PROJECT <- params$PROJECT
+# chosen.quantile <- params$chosen.quantile
+# integration.case <- params$integration.case
 
 path.to.main.input <- file.path(outdir, PROJECT)
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
@@ -167,33 +167,6 @@ if (file.exists(file.path(path.to.06.output, sprintf("combined_contigs_%s_%s_%s.
 } else {
   combined.contigs <- readRDS(file.path(path.to.06.output, sprintf("combined_contigs_%s_%s_%s.rds", threshold, removeNA, removeMulti)))
 }
-
-# 
-# if (file.exists(file.path(path.to.06.output, sprintf("%s.ibex.output.s8.rds", PROJECT))) == FALSE){
-#   ##### change the barcode
-#     
-#   s.obj <- combineExpression(combined.contigs, s.obj, cloneCall="aa")
-#   
-#   #Subset only B cells (by contigs)
-#   s.obj$BCR.recoverd <- "No"
-#   s.obj$BCR.recoverd[!is.na(s.obj$CTaa)] <- "Yes"
-#   s.obj <- subset(s.obj, BCR.recoverd == "Yes")
-#   
-#   s.obj <- runIbex(s.obj, 
-#                        chains = "Heavy",
-#                        encoder.input = "KF", 
-#                        reduction.name = "ibex.KF")
-#   
-#   s.obj <- RunUMAP(s.obj, 
-#                    reduction = "ibex.KF",
-#                    dims = 1:30,
-#                    reduction.name = 'ibex.umap', 
-#                    reduction.key = 'ibexUMAP_')
-#   
-#   saveRDS(s.obj, file.path(path.to.06.output, sprintf("%s.ibex.output.s8.rds", PROJECT)))
-# } else {
-#   s.obj <- readRDS(file.path(path.to.06.output, sprintf("%s.ibex.output.s8.rds", PROJECT)))
-# }
 ```
 
 # UMAP
@@ -350,7 +323,6 @@ print(p)
 clonedf <- readxl::read_excel(file.path(path.to.06.output, "full_clonedf.xlsx"))
 ```
 
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
 ##### add some more information on the sequences
 clonedf <- clonedf %>% rowwise() %>% 
@@ -359,41 +331,11 @@ clonedf <- clonedf %>% rowwise() %>%
 
 # Group clone by sequence similarity and V-J genes
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-source(file.path(path.to.project.src, "helper_functions.R"))
-clonedf <- clonedf %>% rowwise() %>% 
-  mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)) )
-
-##### Assign clones to clusters
-if (file.exists(file.path(path.to.06.output, "full_clonedf.xlsx")) == FALSE){
-  new.clonedf <- data.frame()
-for (input.VJ.combi in unique(clonedf$VJ.len.combi)){
-  tmpdf <- subset(clonedf, clonedf$VJ.len.combi == input.VJ.combi)
-  seqs <- unique(tmpdf$aaSeqCDR3)
-  if (length(seqs) >= 2){
-    cluster.output <- assign_clusters_to_sequences(seqs, threshold = threshold)$res
-    tmpdf[[sprintf("VJcombi_CDR3_%s", threshold)]] <- unlist(lapply(
-      tmpdf$aaSeqCDR3, function(x){
-        return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-      }
-    ))    
-  } else {
-    tmpdf[[sprintf("VJcombi_CDR3_%s", threshold)]] <- sprintf("%s_1", input.VJ.combi)
-  }
-  new.clonedf <- rbind(new.clonedf, tmpdf)
-}
-writexl::write_xlsx(new.clonedf, file.path(path.to.06.output, "full_clonedf.xlsx"))
-} else {
-  new.clonedf <- readxl::read_excel(file.path(path.to.06.output, "full_clonedf.xlsx"))
-}
-```
-
-
-```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-cloneCluster.summary <- data.frame(clone = unique(new.clonedf$VJcombi_CDR3_0.85)) %>% 
+cloneCluster.summary <- data.frame(clone = unique(clonedf$VJcombi_CDR3_0.85)) %>% 
   rowwise() %>%
-  mutate(num_samples = length(unique(subset(new.clonedf, new.clonedf$VJcombi_CDR3_0.85 == clone)$name))) %>%
-  mutate(num_total_seq = nrow(subset(new.clonedf, new.clonedf$VJcombi_CDR3_0.85 == clone))) %>%
-  mutate(num_unique_seq = length(unique(subset(new.clonedf, new.clonedf$VJcombi_CDR3_0.85 == clone)$nSeqCDR3))) %>%
+  mutate(num_samples = length(unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone)$name))) %>%
+  mutate(num_total_seq = nrow(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone))) %>%
+  mutate(num_unique_seq = length(unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone)$nSeqCDR3))) %>%
   arrange(desc(num_total_seq))
 ```
 
@@ -408,12 +350,12 @@ print(sprintf("Number of clones that are unique in only ONE sample: %s", nrow(su
 # Visualization
 ## Circos plot
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-clone.sampledf <- data.frame(SampleID = unique(new.clonedf$name))
-for (sample2 in unique(new.clonedf$name)){
+clone.sampledf <- data.frame(SampleID = unique(clonedf$name))
+for (sample2 in unique(clonedf$name)){
   clone.sampledf[[sample2]] <- unlist(
     lapply(
       clone.sampledf$SampleID, function(sample1){
-        return(length(unique(intersect(subset(new.clonedf, new.clonedf$name == sample1)$VJcombi_CDR3_0.85, subset(new.clonedf, new.clonedf$name == sample2)$VJcombi_CDR3_0.85))))
+        return(length(unique(intersect(subset(clonedf, clonedf$name == sample1)$VJcombi_CDR3_0.85, subset(clonedf, clonedf$name == sample2)$VJcombi_CDR3_0.85))))
       }
     )
   )
