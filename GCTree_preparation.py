@@ -197,7 +197,15 @@ class GCtree(CollapsedTree):
             for mid in tmpdf["MID"].unique():
                 abund_pct[node_name][mid] = 100*np.sum(tmpdf[(tmpdf["MID"] == mid)]["abundance"].values)/total_abund
         self.abund_pct = abund_pct
-
+        count_single_node = 0
+        count_mix_node = 0
+        for seq in abund_pct.keys():
+            if len(abund_pct[seq]) == 1:
+                count_single_node += 1
+            else:
+                count_mix_node += 1
+        self.count_single_node = count_single_node
+        self.count_mix_node = count_mix_node
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
