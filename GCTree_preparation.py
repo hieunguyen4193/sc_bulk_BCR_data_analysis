@@ -181,7 +181,7 @@ class GCtree(CollapsedTree):
         seqdf = seqdf[seqdf["ID"] != "GL"]
         seqdf["abundance"] = seqdf["ID"].apply(lambda x: int(x.split("|")[-1].replace("Abundance:", "")))
         seqdf["MID"] = seqdf["ID"].apply(lambda x: str(x.split("|")[0].replace("Sample:", "")))
-        seqdf_summary = seqdf_summary.groupby("seq")["abundance"].sum().reset_index().copy()
+        seqdf_summary = seqdf.groupby("seq")["abundance"].sum().reset_index().copy()
         seqdf_summary = seqdf_summary.merge(idmapseqdf, right_on = "seq", left_on = "seq")
         self.seqdf = seqdf.copy()
         self.seqdf_summary = seqdf_summary.copy()
