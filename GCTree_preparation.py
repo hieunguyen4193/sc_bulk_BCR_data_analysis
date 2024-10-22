@@ -168,6 +168,7 @@ class GCtree(CollapsedTree):
         self.origin_fasta = origin_fasta
         self.idmap_seq = idmap_seq
         idmapseqdf = pd.read_csv(idmap_seq, skiprows=1, header=None)
+        self.idmapseqdf = idmapseqdf
         idmapseqdf.columns = ["seqid", "seq"]
         with open(origin_fasta) as fasta_file:  # Will close handle cleanly
             identifiers = []
@@ -196,7 +197,7 @@ class GCtree(CollapsedTree):
             for mid in tmpdf["MID"].unique():
                 abund_pct[node_name][mid] = 100*np.sum(tmpdf[(tmpdf["MID"] == mid)]["abundance"].values)/total_abund
         self.abund_pct = abund_pct
-        
+
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
