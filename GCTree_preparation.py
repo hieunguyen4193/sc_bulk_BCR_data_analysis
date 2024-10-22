@@ -149,11 +149,21 @@ class GCtree(CollapsedTree):
     Provides some handy attributes for the analysis of tree characteristics.
     """
     def __init__(self, 
-                 tree: TreeNode = None, 
-                 path: str = None,
-                 origin_fasta: str = None,
-                 idmap_seq: str = None):
+                nk_path: str = None,
+                ab_dict_path: str = None,  
+                origin_fasta: str = None,
+                idmap_seq: str = None):
         super().__init__(tree=None, allow_repeats=False)
+        self.nk_path = nk_path
+        self.ab_dict_path = ab_dict_path
+        tree = Tree(newick=nk_path, format=1)
+        if ab_dict is not None:
+            for node in tree.traverse():
+                node.add_feature('abundance', ab_dict.get(node.name, 0))
+        treeobj = GCtree(tree = tree, 
+                        path = tree_path,
+                        origin_fasta = path_to_orig_fasta,
+                        idmap_seq = input_idmaps)
         self.tree = tree
         self.path = path
         self.tree_name = path.split("/")[-1]
@@ -390,14 +400,14 @@ class LabForest(GCforest):
         """ The absolute path to the forest directory in which the tree directories are located. """
         return self._path
 
-    @property
-    def mid(self) -> Optional[int]:
-        """ The unique MID that identifies the lab sample on which phylogenetic inference has been performed. """
-        if self.path is not None:
-            sample_dir = self.path.split('/')[-1]
-            return get_mid(sample_dir)
-        else:
-            return None
+    # @property
+    # def mid(self) -> Optional[int]:
+    #     """ The unique MID that identifies the lab sample on which phylogenetic inference has been performed. """
+    #     if self.path is not None:
+    #         sample_dir = self.path.split('/')[-1]
+    #         return get_mid(sample_dir)
+    #     else:
+    #         return None
 
     @property
     def missing_trees(self) -> list[int]:
