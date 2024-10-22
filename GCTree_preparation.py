@@ -9,7 +9,8 @@ from ete3 import Tree, TreeNode
 from gctree import CollapsedTree, CollapsedForest
 from typing import List, Union, Optional, Callable
 from Bio import AlignIO, SeqIO
-
+from ete3 import Tree, faces, TreeStyle, NodeStyle, TextFace, SequenceFace, COLOR_SCHEMES
+import math
 #####---------------------------------------------------------------------------------------#####
 ##### CONFIGURATIONS
 #####---------------------------------------------------------------------------------------#####
@@ -206,6 +207,30 @@ class GCtree(CollapsedTree):
                 count_mix_node += 1
         self.count_single_node = count_single_node
         self.count_mix_node = count_mix_node
+
+    def render_tree(self, color_path: str):
+        abund_pct = self.abund_pct
+        mid_color_pal = pd.read_csv(color_path, index_col = [0]).to_dict()["hex color"]
+        def layout(n):
+            size = max(1, 10 * math.sqrt(n.abundance))
+            if n.abundance > 1:
+                cols = [mid_color_pal[mid] for mid in abund_pct[n.name].keys()]
+                values = [abund_pct[n.name][mid] for mid in abund_pct[n.name].keys()]
+                F = faces.PieChartFace(values, colors=cols,
+                                        width=size * 2, height=size * 2)
+                F.border.width = None
+                # F.opacity = 0.6
+                faces.add_face_to_node(F, n, 0, position="branch-right")
+                ns = NodeStyle()
+                ns["size"] = 0
+                n.set_style(ns)
+        t = self.tree
+        ts = TreeStyle()
+        ts.layout_fn = layout
+        ts.mode = "r"
+        ts.rotation = 90
+        ts.show_leaf_name = False
+        self.tree.render("%%inline", tree_style=ts)
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
