@@ -186,6 +186,17 @@ class GCtree(CollapsedTree):
         self.seqdf = seqdf.copy()
         self.seqdf_summary = seqdf_summary.copy()
         self.seqs = seqs
+
+        abund_pct = dict()
+        for node_name in seqdf_summary.seqid.unique():
+            seq = seqdf_summary[seqdf_summary["seqid"] == node_name].seq.unique()[0]
+            total_abund = seqdf_summary[seqdf_summary["seqid"] == node_name].abundance.unique()[0]
+            abund_pct[node_name] = dict()
+            tmpdf = seqdf[seqdf["seq"] == seq]
+            for mid in tmpdf["MID"].unique():
+                abund_pct[node_name][mid] = 100*np.sum(tmpdf[(tmpdf["MID"] == mid)]["abundance"].values)/total_abund
+        self.abund_pct = abund_pct
+        
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
