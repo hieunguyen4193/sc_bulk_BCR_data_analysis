@@ -208,7 +208,7 @@ class GCtree(CollapsedTree):
         self.count_single_node = count_single_node
         self.count_mix_node = count_mix_node
 
-    def render_tree(self, color_path: str):
+    def generate_tree_style(self, color_path: str):
         abund_pct = self.abund_pct
         mid_color_pal = pd.read_csv(color_path, index_col = [0]).to_dict()["hex color"]
         def layout(n):
@@ -224,14 +224,14 @@ class GCtree(CollapsedTree):
                 ns = NodeStyle()
                 ns["size"] = 0
                 n.set_style(ns)
-        t = self.tree
         ts = TreeStyle()
         ts.layout_fn = layout
         ts.mode = "r"
         ts.rotation = 90
         ts.show_leaf_name = False
-        self.tree.render("%%inline", tree_style=ts)
+        return ts
         
+
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
