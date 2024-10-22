@@ -156,18 +156,14 @@ class GCtree(CollapsedTree):
         super().__init__(tree=None, allow_repeats=False)
         self.nk_path = nk_path
         self.ab_dict_path = ab_dict_path
+        abund_df = pd.read_csv(ab_dict_path, index_col=0, names=['val'])
+        ab_dict = abund_df.to_dict().get('val')
+
         tree = Tree(newick=nk_path, format=1)
         if ab_dict is not None:
             for node in tree.traverse():
                 node.add_feature('abundance', ab_dict.get(node.name, 0))
-        treeobj = GCtree(tree = tree, 
-                        path = tree_path,
-                        origin_fasta = path_to_orig_fasta,
-                        idmap_seq = input_idmaps)
         self.tree = tree
-        self.path = path
-        self.tree_name = path.split("/")[-1]
-        self.sample_name = path.split("/")[-2]
         self.root = tree
         self.nodes = list(self.tree.traverse())
         self.leaves = list(self.tree)
