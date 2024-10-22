@@ -8,7 +8,7 @@ from tqdm import tqdm
 from ete3 import Tree, TreeNode
 from gctree import CollapsedTree, CollapsedForest
 from typing import List, Union, Optional, Callable
-
+from Bio import AlignIO, SeqIO
 
 #####---------------------------------------------------------------------------------------#####
 ##### CONFIGURATIONS
@@ -147,7 +147,11 @@ class GCtree(CollapsedTree):
     A subclass of the gctree CollapsedTree class.
     Provides some handy attributes for the analysis of tree characteristics.
     """
-    def __init__(self, tree: TreeNode = None, path: str = None):
+    def __init__(self, 
+                 tree: TreeNode = None, 
+                 path: str = None,
+                 origin_fasta: str = None,
+                 idmap_seq: str = None):
         super().__init__(tree=None, allow_repeats=False)
         self.tree = tree
         self.path = path
@@ -161,7 +165,27 @@ class GCtree(CollapsedTree):
         self.split_nodes = [node for node in self.internal_nodes if len(node.children) > 1]
         self.observed_nodes = [node for node in self.nodes if node.abundance > 0]
         self.inferred_nodes = [node for node in self.nodes if node.abundance == 0]
+        self.origin_fasta = origin_fasta
+        self.idmap_seq = idmap_seq
+        idmapseqdf = pd.read_csv(idmap_seq, skiprows=1, header=None)
+        idmapseqdf.columns = ["seqid", "seq"]
+        with open(origin_fasta) as fasta_file:  # Will close handle cleanly
+            identifiers = []
+            seqs = []
+            for seq_record in SeqIO.parse(fasta_file, 'fasta'):  # (generator)
+                identifiers.append(seq_record.id)
+                seqs.append(str(seq_record.seq))
 
+        seqdf = pd.DataFrame(data = identifiers, columns = ["ID"])
+        seqdf["seq"] = seqs
+        seqdf = seqdf[seqdf["ID"] != "GL"]
+        seqdf["abundance"] = seqdf["ID"].apply(lambda x: int(x.split("|")[-1].replace("Abundance:", "")))
+        seqdf["MID"] = seqdf["ID"].apply(lambda x: str(x.split("|")[0].replace("Sample:", "")))
+        seqdf_summary = seqdf_summary.groupby("seq")["abundance"].sum().reset_index().copy()
+        seqdf_summary = seqdf_summary.merge(idmapseqdf, right_on = "seq", left_on = "seq")
+        self.seqdf = seqdf.copy()
+        self.seqdf_summary = seqdf_summary.copy()
+        self.seqs = seqs
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
