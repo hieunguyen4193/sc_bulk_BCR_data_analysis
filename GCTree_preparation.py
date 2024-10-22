@@ -231,6 +231,7 @@ class GCtree(CollapsedTree):
         ts.rotation = 90
         ts.show_leaf_name = False
         self.tree.render("%%inline", tree_style=ts)
+        
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
 
