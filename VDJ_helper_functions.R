@@ -100,9 +100,11 @@ formatBulkVDJtable <- function(cloneset_files,
                                PROJECT,
                                thres,
                                savefile, 
-                               path.to.save.output){
+                               path.to.save.output,
+                               rerun = FALSE){
   if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
-      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE){
+      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE | rerun == TRUE){
+      
     print("Generate File clonedf.xlsx and flie split_clones.xlsx ...")
     clonesets <- read_tsv(cloneset_files, id="fileName") %>% 
       mutate(id=str_remove_all(fileName,".*\\/|.reassigned_IGH.tsv"),
@@ -111,8 +113,10 @@ formatBulkVDJtable <- function(cloneset_files,
     clonesets <- clonesets %>% rowwise() %>%
       mutate(V.gene = str_split(str_split(allVHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(V.gene = paste(str_split(V.gene, "-")[[1]][1:2], collapse = "-")) %>% 
+      mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE), str_split(x, "[*]")[[1]][[1]] , V.gene) %>%
       mutate(J.gene = str_split(str_split(allJHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(J.gene = str_split(J.gene, "-")[[1]][[1]]) %>%
+      mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE), str_split(x, "[*]")[[1]][[1]] , J.gene) %>%
       mutate(D.gene = str_split(str_split(allDHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(D.gene = paste(str_split(D.gene, "-")[[1]][1:2], collapse = "-")) %>% 
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
@@ -179,7 +183,17 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
                                                 PROJECT,
                                                 thres, 
                                                 savefile = TRUE,
-                                                verbose = TRUE){
+                                                verbose = TRUE,
+                                                rerun = FALSE){
+  if (rerun == TRUE){
+    ##### CLEAN UP OLD RESULTS
+    if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
+      file.remove(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+    }
+    if (file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == TRUE){
+      file.remove(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
+    }
+  }
   if (verbose == TRUE){
     print(sprintf("Output will be saved at %s", path.to.save.output))
   }
@@ -196,7 +210,7 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
       return(str_replace(x, ".reassigned_IGH.tsv", ""))
     }
   ))
-  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE){
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE | rerun == TRUE){
     #> by running this function, we read all the clone table "*.reassigned_IGH.tsv"
     #> from the input path.to.storage, path.to.mid.output and preprocess them all.
     #> Generate one final big VDJ data table containing all clones from all samples / all MIDs
@@ -208,7 +222,8 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
                                  PROJECT = PROJECT,
                                  thres = thres,
                                  savefile = savefile,
-                                 path.to.save.output = path.to.save.output)
+                                 path.to.save.output = path.to.save.output,
+                                 rerun = rerun)
     saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   } else {
     output <- readRDS(file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
@@ -226,9 +241,11 @@ formatScVDJtable <- function(all.VDJ.files,
                              PROJECT, 
                              thres,
                              savefile, 
-                             path.to.save.output){
+                             path.to.save.output,
+                             rerun){
   if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
-      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE){
+      file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE |
+      rerun == TRUE){
     print("Generate File clonedf.xlsx and flie split_clones.xlsx ...")
     clonesets <- data.frame()
     for (file in all.VDJ.files){
@@ -244,7 +261,9 @@ formatScVDJtable <- function(all.VDJ.files,
       rowwise() %>%
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt)) %>%
       mutate(V.gene = v_gene) %>%
+      mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE), str_split(x, "[*]")[[1]][[1]] , V.gene) %>%
       mutate(J.gene = j_gene) %>%
+      mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE), str_split(x, "[*]")[[1]][[1]] , J.gene) %>%
       mutate(D.gene = d_gene) %>% 
       mutate(nSeqCDR1 = cdr1_nt) %>%
       mutate(nSeqCDR2 = cdr2_nt) %>%
@@ -319,7 +338,17 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
                                           path.to.save.output, 
                                           PROJECT,
                                           thres, 
-                                          savefile = TRUE){
+                                          savefile = TRUE,
+                                          rerun = FALSE){
+  if (rerun == TRUE){
+    ##### CLEAN UP OLD RESULTS
+    if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
+      file.remove(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+    }
+    if (file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == TRUE){
+      file.remove(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))
+    }
+  }
   dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
   all.VDJ.files <- Sys.glob(file.path(path.to.VDJ.output, "*.xlsx"))
   names(all.VDJ.files) <- unlist(lapply(all.VDJ.files, function(x){
@@ -327,13 +356,14 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
   }))
   # temp remove 
   all.VDJ.files <- all.VDJ.files[names(all.VDJ.files) != "GF_7w_14w"]
-  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE){
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.rds", PROJECT))) == FALSE | rerun == TRUE){
     print(sprintf("Generating file %s", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))
     output <- formatScVDJtable(all.VDJ.files = all.VDJ.files,
                                PROJECT = PROJECT, 
                                thres = thres,
                                savefile = savefile, 
-                               path.to.save.output = path.to.save.output)
+                               path.to.save.output = path.to.save.output,
+                               rerun = rerun)
     saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   } else { 
     print(sprintf("File %s exists", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))

@@ -21,7 +21,6 @@ outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.04.output <- file.path(outdir, "VDJ_output", "04_output")
 dir.create(path.to.04.output, showWarnings = FALSE, recursive = TRUE)
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 
 #####---------------------------------------------------------------------------#####

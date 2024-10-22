@@ -31,9 +31,10 @@ for (PROJECT in c("1st_2nd_BSimons_Datasets",
   path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
   dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
   output[[PROJECT]] <- run_preprocessing_all_sc_data(path.to.VDJ.output = path.to.VDJ.output, 
-                                                           path.to.save.output = path.to.save.output,
-                                                           thres = thres,
-                                                           PROJECT = PROJECT)  
+                                                     path.to.save.output = path.to.save.output,
+                                                     thres = thres,
+                                                     PROJECT = PROJECT,
+                                                     rerun = TRUE)  
 }
 
 

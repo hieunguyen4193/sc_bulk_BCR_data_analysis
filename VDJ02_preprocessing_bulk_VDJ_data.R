@@ -33,7 +33,8 @@ for (PROJECT in c("220701_etc_biopsies",
   output[[PROJECT]] <- run_preprocessing_all_bulk_VDJ_data(path.to.mid.output = path.to.mid.output, 
                                                            path.to.save.output = path.to.save.output,
                                                            thres = thres,
-                                                           PROJECT = PROJECT)  
+                                                           PROJECT = PROJECT,
+                                                           rerun = TRUE)  
 }
 
 
