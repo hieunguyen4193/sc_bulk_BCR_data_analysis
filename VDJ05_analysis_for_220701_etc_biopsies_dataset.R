@@ -23,7 +23,9 @@ path.to.05.output <- file.path(outdir, "VDJ_output", "05_output")
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 thres <- 0.85
 clonedf <- read.csv(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv"), row.names = "X")
+clonedf <- subset(clonedf, clonedf$num_mutation != "region_not_covered-skip")
 
+clonedf$num_mutation <- as.numeric(clonedf$num_mutation)
 mid.metadata <- read.csv("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/220701_etc_biopsies/metadata.csv", sep =";")
 count.mid.in.mouse <- table(mid.metadata$population, mid.metadata$mouse) %>% colSums()
 
@@ -43,4 +45,3 @@ if (file.exists(file.path(path.to.05.output, "sample_list_based_on_YFP.rds")) ==
 mouse.id <- "m53"
 tmpdf <- subset(clonedf, clonedf$id %in% yfp.mids[[mouse.id]]$all)
 
-tmpdf$VJ.len.combi

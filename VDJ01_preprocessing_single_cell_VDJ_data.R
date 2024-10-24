@@ -19,7 +19,7 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
-
+rerun <- FALSE
 output <- list()
 for (PROJECT in c("1st_2nd_BSimons_Datasets",
                   "240805_BSimons",
@@ -34,7 +34,7 @@ for (PROJECT in c("1st_2nd_BSimons_Datasets",
                                                      path.to.save.output = path.to.save.output,
                                                      thres = thres,
                                                      PROJECT = PROJECT,
-                                                     rerun = TRUE)  
+                                                     rerun = rerun)  
 }
 
 

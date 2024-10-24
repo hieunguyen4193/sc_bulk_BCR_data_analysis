@@ -194,10 +194,10 @@ if (file.exists(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.cs
   
   clonedf$num_mutation <- unlist(lapply(
     seq(1, nrow(clonedf)), function(x){
-      # if (x%%1000 == 0){
-      #   print(sprintf("Working at step %s", x))
-      # }
-      print(x)
+      if (x%%1000 == 0){
+        print(sprintf("Working at step %s", x))
+      }
+      # print(x)
       count_mutation_for_line_i(x)
     }
   ))
