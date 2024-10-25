@@ -216,8 +216,10 @@ class GCtree(CollapsedTree):
 
     def generate_tree_style(self, color_path: str):
         abund_pct = self.abund_pct
+        abund_pct["GL"] = {'GL': np.float64(100.0)}
         mid_color_pal = pd.read_csv(color_path, index_col = [0]).to_dict()["hex color"]
         mid_color_pal["GL"] = "gray"
+        # print(mid_color_pal)
         def layout(n):
             size = max(1, 10 * math.sqrt(n.abundance))
             if n.abundance > 1:
