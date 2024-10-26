@@ -90,7 +90,10 @@ for (mouse.id in names(yfp.mids)){
     
     inputdf <- subset(clonedf, clonedf$id %in% yfp.mids[[mouse.id]][[yfp.case]])
     
+    print("START assign clones to groups of clones by CDR3 similarity")
     new.clonesetsdf <- data.frame()
+    total_count <- length(unique(inputdf$VJ.len.combi))
+    count_i <- 0
     for (input.VJ.combi in unique(inputdf$VJ.len.combi)){
       tmpdf <- subset(inputdf, inputdf$VJ.len.combi == input.VJ.combi)
       seqs <- unique(tmpdf$aaSeqCDR3)
@@ -105,81 +108,92 @@ for (mouse.id in names(yfp.mids)){
         tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
       }
       new.clonesetsdf <- rbind(new.clonesetsdf, tmpdf)
+      # Sleep for 0.1 seconds
+      Sys.sleep(0.01)
+      # Print progress
+      count_i <- count_i + 1
+      cat("\rFinished", count_i, "of", total_count)
     }
     
     for (input.VJ.combi in unique(new.clonesetsdf[[sprintf("VJcombi_CDR3_%s", thres)]])){
+      print(sprintf("Working on the VJ clone: %s, mouse %s, YFP: %s", input.VJ.combi, mouse.id, yfp.case))
       path.to.output.fasta <- file.path(path.to.save.fasta, sprintf("%s_%s_%s.fasta", mouse.id, save.folder.name, input.VJ.combi))
-      fasta.df <- subset(new.clonesetsdf, new.clonesetsdf[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)
-      
-      V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
-      J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
-      CDR3.length <- as.numeric(str_split(input.VJ.combi, "_")[[1]][[3]])
-      
-      ##### get germline sequences and merge with the real data sequences
-      GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
-      GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
-      repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
-      GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
-      
-      fasta.output <- fasta.df[, c("targetSequences",
-                                   "uniqueMoleculeCount", 
-                                   "V.gene", 
-                                   "D.gene", 
-                                   "J.gene", 
-                                   "id", 
-                                   "aaSeqCDR3", 
-                                   "nSeqCDR3")]
-      
-      colnames(fasta.output) <- c("seq", "abundance", "V.gene", "D.gene", "J.gene", "SampleID", "CDR3aa", "CDR3nt")
-      
-      all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
-      
-      #####----------------------------------------------------------------#####
-      ##### start writing fasta file
-      #####----------------------------------------------------------------#####
-      if (nrow(fasta.output) > 1){
-        ##### multiple alignment sequences, package MSA. 
-        MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
-        msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
-        sink(path.to.output.fasta)
-        for (i in seq(1, length(all.seqs))){
-          if (i == length(all.seqs)){
-            output.info <- ">GL"
-          } else {
-            sample.id <- fasta.output[i, ]$SampleID
-            cdr3aa <- fasta.output[i, ]$CDR3aa
-            cdr3nt <- fasta.output[i, ]$CDR3nt
-            abundance <- fasta.output[i, ]$abundance
-            output.info <- sprintf(">Sample:%s|Mouse:%s|CDR3aa:%s|CDR3nt:%s|Index:%s|Abundance:%s", 
-                                   sample.id, 
-                                   mouse.id,
-                                   cdr3aa,
-                                   cdr3nt,
-                                   i,
-                                   abundance)            
+      if (file.exists(path.to.output.fasta) == FALSE){
+        fasta.df <- subset(new.clonesetsdf, new.clonesetsdf[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)
+        V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
+        J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
+        CDR3.length <- as.numeric(str_split(input.VJ.combi, "_")[[1]][[3]])
+        
+        ##### get germline sequences and merge with the real data sequences
+        GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
+        GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
+        repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
+        GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
+        
+        fasta.output <- fasta.df[, c("targetSequences",
+                                     "uniqueMoleculeCount", 
+                                     "V.gene", 
+                                     "D.gene", 
+                                     "J.gene", 
+                                     "id", 
+                                     "aaSeqCDR3", 
+                                     "nSeqCDR3")]
+        
+        colnames(fasta.output) <- c("seq", "abundance", "V.gene", "D.gene", "J.gene", "SampleID", "CDR3aa", "CDR3nt")
+        
+        all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
+        
+        #####----------------------------------------------------------------#####
+        ##### start writing fasta file
+        #####----------------------------------------------------------------#####
+        if (nrow(fasta.output) > 1){
+          print(sprintf("File %s does not exist", path.to.output.fasta))
+          print(sprintf("Number of sequence in this group of clone: %s", nrow(fasta.df)))
+          ##### multiple alignment sequences, package MSA. 
+          MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
+          msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
+          sink(path.to.output.fasta)
+          for (i in seq(1, length(all.seqs))){
+            if (i == length(all.seqs)){
+              output.info <- ">GL"
+            } else {
+              sample.id <- fasta.output[i, ]$SampleID
+              cdr3aa <- fasta.output[i, ]$CDR3aa
+              cdr3nt <- fasta.output[i, ]$CDR3nt
+              abundance <- fasta.output[i, ]$abundance
+              output.info <- sprintf(">Sample:%s|Mouse:%s|CDR3aa:%s|CDR3nt:%s|Index:%s|Abundance:%s", 
+                                     sample.id, 
+                                     mouse.id,
+                                     cdr3aa,
+                                     cdr3nt,
+                                     i,
+                                     abundance)            
+            }
+            
+            output.seq <- toString(unmasked(msaMiXCRtreeVDJ)[[i]])  
+            # print(nchar(output.seq))
+            cat(output.info)
+            cat("\n")
+            cat(output.seq)
+            cat("\n")
           }
-          
-          output.seq <- toString(unmasked(msaMiXCRtreeVDJ)[[i]])  
-          # print(nchar(output.seq))
-          cat(output.info)
-          cat("\n")
-          cat(output.seq)
-          cat("\n")
+          sink()
+          #####----------------------------------------------------------------#####
+          # finished writing to fasta file
+          #####----------------------------------------------------------------#####
         }
-        sink()
-        #####----------------------------------------------------------------#####
-        # finished writing to fasta file
-        #####----------------------------------------------------------------#####
-        tmp.sumdf <- data.frame(
-          MouseID = c(mouse.id),
-          Case = c(yfp.case),
-          MID = c(paste( yfp.mids[[mouse.id]][[yfp.case]], collapse = ",")),
-          cloneID = c(input.VJ.combi),
-          fastaName = c(basename(path.to.output.fasta)),
-          numSeq = c(length(all.seqs))
-        )
-        summary.fastadf <- rbind(summary.fastadf, tmp.sumdf)
+      } else {
+        print(sprintf("File %s exists", path.to.output.fasta))
       }
+      tmp.sumdf <- data.frame(
+        MouseID = c(mouse.id),
+        Case = c(yfp.case),
+        MID = c(paste( yfp.mids[[mouse.id]][[yfp.case]], collapse = ",")),
+        cloneID = c(input.VJ.combi),
+        fastaName = c(basename(path.to.output.fasta)),
+        numSeq = c(length(all.seqs))
+      )
+      summary.fastadf <- rbind(summary.fastadf, tmp.sumdf)
     }
   }
 }
