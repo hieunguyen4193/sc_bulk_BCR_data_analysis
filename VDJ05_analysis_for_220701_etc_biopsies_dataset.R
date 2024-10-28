@@ -97,6 +97,7 @@ for (mouse.id in names(yfp.mids)){
     for (input.VJ.combi in unique(inputdf$VJ.len.combi)){
       tmpdf <- subset(inputdf, inputdf$VJ.len.combi == input.VJ.combi)
       seqs <- unique(tmpdf$aaSeqCDR3)
+      print(length(seqs))
       if (length(seqs) >= 2){
         cluster.output <- assign_clusters_to_sequences(seqs, threshold = 1 - thres)$res
         tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
