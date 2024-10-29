@@ -158,10 +158,19 @@ if (file.exists(file.path(path.to.04.output, sprintf("combined_contigs_%s_%s_%s.
 }
 ```
 
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+print(sprintf("Number of cells in the dataset: %s \n", nrow(s.obj@meta.data)))
+all.cells <- s.obj@meta.data$CTstrict
+names(all.cells) <- row.names(s.obj@meta.data)
+with.clone.cells <- all.cells[is.na(all.cells) == FALSE] %>% names()
+without.clone.cells <- setdiff(names(all.cells), with.clone.cells)
+print(sprintf("Number of cells having proper VDJ clone information %s \n", length(with.clone.cells)))
+```
+
 # UMAP
 ## Cells with proper clone information and cells without proper clone information
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-# DimPlot(object = s.obj, cells.highlight = list("with.Clone" = with.clone.cells, "without.Clone" = without.clone.cells), label = TRUE, label.size = 8, reduction = "RNA_UMAP")
+DimPlot(object = s.obj, cells.highlight = list("with.Clone" = with.clone.cells, "without.Clone" = without.clone.cells), label = TRUE, label.size = 8, reduction = "RNA_UMAP")
 ```
 
 ## UMAP: All cells in all samples

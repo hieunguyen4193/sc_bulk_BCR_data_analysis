@@ -1,0 +1,125 @@
+---
+title: "Data analysis first dataset - GEX, 26.10.2023"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    keep_md: true
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: false
+    theme: lumen
+---
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+
+```{r echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+#####----------------------------------------------------------------------#####
+
+# clean up 
+gc()
+rm(list = ls())
+
+source("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/VDJ_helper_functions.R")
+# install.packages("https://cran.r-project.org/src/contrib/cpp11_0.5.0.tar.gz", type = "source", repos = NULL)
+# install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPARATION
+#####----------------------------------------------------------------------#####
+analysis.case <- "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1"
+
+source("/media/hieunguyen/HNSD01/src/bcr_data_analysis/1st_2nd_datasets/00_helper_functions.R")
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
+
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS AND PREPRATIONS
+#####----------------------------------------------------------------------#####
+outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "1st_2nd_BSimons_Datasets"
+
+path.to.output <- file.path(outdir, PROJECT, "data_analysis", "NEW")
+
+path.to.01.output <- file.path(path.to.output, "01_output")
+dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
+
+s.obj <- readRDS(file.path(outdir, 
+                           PROJECT, 
+                           "data_analysis", 
+                           "01_output",
+                           "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1", 
+                           "1st_dataset_removed_7_9_removed_16_removed_9.with_reInt.res1.rds"))
+
+if ("svglite" %in% installed.packages() == FALSE){
+  install.packages("svglite")
+}
+
+##### read the summary clone information with mutation rate
+clonedf<- read.csv(file.path(outdir, "VDJ_output", "04_output", "full_clonedf_with_mutation_rate.csv"))
+clonedf <- subset(clonedf, clonedf$dataset.name == "1st_2nd_BSimons_Datasets")
+clonedf <- subset(clonedf, clonedf$id %in% unique(s.obj$name))
+clonedf <- clonedf %>% rowwise() %>%
+  mutate(barcode = sprintf("%s_%s_%s", id, id, barcode))
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+meta.data <- merge(meta.data, clonedf, by.x = "barcode", by.y = "barcode")
+
+#####----------------------------------------------------------------------#####
+##### define clones
+#####----------------------------------------------------------------------#####
+#> although this is a single cell dataset, we define the clones using the same
+#> definition we used in bulk dataset
+#> Update the package igraph to version 2.1.1 in the docker image trex
+#> since the old version has some problem while running assign_clusters_to_sequences
+clonesets <- clonedf
+new.clonesets <- data.frame()
+for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+  tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+  seqs <- unique(tmpdf$aaSeqCDR3)
+  if (length(seqs) >= 2){
+    cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+    tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+      tmpdf$aaSeqCDR3, function(x){
+        return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+      }
+    ))    
+  } else {
+    tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+  }
+  new.clonesets <- rbind(new.clonesets, tmpdf)
+}
+```
+
+# UMAP: the 1st dataset
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
+```
