@@ -207,7 +207,7 @@ FeaturePlot(object = with.mutation.rate.s.obj, reduction = "INTE_UMAP", features
 
 ## Violin plot mutation rate
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-Idents(s.obj) <- "seurat_clusterss"
+Idents(s.obj) <- "seurat_clusters"
 VlnPlot(object = with.mutation.rate.s.obj, features = c("mutation_rate"))
 ```
 
@@ -258,16 +258,21 @@ with.mutation.rate.s.obj <- AddMetaData(object = with.mutation.rate.s.obj, col.n
 
 diff.genes.mutation.rate <- FindMarkers(object = with.mutation.rate.s.obj, ident.1 = "high_mutation_rate", ident.2 = "low_mutation_rate", group.by = "mutation.rate.group", assay = "RNA", test.use = "wilcox")
 ```
-
 ## UMAP: high mutation rate cells
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-DimPlot(object = with.mutation.rate.s.obj, cells.highlight = high.mutation.rate.cells) + DimPlot(object = with.mutation.rate.s.obj, cells.highlight = low.mutation.rate.cells)
+DimPlot(object = with.mutation.rate.s.obj, cells.highlight = high.mutation.rate.cells) + 
+  ggtitle("High mutation rate cells") + 
+  theme(legend.position = "none")
 ```
+
 
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-diff.genes.mutation.rate %>% subset(p_val_adj <= 0.05) %>% rownames_to_column("Gene") %>% create_dt()
+DimPlot(object = with.mutation.rate.s.obj, cells.highlight = low.mutation.rate.cells) +
+  ggtitle("Low mutation rate cells") +
+  theme(legend.position = "none")
 ```
 
+## DGE table
 
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
 ```
