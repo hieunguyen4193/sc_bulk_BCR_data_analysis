@@ -68,7 +68,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "241002_BSimons"
 analysis.round <- "1st"
-
+sample.id <- "PP3"
 path.to.output <- file.path(outdir, PROJECT, "data_analysis")
 
 path.to.05.output <- file.path(path.to.output, "05_output")
@@ -89,7 +89,7 @@ clonedf <- read.csv(file.path(outdir, "VDJ_output", "04_output", "full_clonedf_w
 clonedf <- subset(clonedf, clonedf$dataset.name == "241002_BSimons")
 clonedf <- subset(clonedf, clonedf$id %in% unique(s.obj$name))
 clonedf <- clonedf %>% rowwise() %>%
-  mutate(barcode = sprintf("%s_%s_%s", id, id, barcode))
+  mutate(barcode = sprintf("%s_%s", id, barcode))
 
 #####----------------------------------------------------------------------#####
 ##### define clones
@@ -142,12 +142,12 @@ source(ref.gene.config) # path to the configuration file for the input BCR refer
 
 ## All samples, grouped by clusters
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
+DimPlot(object = s.obj, reduction = "RNA_UMAP", label = TRUE, label.box = TRUE, repel = TRUE)
 ```
 
 ## All samples, highlighted cells with clone VDJ information
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, repel = TRUE,
+DimPlot(object = s.obj, reduction = "RNA_UMAP", label = TRUE, label.box = TRUE, repel = TRUE,
         cols.highlight = c("red", "gray"), cells.highlight = list("with.Clone" = with.clone.cells, "without.Clone" = without.clone.cells))
 ```
 
@@ -197,7 +197,7 @@ library(viridis)
 # we remove cells without mutation rate before plotting
 with.mutation.rate.cells <- subset(s.obj@meta.data, is.na(s.obj@meta.data$mutation_rate) == FALSE) %>% row.names()
 with.mutation.rate.s.obj <- subset(s.obj, cells = with.mutation.rate.cells)
-FeaturePlot(object = with.mutation.rate.s.obj, reduction = "INTE_UMAP", features = c("mutation_rate"), pt.size = 1) +
+FeaturePlot(object = with.mutation.rate.s.obj, reduction = "RNA_UMAP", features = c("mutation_rate"), pt.size = 1) +
   scale_colour_viridis(option = "plasma")
 ```
 
@@ -228,7 +228,7 @@ for (clone.id in selected.clones){
   
   names(highligh.list) <- c(clone.id, "others")
   p <- DimPlot(object = s.obj,
-          reduction = "INTE_UMAP",
+          reduction = "RNA_UMAP",
           label = TRUE,
           label.box = TRUE,
           repel = TRUE,
@@ -294,7 +294,7 @@ diff.gene.yfp %>% subset(p_val_adj <= 0.05) %>% rownames_to_column("Gene") %>% c
 
 ## Highlight YFP cells
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
-DimPlot(object = s.obj, reduction = "INTE_UMAP", 
+DimPlot(object = s.obj, reduction = "RNA_UMAP", 
         cells.highlight = yfp.cells, cols.highlight = "red") + 
   theme(legend.position = "none")
 ```

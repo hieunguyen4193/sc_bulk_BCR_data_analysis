@@ -62,6 +62,9 @@ source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
+# install.packages("https://cran.r-project.org/src/contrib/Archive/knitr/knitr_1.45.tar.gz", type = "source", repos = NULL)
+# install.packages("https://cran.r-project.org/src/contrib/Archive/rmarkdown/rmarkdown_2.26.tar.gz", type = "source", repos = NULL)
+
 #####----------------------------------------------------------------------#####
 # CONFIGURATIONS AND PREPRATIONS
 #####----------------------------------------------------------------------#####
