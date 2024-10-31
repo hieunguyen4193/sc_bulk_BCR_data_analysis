@@ -47,12 +47,6 @@ gc()
 rm(list = ls())
 
 source("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/VDJ_helper_functions.R")
-# install.packages("https://cran.r-project.org/src/contrib/cpp11_0.5.0.tar.gz", type = "source", repos = NULL)
-# install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
-# install.packages("https://cran.r-project.org/src/contrib/Archive/knitr/knitr_1.45.tar.gz", type = "source", repos = NULL)
-# install.packages("https://cran.r-project.org/src/contrib/Archive/rmarkdown/rmarkdown_2.26.tar.gz", type = "source", repos = NULL)
-
-
 ####----------------------------------------------------------------------#####
 # CONFIGURATIONS AND PREPARATION
 #####----------------------------------------------------------------------#####
@@ -193,7 +187,8 @@ meta.data <- meta.data[row.names(s.obj@meta.data), ]
 s.obj <- AddMetaData(object = s.obj, col.name = "mutation_rate", metadata = meta.data$mutation_rate)
 ```
 
-## Clone size vs number of mutations
+## Distribution of mutation rates in all samples
+
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
 sc.clonedf %>% ggplot(aes(x = "All clones", y = mutation_rate)) + geom_boxplot() + theme_pubr()
 ```
@@ -214,7 +209,7 @@ Idents(s.obj) <- "seurat_clusters"
 VlnPlot(object = with.mutation.rate.s.obj, features = c("mutation_rate"))
 ```
 
-## Distribution of mutation rates in all samples
+## Clone size vs number of mutations
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
 sc.clonedf %>% ggplot(aes(x = count, y = mutation_rate)) + geom_point()
 ```

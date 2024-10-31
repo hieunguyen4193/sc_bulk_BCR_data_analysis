@@ -193,7 +193,8 @@ meta.data <- meta.data[row.names(s.obj@meta.data), ]
 s.obj <- AddMetaData(object = s.obj, col.name = "mutation_rate", metadata = meta.data$mutation_rate)
 ```
 
-## Clone size vs number of mutations
+## Distribution of mutation rates in all samples
+
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
 sc.clonedf %>% ggplot(aes(x = "All clones", y = mutation_rate)) + geom_boxplot() + theme_pubr()
 ```
@@ -214,7 +215,7 @@ Idents(s.obj) <- "seurat_clusters"
 VlnPlot(object = with.mutation.rate.s.obj, features = c("mutation_rate"))
 ```
 
-## Distribution of mutation rates in all samples
+## Clone size vs number of mutations
 ```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
 sc.clonedf %>% ggplot(aes(x = count, y = mutation_rate)) + geom_point()
 ```
@@ -329,6 +330,18 @@ DefaultAssay(s.obj) <- "RNA"
 for (gene in intersect(gene.list, row.names(s.obj))){
   cat(sprintf("### Gene %s \n", gene))
   p <- VlnPlot(object = s.obj, features = c(gene))
+  print(p)
+  cat("\n \n")
+}
+```
+
+
+## Violin plot, YFP vs non YFP {.tabset}
+```{r echo=FALSE, warning=FALSE, results='asis', message=FALSE, fig.width=14, fig.height=10}
+DefaultAssay(s.obj) <- "RNA"
+for (gene in intersect(gene.list, row.names(s.obj))){
+  cat(sprintf("### Gene %s \n", gene))
+  p <- VlnPlot(object = s.obj, features = c(gene), group.by = "YFP.group")
   print(p)
   cat("\n \n")
 }

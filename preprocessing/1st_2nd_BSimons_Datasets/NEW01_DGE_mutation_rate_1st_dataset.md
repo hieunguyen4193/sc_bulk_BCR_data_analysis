@@ -52,7 +52,8 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 # VDJ information
 
 
-## Clone size vs number of mutations
+## Distribution of mutation rates in all samples
+
 ![](NEW01_DGE_mutation_rate_1st_dataset_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 ## Mutation rate on UMAP
@@ -61,7 +62,7 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 ## Violin plot mutation rate
 ![](NEW01_DGE_mutation_rate_1st_dataset_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-## Distribution of mutation rates in all samples
+## Clone size vs number of mutations
 ![](NEW01_DGE_mutation_rate_1st_dataset_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 ## Clone size (>= 10) vs number of mutations

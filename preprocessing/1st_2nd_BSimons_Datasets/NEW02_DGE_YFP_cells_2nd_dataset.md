@@ -52,7 +52,8 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 # VDJ information
 
 
-## Clone size vs number of mutations
+## Distribution of mutation rates in all samples
+
 ![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 ## Mutation rate on UMAP
@@ -61,7 +62,7 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 ## Violin plot mutation rate
 ![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-## Distribution of mutation rates in all samples
+## Clone size vs number of mutations
 ![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 ## Clone size (>= 10) vs number of mutations
@@ -150,4 +151,31 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
  
 ### Gene Sdc1 
 ![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-19-8.png)<!-- -->
+ 
+
+
+## Violin plot, YFP vs non YFP {.tabset}
+### Gene Cxcr3 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+ 
+### Gene Tigit 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-2.png)<!-- -->
+ 
+### Gene Ly6a 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-3.png)<!-- -->
+ 
+### Gene Cd93 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-4.png)<!-- -->
+ 
+### Gene H2-Aa 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-5.png)<!-- -->
+ 
+### Gene Epcam 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-6.png)<!-- -->
+ 
+### Gene Slamf6 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-7.png)<!-- -->
+ 
+### Gene Sdc1 
+![](NEW02_DGE_YFP_cells_2nd_dataset_files/figure-html/unnamed-chunk-20-8.png)<!-- -->
  
