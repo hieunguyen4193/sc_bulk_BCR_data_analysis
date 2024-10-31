@@ -215,7 +215,7 @@ class GCtree(CollapsedTree):
                 single_nodes.append(seq)
             else:
                 count_mix_node += 1
-                mixed_nodes.apepnd(seq)
+                mixed_nodes.append(seq)
         self.count_single_node = count_single_node
         self.count_mix_node = count_mix_node
         self.mixed_nodes = mixed_nodes
