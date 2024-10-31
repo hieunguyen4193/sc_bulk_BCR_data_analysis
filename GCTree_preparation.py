@@ -206,13 +206,21 @@ class GCtree(CollapsedTree):
         self.abund_pct = abund_pct
         count_single_node = 0
         count_mix_node = 0
+
+        single_nodes = []
+        mixed_nodes = []
         for seq in abund_pct.keys():
             if len(abund_pct[seq]) == 1:
                 count_single_node += 1
+                single_nodes.append(seq)
             else:
                 count_mix_node += 1
+                mixed_nodes.apepnd(seq)
         self.count_single_node = count_single_node
         self.count_mix_node = count_mix_node
+        self.mixed_nodes = mixed_nodes
+        self.single_nodes = single_nodes
+        
 
     def generate_tree_style(self, color_path: str):
         abund_pct = self.abund_pct
