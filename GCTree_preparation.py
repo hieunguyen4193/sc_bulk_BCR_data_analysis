@@ -331,20 +331,6 @@ class GCtree(CollapsedTree):
         return pd.concat([info_features, self.t_size_features(), self.t_abundance_features(), self.t_len_features(),
                           self.t_bushiness_features()], axis=0)
 
-def read_tree_from_path(treedir):
-    treedir = str(treedir)
-    nk_path = os.path.join(treedir, "gctree.out.inference.1.nk")
-    if os.path.exists(nk_path) == True:
-        ab_dict_path = os.path.join(treedir, "abund.csv")
-        abund_df = pd.read_csv(ab_dict_path, index_col=0, names=['val'])
-        ab_dict = abund_df.to_dict().get('val')
-        tree_path = treedir
-        tree = Tree(newick=nk_path, format=1)
-        if ab_dict is not None:
-            for node in tree.traverse():
-                node.add_feature('abundance', ab_dict.get(node.name, 0))
-        treeobj = GCtree(tree = tree, path = tree_path)
-        return treeobj
 #####---------------------------------------------------------------------------------------#####
 ##### GCFOREST #####
 
