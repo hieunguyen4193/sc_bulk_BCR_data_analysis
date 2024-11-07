@@ -69,29 +69,28 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
 )  
 
 clonesets <- clone.output$clonesets
-# mouse.id <- "m42"
-# input.case <- "all"
 
 for (mouse.id in names(yfp.mids)){
-  for (yfp.case in c("all", "neg", "pos", "biopsy")){
-    if (yfp.case == "biopsy"){
-      save.folder.name <- yfp.case
+  for (input.case in c("all", "neg", "pos", "biopsy")){
+    if (input.case == "biopsy"){
+      save.folder.name <- input.case
     } else {
-      save.folder.name <- sprintf("%s_YFP", yfp.case)
+      save.folder.name <- sprintf("%s_YFP", input.case)
     }
     
     input.clonesets <- subset(clonesets, clonesets$id %in% yfp.mids[[mouse.id]][[input.case]])
     
     ##### This script might not run when in RSTUDIO, run in BASH command line. 
-    output.all.fasta <- generate_fasta(clonesets = input.clonesets, 
-                   path.to.save.output = file.path(path.to.save.fasta, mouse.id, yfp.case), 
-                   path.to.fasta.file = path.to.fasta.file,
-                   ref.gene = ref.gene, 
-                   ref.gene.config = ref.gene.config,
-                   PROJECT = PROJECT,
-                   thres = 0.85,
-                   thres.dis = 0.15,
-                   save_fasta = TRUE,
-                   re_define_clone_cluster = TRUE)
+    output.all.fasta <- generate_fasta(
+       clonesets = input.clonesets, 
+       mouse.id = mouse.id,
+       path.to.save.output = file.path(path.to.save.fasta, mouse.id, input.case), 
+       ref.gene = ref.gene, 
+       ref.gene.config = ref.gene.config,
+       PROJECT = PROJECT,
+       thres = 0.85,
+       thres.dis = 0.15,
+       save_fasta = TRUE,
+       re_define_clone_cluster = TRUE)
   }
 }

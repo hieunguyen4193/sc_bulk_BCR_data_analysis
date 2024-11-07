@@ -414,8 +414,8 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
 ##### Generate FASTA files from clonesets
 #####----------------------------------------------------------------------#####
 generate_fasta <- function(clonesets, 
+                           mouse.id,
                            path.to.save.output, 
-                           path.to.fasta.file,
                            ref.gene, 
                            ref.gene.config,
                            PROJECT,
@@ -423,7 +423,6 @@ generate_fasta <- function(clonesets,
                            thres.dis = 0.15,
                            save_fasta = TRUE,
                            re_define_clone_cluster = FALSE){
-  if (file.exists(file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT))) == FALSE){
     dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
     if (re_define_clone_cluster == TRUE){
       print("RE-DEFINE THE CLONE CLUSTERS BASED ON CDR3 SEQUENCE SIMILARITY AND V-J GENE USAGES ON SELECTED SAMPLES/MIDS ONLY")
@@ -474,6 +473,8 @@ generate_fasta <- function(clonesets,
       J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
       CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
       # remove the * sign in the file name
+      path.to.fasta.file <- file.path(path.to.save.output, 
+                                      sprintf("%s.fasta", input.VJ.combi))
       if (file.exists(path.to.fasta.file) == FALSE){
         fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
                                                                                                                 "uniqueMoleculeCount", 
@@ -537,17 +538,7 @@ generate_fasta <- function(clonesets,
             }
             sink()
           }
-        }
+        } 
       }
-      output[[input.VJ.combi]] <- list(
-        MiXCRtreeVDJ = MiXCRtreeVDJ,
-        msaMiXCRtreeVDJ = msaMiXCRtreeVDJ,
-        all.seqs = all.seqs
-      )
     }
-    saveRDS(output, file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT)))
-  } else {
-    output <- readRDS(file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT)))
-  }
-  return(output)
-}
+  } 

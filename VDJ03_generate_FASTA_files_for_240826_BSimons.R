@@ -64,13 +64,13 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
 
 clonesets <- clone.output$clonesets
 
-for (mouse.id in names(yfp.mids)){
+for (mouse.id in names(sample.list)){
   for (input.case in c("all", "without_colon_sample")){
-    input.clonesets <- subset(clonesets, clonesets$id %in% yfp.mids[[mouse.id]][[input.case]])
+    input.clonesets <- subset(clonesets, clonesets$id %in% sample.list[[mouse.id]][[input.case]])
     ##### This script might not run when in RSTUDIO, run in BASH command line. 
     output.all.fasta <- generate_fasta(clonesets = input.clonesets, 
+                                       mouse.id = mouse.id,
                                        path.to.save.output = file.path(path.to.save.fasta, mouse.id, input.case), 
-                                       path.to.fasta.file = path.to.fasta.file,
                                        ref.gene = ref.gene, 
                                        ref.gene.config = ref.gene.config,
                                        PROJECT = PROJECT,
