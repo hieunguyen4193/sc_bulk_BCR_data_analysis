@@ -55,16 +55,3 @@ for (mouse.id in names(count.mid.in.mouse[count.mid.in.mouse >= 4])){
                                neg = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[-]", mid.metadata$population) == TRUE)$X,
                                biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id & mid.metadata$population == "biopsy")$X)   
 }
-tmpdf <- readxl::read_excel(all.clone.files[["220701_etc_biopsies"]])
-tmpdf <- subset(tmpdf, tmpdf$id %in% yfp.mids[["m42"]]$all)
-subset.tmpdf <- subset(tmpdf, tmpdf$VJ.len.combi == "IGHV1-52_IGHJ4_60")
-seqs <- unique(subset.tmpdf$aaSeqCDR3)
-# cluster.output <- assign_clusters_to_sequences(seqs, threshold = 0.15)$res
-threshold <- 0.15
-
-distance_matrix <- compute_distance_matrix(seqs)
-max_length <- max(nchar(seqs))
-normalized_matrix <- distance_matrix / max_length
-graph <- graph_from_adjacency_matrix(normalized_matrix < threshold, mode = "undirected", diag = FALSE)
-cl <- cluster_optimal(graph)
-clus.res <- data.frame(seq = seqs, cluster = cl$membership)
