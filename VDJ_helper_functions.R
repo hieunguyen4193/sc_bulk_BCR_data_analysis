@@ -111,7 +111,8 @@ formatBulkVDJtable <- function(cloneset_files,
                                thres.dis,
                                savefile, 
                                path.to.save.output,
-                               rerun = FALSE){
+                               define.clone.clusters,
+                               rerun){
   if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
       file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE | rerun == TRUE){
       
@@ -197,10 +198,10 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
                                                 PROJECT,
                                                 thres, 
                                                 thres.dis,
-                                                savefile = TRUE,
-                                                verbose = TRUE,
-                                                rerun = FALSE,
-                                                define.clone.clusters = FALSE){
+                                                savefile,
+                                                verbose,
+                                                rerun,
+                                                define.clone.clusters){
   if (rerun == TRUE){
     ##### CLEAN UP OLD RESULTS
     if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
@@ -368,9 +369,9 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
                                           PROJECT,
                                           thres, 
                                           thres.dis,
-                                          savefile = TRUE,
-                                          rerun = FALSE,
-                                          define.clone.clusters =  FALSE){
+                                          savefile,
+                                          rerun,
+                                          define.clone.clusters){
   if (rerun == TRUE){
     ##### CLEAN UP OLD RESULTS
     if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
