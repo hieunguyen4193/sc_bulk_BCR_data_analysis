@@ -79,9 +79,6 @@ package_loading_Status_bioc <- lapply(bioc.packages,
                                       require, 
                                       character.only = TRUE)
 
-##### install monocle3
-
-
 ##### install ClusterProfiler
 BiocManager::install("msigdbr", update = FALSE)
 BiocManager::install("org.Hs.eg.db", update = FALSE)
@@ -105,5 +102,27 @@ if ("clusterProfiler" %in% installed.packages() == TRUE){
   remotes::install_github("GuangchuangYu/clusterProfiler", upgrade = "never")
 }
 
+new.pkgs <- c("svglite", "Matrix", "car")
+for (pkg in new.pkgs){
+  if (pkg %in% installed.packages() == FALSE){
+    install.packages(pkg)
+  }   
+}
 
+if (packageVersion("igraph") != "2.1.1"){
+  install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
+}
+if (packageVersion("ggplot2") != "3.4.4"){
+  install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)
+}
+
+if ("msa" %in% installed.packages() == FALSE){
+  BiocManager::install("msa", update = FALSE)
+}
+
+if (packageVersion("tidyr") != "1.3.1"){
+  install.packages("tidyr")  
+  install.packages("tidyselect")
+  library(tidyr)
+}
 # EOF ##########################################################################

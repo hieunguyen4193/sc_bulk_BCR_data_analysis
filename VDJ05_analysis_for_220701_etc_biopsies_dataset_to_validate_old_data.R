@@ -23,7 +23,9 @@ outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.04.output <- file.path(outdir, "VDJ_output", "04_output")
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", "220701_etc_biopsies")
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
+
 thres <- 0.85
+thres.dis <- 0.15
 
 all.clone.files <- Sys.glob(file.path(outdir, "VDJ_output", "*", sprintf("VDJ_output_%s", thres), "preprocessed_files", "clonesets*.split_clones.xlsx" ))
 
@@ -78,9 +80,9 @@ if (ref.gene == "10x"){
 ##### MAIN RUN: GENERATE FASTA FOR EACH YFP CASE AND BIOPSY SAMPLES
 #####----------------------------------------------------------------------#####
 summary.fastadf <- data.frame()
-for (mouse.id in names(yfp.mids)){
+# for (mouse.id in names(yfp.mids)){
+for (mouse.id in c("m42")){
   for (yfp.case in c("all", "neg", "pos", "biopsy")){
-    
     if (yfp.case == "biopsy"){
       save.folder.name <- yfp.case
     } else {
@@ -99,9 +101,9 @@ for (mouse.id in names(yfp.mids)){
     for (input.VJ.combi in unique(inputdf$VJ.len.combi)){
       tmpdf <- subset(inputdf, inputdf$VJ.len.combi == input.VJ.combi)
       seqs <- unique(tmpdf$aaSeqCDR3)
-      print(length(seqs))
+      print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
       if (length(seqs) >= 2){
-        cluster.output <- assign_clusters_to_sequences(seqs, threshold = 1 - thres)$res
+        cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
         tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
           tmpdf$aaSeqCDR3, function(x){
             return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))

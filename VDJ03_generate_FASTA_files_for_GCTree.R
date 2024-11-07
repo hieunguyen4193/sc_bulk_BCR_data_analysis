@@ -18,7 +18,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
-PROJECT <- "240826_BSimons"
+PROJECT <- "220701_etc_biopsies"
 
 path.to.save.fasta <- file.path(outdir, "FASTA_output", PROJECT,  sprintf("VDJ_output_%s", thres))
 dir.create(path.to.save.fasta, showWarnings = FALSE, recursive = TRUE)

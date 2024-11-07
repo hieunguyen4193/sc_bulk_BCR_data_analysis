@@ -21,9 +21,9 @@ outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 
 output <- list()
-for (PROJECT in c("240826_BSimons",
-                  "220701_etc_biopsies")){
-# for (PROJECT in c("240826_BSimons")){
+# for (PROJECT in c("240826_BSimons",
+#                   "220701_etc_biopsies")){
+for (PROJECT in c("240826_BSimons")){
   print("#####----------------------------------#####")
   print(sprintf("Working on project %s", PROJECT))
   print("#####----------------------------------#####")

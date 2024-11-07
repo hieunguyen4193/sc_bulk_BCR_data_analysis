@@ -1,15 +1,25 @@
-new.pkgs <- c("svglite", "ggpubr")
+new.pkgs <- c("svglite", "Matrix", "car")
 for (pkg in new.pkgs){
   if (pkg %in% installed.packages() == FALSE){
     install.packages(pkg)
   }   
 }
 
-if (packageVersion("Matrix") != "1.5.4.1" | packageVersion("ggplot2") != "3.4.4"){
-  install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type = "source", repos = NULL)
-  install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)  
+# if (packageVersion("Matrix") != "1.5.4.1" | packageVersion("ggplot2") != "3.4.4"){
+#   install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type = "source", repos = NULL)
+#   install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)  
+# }
+
+if (packageVersion("igraph") != "2.1.1"){
+  install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
+}
+if (packageVersion("ggplot2") != "3.4.4"){
+  install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)
 }
 
+if ("msa" %in% installed.packages() == FALSE){
+  BiocManager::install("msa", update = FALSE)
+}
 
 if (packageVersion("tidyr") != "1.3.1"){
   install.packages("tidyr")  
@@ -33,7 +43,6 @@ library(data.table)
 library(ggtree)
 library(ape)
 library(igraph)
-library(ggpubr)
 library(circlize)
 library(ggalluvial)
 
@@ -99,6 +108,7 @@ assign_clusters_to_sequences <- function(seqs, threshold = 0.15){
 formatBulkVDJtable <- function(cloneset_files, 
                                PROJECT,
                                thres,
+                               thres.dis,
                                savefile, 
                                path.to.save.output,
                                rerun = FALSE){
@@ -123,24 +133,28 @@ formatBulkVDJtable <- function(cloneset_files,
       mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
     
-    ##### Group sequences + Gene usages to clones
-    ##### Definition: A clone = V + J gene, length of the CDR3 sequence.
-    ##### use similarity distance to define sequences in a clone. 
-    new.clonesets <- data.frame()
-    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
-      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
-      seqs <- unique(tmpdf$aaSeqCDR3)
-      if (length(seqs) >= 2){
-        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-          tmpdf$aaSeqCDR3, function(x){
-            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-          }
-        ))    
-      } else {
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    if (define.clone.clusters == TRUE){
+      ##### Group sequences + Gene usages to clones
+      ##### Definition: A clone = V + J gene, length of the CDR3 sequence.
+      ##### use similarity distance to define sequences in a clone. 
+      new.clonesets <- data.frame()
+      for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+        tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+        seqs <- unique(tmpdf$aaSeqCDR3)
+        if (length(seqs) >= 2){
+          cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+            tmpdf$aaSeqCDR3, function(x){
+              return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+            }
+          ))    
+        } else {
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+        }
+        new.clonesets <- rbind(new.clonesets, tmpdf)
       }
-      new.clonesets <- rbind(new.clonesets, tmpdf)
+    } else {
+      new.clonesets <- clonesets
     }
     
     ##### Create the final clone dataframe
@@ -159,8 +173,8 @@ formatBulkVDJtable <- function(cloneset_files,
       arrange(desc(cloneSize))
     clonedf <- subset(clonedf, select = -c(VJseq.combi.tmp))
     if (savefile == TRUE){
-      clonedf <- writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
-      new.clonesets <- writexl::write_xlsx(new.clonesets, file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))    
+      writexl::write_xlsx(clonedf, file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT)))
+      writexl::write_xlsx(new.clonesets, file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT)))    
     }
   } else {
     print("File clonedf.xlsx and flie split_clones.xlsx exist, reading in ...")
@@ -182,9 +196,11 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
                                                 path.to.save.output,
                                                 PROJECT,
                                                 thres, 
+                                                thres.dis,
                                                 savefile = TRUE,
                                                 verbose = TRUE,
-                                                rerun = FALSE){
+                                                rerun = FALSE,
+                                                define.clone.clusters = FALSE){
   if (rerun == TRUE){
     ##### CLEAN UP OLD RESULTS
     if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
@@ -226,9 +242,11 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
     output <- formatBulkVDJtable(cloneset_files = all.clones.tables, 
                                  PROJECT = PROJECT,
                                  thres = thres,
+                                 thres.dis = thres.dis,
                                  savefile = savefile,
                                  path.to.save.output = path.to.save.output,
-                                 rerun = rerun)
+                                 rerun = rerun,
+                                 define.clone.clusters = define.clone.clusters)
     saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   } else {
     output <- readRDS(file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
@@ -245,9 +263,11 @@ run_preprocessing_all_bulk_VDJ_data <- function(path.to.mid.output,
 formatScVDJtable <- function(all.VDJ.files,
                              PROJECT, 
                              thres,
+                             thres.dis,
                              savefile, 
                              path.to.save.output,
-                             rerun){
+                             rerun,
+                             define.clone.clusters){
   if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == FALSE |
       file.exists(file.path(path.to.save.output, sprintf("clonesets_%s.split_clones.xlsx", PROJECT))) == FALSE |
       rerun == TRUE){
@@ -288,22 +308,26 @@ formatScVDJtable <- function(all.VDJ.files,
       mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
     
-    ##### Group sequences + Gene usages to clones
-    new.clonesets <- data.frame()
-    for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
-      tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
-      seqs <- unique(tmpdf$aaSeqCDR3)
-      if (length(seqs) >= 2){
-        cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-          tmpdf$aaSeqCDR3, function(x){
-            return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-          }
-        ))    
-      } else {
-        tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    if (define.clone.clusters == TRUE){
+      ##### Group sequences + Gene usages to clones
+      new.clonesets <- data.frame()
+      for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+        tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+        seqs <- unique(tmpdf$aaSeqCDR3)
+        if (length(seqs) >= 2){
+          cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+            tmpdf$aaSeqCDR3, function(x){
+              return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+            }
+          ))    
+        } else {
+          tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+        }
+        new.clonesets <- rbind(new.clonesets, tmpdf)
       }
-      new.clonesets <- rbind(new.clonesets, tmpdf)
+    } else {
+      new.clonesets <- clonesets
     }
     
     clonedf <- data.frame(
@@ -343,8 +367,10 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
                                           path.to.save.output, 
                                           PROJECT,
                                           thres, 
+                                          thres.dis,
                                           savefile = TRUE,
-                                          rerun = FALSE){
+                                          rerun = FALSE,
+                                          define.clone.clusters =  FALSE){
   if (rerun == TRUE){
     ##### CLEAN UP OLD RESULTS
     if (file.exists(file.path(path.to.save.output, sprintf("%s.clonedf.xlsx", PROJECT))) == TRUE){
@@ -371,9 +397,11 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
     output <- formatScVDJtable(all.VDJ.files = all.VDJ.files,
                                PROJECT = PROJECT, 
                                thres = thres,
+                               thres.dis = thres.dis,
                                savefile = savefile, 
                                path.to.save.output = path.to.save.output,
-                               rerun = rerun)
+                               rerun = rerun,
+                               define.clone.clusters = define.clone.clusters)
     saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   } else { 
     print(sprintf("File %s exists", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))
@@ -390,6 +418,8 @@ generate_fasta <- function(clonesets,
                            ref.gene.config,
                            mouse.id,
                            PROJECT,
+                           thres = 0.85,
+                           thres.dis = 0.15,
                            save_fasta = TRUE,
                            re_define_clone_cluster = FALSE){
   if (file.exists(file.path(path.to.save.output, sprintf("%s.all_FASTA_info.rds", PROJECT))) == FALSE){
@@ -409,7 +439,7 @@ generate_fasta <- function(clonesets,
         tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
         seqs <- unique(tmpdf$aaSeqCDR3)
         if (length(seqs) >= 2){
-          cluster.output <- assign_clusters_to_sequences(seqs, threshold = thres)$res
+          cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
           tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
             tmpdf$aaSeqCDR3, function(x){
               return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
