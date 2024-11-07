@@ -57,6 +57,21 @@ for (input.file in all.files){
   countdf <- rbind(countdf, tmpdf)
 }
 
-countdf <- countdf %>% arrange(count)
-write.csv(countdf, file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.csv", PROJECT)))
-write.table(countdf[, c("filename", "path")], file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.nextflow.csv", PROJECT)), row.names = FALSE, quote = FALSE, sep = ",")
+dir.create(file.path(path.to.main.src, sprintf("SampleSheet_GCTree_nextflow_%s", PROJECT)), showWarnings = FALSE, recursive = TRUE)
+
+for (input.mouse.id in unique(countdf$mouse.id)){
+  for (input.case.id in unique(countdf$input.case)){
+    tmp.countdf <- subset(countdf, countdf$mouse.id == input.mouse.id & countdf$input.case == input.case.id)
+    tmp.countdf <- tmp.countdf %>% arrange(count)
+    write.table(tmp.countdf[, c("filename", "path")], 
+                file.path(path.to.main.src, sprintf("SampleSheet_GCTree_nextflow_%s", PROJECT), 
+                          sprintf("SampleSheet_GCTree_%s_%s_%s.nextflow.csv", 
+                                  PROJECT, 
+                                  input.mouse.id, 
+                                  input.case.id)), 
+                row.names = FALSE, 
+                quote = FALSE, 
+                sep = ",")
+  }
+}
+
