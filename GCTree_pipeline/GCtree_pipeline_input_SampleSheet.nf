@@ -26,6 +26,7 @@ Channel
         return [sample_id, file(path)]
     }
     .set { fastaFilesChannel }
+    .view()
     
 process deduplicate { 
     cache "deep"; tag "$sample_id"
