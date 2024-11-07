@@ -59,4 +59,4 @@ for (input.file in all.files){
 
 countdf <- countdf %>% arrange(count)
 write.csv(countdf, file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.csv", PROJECT)))
-write.table(countdf[, c("filename", "path")], file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.nextflow.csv", PROJECT)), row.names = FALSE, quote = FALSE)
+write.table(countdf[, c("filename", "path")], file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.nextflow.csv", PROJECT)), row.names = FALSE, quote = FALSE, sep = ",")
