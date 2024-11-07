@@ -36,7 +36,7 @@ all.files <- Sys.glob(file.path(path.to.save.fasta, "*/*/*.fasta"))
 planned.outdir <- "/home/hieu/outdir"
 countdf <- data.frame()
 for (input.file in all.files){
-  fasta.filename <- basename(input.file)
+  filename <- str_replace(basename(input.file), ".fasta", "")
   input.case <- dirname(input.file) %>% basename()
   mouse.id <- dirname(dirname(input.file)) %>% basename()
   c <-readDNAStringSet(input.file) %>% as.data.frame() %>% nrow()
@@ -49,10 +49,10 @@ for (input.file in all.files){
                             sprintf("VDJ_output_%s", thres),
                             mouse.id, 
                             input.case,
-                            fasta.filename
+                            filename
                             )
   tmpdf <- data.frame(
-    filename = c(fasta.filename),
+    filename = c(filename),
     path = c(path.to.file),
     mouse.id = c(mouse.id),
     input.case = c(input.case),
@@ -63,3 +63,4 @@ for (input.file in all.files){
 
 countdf <- countdf %>% arrange(count)
 write.csv(countdf, file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.csv", PROJECT)))
+write.csv(countdf[, c("filename", "path")], file.path(path.to.main.src, sprintf("SampleSheet_GCTree_%s.nextflow.csv", PROJECT)))
