@@ -13,8 +13,8 @@ params.output=""
 
 // path to the python source use in deduplicating the sequences.
 deduplicate_src=file(params.deduplicate_src)
-modify_tree_colors=file(params.modify_tree_colors)
-color_path=file(params.color_path)
+// modify_tree_colors=file(params.modify_tree_colors)
+// color_path=file(params.color_path)
 
 // Create a channel that emits files from the specified input directory
 Channel
@@ -85,33 +85,33 @@ process dnapars_and_inferring_gc_trees {
     '''
 }
 
-process modify_gctree_colors {
-    cache "deep"; tag "$sample_id"
-    publishDir "$params.output/$sample_id/03_modify_gctree_colors", mode: 'copy'
-    errorStrategy 'ignore'
-    maxRetries 1
-    maxForks 10
+// process modify_gctree_colors {
+//     cache "deep"; tag "$sample_id"
+//     publishDir "$params.output/$sample_id/03_modify_gctree_colors", mode: 'copy'
+//     errorStrategy 'ignore'
+//     maxRetries 1
+//     maxForks 10
     
-    input:
-        tuple sample_id, file("*") from modify_gctree_colors_ch
-        tuple sample_id, file(fasta) from orig_fasta_ch
-        tuple sample_id, "${sample_id}.id_map.csv" from idmap_ch
-        tuple sample_id, "${sample_id}.id_map_seq.csv" from idmap_seq_ch
-        file(modify_tree_colors)
-        file(color_path)
-    output:
-        tuple sample_id, file("*.svg") into final_ch
-    script:
-    """
-    export QT_QPA_PLATFORM=offscreen
-    export XDG_RUNTIME_DIR=/tmp/runtime-runner
-    export MPLBACKEND=agg
-    python ${modify_tree_colors} \
-    --input_fasta ${fasta} \
-    --input_idmap ${sample_id}.id_map_seq.csv \
-    --gctree_inference_file gctree.out.inference.1.p \
-    --color_path ${color_path} \
-    --output . \
-    --svg_name ${sample_id}.color
-    """
-}
+//     input:
+//         tuple sample_id, file("*") from modify_gctree_colors_ch
+//         tuple sample_id, file(fasta) from orig_fasta_ch
+//         tuple sample_id, "${sample_id}.id_map.csv" from idmap_ch
+//         tuple sample_id, "${sample_id}.id_map_seq.csv" from idmap_seq_ch
+//         file(modify_tree_colors)
+//         file(color_path)
+//     output:
+//         tuple sample_id, file("*.svg") into final_ch
+//     script:
+//     """
+//     export QT_QPA_PLATFORM=offscreen
+//     export XDG_RUNTIME_DIR=/tmp/runtime-runner
+//     export MPLBACKEND=agg
+//     python ${modify_tree_colors} \
+//     --input_fasta ${fasta} \
+//     --input_idmap ${sample_id}.id_map_seq.csv \
+//     --gctree_inference_file gctree.out.inference.1.p \
+//     --color_path ${color_path} \
+//     --output . \
+//     --svg_name ${sample_id}.color
+//     """
+// }
