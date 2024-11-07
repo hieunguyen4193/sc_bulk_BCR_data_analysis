@@ -33,7 +33,7 @@ dir.create(path.to.save.fasta, showWarnings = FALSE, recursive = TRUE)
 
 all.files <- Sys.glob(file.path(path.to.save.fasta, "*/*/*.fasta"))
 
-planned.outdir <- "/home/hieu/outdir"
+planned.outdir <- "/home/hieu/storage"
 countdf <- data.frame()
 for (input.file in all.files){
   filename <- str_replace(basename(input.file), ".fasta", "")
@@ -41,15 +41,11 @@ for (input.file in all.files){
   mouse.id <- dirname(dirname(input.file)) %>% basename()
   c <-readDNAStringSet(input.file) %>% as.data.frame() %>% nrow()
   path.to.file <- file.path(planned.outdir, 
-                            "sc_bulk_BCR_data_analysis_v0.1",
-                            "VDJ_output", 
-                            "03_output",
-                            "FASTA_output", 
-                            "PROJECT",
+                            PROJECT,
                             sprintf("VDJ_output_%s", thres),
                             mouse.id, 
                             input.case,
-                            filename
+                            basename(input.file)
                             )
   tmpdf <- data.frame(
     filename = c(filename),
