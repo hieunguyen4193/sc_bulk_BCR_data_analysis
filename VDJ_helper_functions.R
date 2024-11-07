@@ -415,9 +415,9 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
 #####----------------------------------------------------------------------#####
 generate_fasta <- function(clonesets, 
                            path.to.save.output, 
+                           path.to.fasta.file,
                            ref.gene, 
                            ref.gene.config,
-                           mouse.id,
                            PROJECT,
                            thres = 0.85,
                            thres.dis = 0.15,
@@ -439,6 +439,7 @@ generate_fasta <- function(clonesets,
       for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
         tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
         seqs <- unique(tmpdf$aaSeqCDR3)
+        print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
         if (length(seqs) >= 2){
           cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
           tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
@@ -473,18 +474,7 @@ generate_fasta <- function(clonesets,
       J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
       CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
       # remove the * sign in the file name
-      dir.create(file.path(path.to.save.output,
-                           PROJECT,
-                           mouse.id), 
-                 showWarnings = FALSE, 
-                 recursive = TRUE)
-      path.to.output.fasta <- file.path(path.to.save.output,
-                                        PROJECT,
-                                        mouse.id, 
-                                        sprintf("%s_%s.aln.fasta",
-                                                mouse.id,
-                                                str_replace_all(input.VJ.combi, "[*]", "-")))
-      if (file.exists(path.to.output.fasta) == FALSE){
+      if (file.exists(path.to.fasta.file) == FALSE){
         fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
                                                                                                                 "uniqueMoleculeCount", 
                                                                                                                 "V.gene", 
@@ -521,7 +511,7 @@ generate_fasta <- function(clonesets,
           MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
           msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
           if (save_fasta == TRUE){
-            sink(path.to.output.fasta)
+            sink(path.to.fasta.file)
             for (i in seq(1, length(all.seqs))){
               if (i == length(all.seqs)){
                 output.info <- ">GL"

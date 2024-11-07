@@ -80,8 +80,8 @@ if (ref.gene == "10x"){
 ##### MAIN RUN: GENERATE FASTA FOR EACH YFP CASE AND BIOPSY SAMPLES
 #####----------------------------------------------------------------------#####
 summary.fastadf <- data.frame()
-# for (mouse.id in names(yfp.mids)){
-for (mouse.id in c("m42")){
+for (mouse.id in names(yfp.mids)){
+# for (mouse.id in c("m42")){
   for (yfp.case in c("all", "neg", "pos", "biopsy")){
     if (yfp.case == "biopsy"){
       save.folder.name <- yfp.case
