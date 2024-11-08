@@ -516,6 +516,7 @@ generate_fasta <- function(clonesets,
           MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
           msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
           if (save_fasta == TRUE){
+            print(sprintf("File fasta: %s", basename(path.to.fasta.file)))
             sink(path.to.fasta.file)
             for (i in seq(1, length(all.seqs))){
               if (i == length(all.seqs)){

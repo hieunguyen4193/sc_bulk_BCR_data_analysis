@@ -3,6 +3,8 @@
 ##### batch 2:
 # path_to_input="/home/hieu/storage/240826_Simons_pabst_MolMedcine_AmpliSeq/Fastq";
 #####: 240826_BSimons dataset
+##### batch 3:
+# path_to_input="/home/hieu/storage/241031_Simons_Pabst_MolMedicine_FASTQ";
 
 while getopts "i:o:t:r:" opt; do
   case ${opt} in
