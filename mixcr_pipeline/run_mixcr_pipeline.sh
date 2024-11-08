@@ -6,7 +6,7 @@
 ##### batch 3:
 # path_to_input="/home/hieu/storage/241031_Simons_Pabst_MolMedicine_FASTQ";
 
-while getopts "i:o:t:r:" opt; do
+while getopts "i:o:e:" opt; do
   case ${opt} in
     i )
       path_to_input=$OPTARG

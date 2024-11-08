@@ -6,7 +6,7 @@ echo -e "#############################################";
 # fastq2=$3;
 # outputdir=$4;
 
-while getopts "i:o:t:r:" opt; do
+while getopts "i:o:f:r:" opt; do
   case ${opt} in
     i )
       sampleid=$OPTARG
