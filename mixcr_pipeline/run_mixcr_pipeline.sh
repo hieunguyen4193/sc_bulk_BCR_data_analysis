@@ -40,5 +40,5 @@ echo $sampleid;
 echo -e $fastq1;
 echo -e $fastq2;
 
-bash mixcr_pipeline.sh $sampleid $fastq1 $fastq2 $outputdir;
+bash mixcr_pipeline.sh -i $sampleid -o $outputdir -f $fastq1 -r $fastq2;
 done
