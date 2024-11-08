@@ -1,11 +1,3 @@
-echo -e "#############################################";
-echo -e "Working on sample " ${sampleid} "\n";
-echo -e "#############################################";
-# sampleid=$1;
-# fastq1=$2;
-# fastq2=$3;
-# outputdir=$4;
-
 while getopts "i:o:f:r:" opt; do
   case ${opt} in
     i )
