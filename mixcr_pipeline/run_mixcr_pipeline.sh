@@ -34,9 +34,8 @@ sampleid=${filename%_S*};
 fastq1=${file}
 fastq2=${file%R1*}R2_001.${ext}; # add .gz depending on the input fastq format ext
 echo -e "------------------------------------------"
-echo -e "WORKING ON SAMPLE " $sampleid "\n"
+echo -e "WORKING ON SAMPLE " $filename "\n"
 echo -e "------------------------------------------"
-echo $sampleid;
 echo -e $fastq1;
 echo -e $fastq2;
 
