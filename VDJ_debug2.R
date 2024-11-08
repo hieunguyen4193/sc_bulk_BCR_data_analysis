@@ -71,24 +71,37 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
 clonesets <- clone.output$clonesets
 
 input.case <- "all"
-mouse.id <- "m32"
-input.clonesets <- subset(clonesets, clonesets$id %in% yfp.mids[[mouse.id]][[input.case]])
+mouse.id <- "m11"
+clonesets <- subset(clonesets, clonesets$id %in% yfp.mids[[mouse.id]][[input.case]])
 
-input.VJ.combi <- "IGHV1-4_IGHJ3_48"
-
-tmpdf <- subset(input.clonesets, input.clonesets$VJ.len.combi == input.VJ.combi)
-seqs <- unique(tmpdf$aaSeqCDR3)
-print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
-if (length(seqs) >= 2){
-  cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
-  tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
-    tmpdf$aaSeqCDR3, function(x){
-      return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
-    }
-  ))    
-} else {
-  tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+new.clonesets <- data.frame()
+for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+  tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+  seqs <- unique(tmpdf$aaSeqCDR3)
+  print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
+  if (length(seqs) >= 2){
+    cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+    tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+      tmpdf$aaSeqCDR3, function(x){
+        return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+      }
+    ))    
+  } else {
+    tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+  }
+  new.clonesets <- rbind(new.clonesets, tmpdf)
 }
+clonesets <- new.clonesets
+print("IMPORTANT NOTE: THE CLONE CLUSTERS ARE GENERATED BASED ON SAMPLES/MIDS IN THIS SELECTED MOUSE/SAMPLE ONLY; NOT THE AGGREGATED TABLE.")
+old.clonesets <- readxl::read_excel("/media/hieunguyen/GSHD_HN01/raw_data/mixcr_gctree_archived_output/mixcr_pipeline_output/data_analysis/05_output/CDR3_0.15/m11/all_YFP_MIDs/clonesets_m11.split_clones_0.15.xlsx")
+old.clonesets <- old.clonesets %>% rowwise() %>%
+  mutate(VJcombi_CDR3_0.15 = str_replace_all(VJcombi_CDR3_0.15, "[*]01", "")) %>%
+  mutate(VJcombi_CDR3_0.15 = str_replace_all(VJcombi_CDR3_0.15, "[*]02", "")) %>%
+  mutate(VJcombi_CDR3_0.15 = str_replace_all(VJcombi_CDR3_0.15, "[*]03", "")) %>%
+  mutate(VJcombi_CDR3_0.15 = str_replace_all(VJcombi_CDR3_0.15, "[*]04", ""))
+
+# setdiff(old.clonesets$VJcombi_CDR3_0.15, clonesets$VJcombi_CDR3_0.85)
+# setdiff(clonesets$VJcombi_CDR3_0.85, old.clonesets$VJcombi_CDR3_0.15)
 
 source(ref.gene.config) # path to the configuration file for the input BCR reference genes
 if (ref.gene == "10x"){
@@ -108,25 +121,38 @@ if (ref.gene == "10x"){
   })
 }
 
-input.VJ.combi <- "IGHV1-4_IGHJ3_48_1"
+save_fasta <- TRUE
+path.to.save.output <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1/VDJ_output/test"
+all.saved.files <- Sys.glob(file.path(path.to.save.output, "*"))
+all.saved.files <- to_vec(
+  for (item in all.saved.files){
+    str_replace(basename(item), ".fasta", "")
+  }
+)
 
-V.gene <- str_split(input.VJ.combi, "_")[[1]][[1]]
-J.gene <- str_split(input.VJ.combi, "_")[[1]][[2]]
-CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
+path.to.old.files <- "/media/hieunguyen/GSHD_HN01/raw_data/mixcr_gctree_archived_output/mixcr_pipeline_output/data_analysis/05_output/CDR3_0.15/m11/all_YFP_MIDs"
+old.saved.files <- Sys.glob(file.path(path.to.old.files, "*.fasta"))
+old.saved.files <- to_vec(
+  for (item in old.saved.files){
+    str_replace(basename(item), ".aln.fasta", "") %>% str_replace("m11_all_YFP_", "") %>% 
+      str_replace_all("-01", "") %>% 
+      str_replace_all("-02", "") %>% 
+      str_replace_all("-03", "") %>% 
+      str_replace_all("-04", "")
+  }
+)
 
-##### get germline sequences and merge with the real data sequences
-if (ref.gene == "IMGT"){
-  GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
-  GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
-} else if (ref.gene == "10x"){
-  GL.V.gene <- ref.fasta[[V.gene]] %>% as.character()
-  GL.J.gene <- ref.fasta[[J.gene]] %>% as.character()
+setdiff(clonesets$VJcombi_CDR3_0.85, all.saved.files)
+
+setdiff(old.saved.files, all.saved.files)
+
+setdiff(all.saved.files, clonesets$VJcombi_CDR3_0.85)
+
+for (i in setdiff(old.saved.files, all.saved.files)){
+  print(subset(old.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow())   
 }
 
-repN.seq <- paste(replicate(n = CDR3.length, expr = "N"), collapse = "")
-GL.seq <- sprintf("%s%s%s", GL.V.gene, repN.seq, GL.J.gene)
-# merge the clone sequences with the reference sequence. 
-all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
+for (i in setdiff(old.saved.files, all.saved.files)){
+  print(subset(new.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow()) 
+}
 
-fa.old <- readDNAStringSet('/media/hieunguyen/GSHD_HN01/raw_data/mixcr_gctree_archived_output/mixcr_pipeline_output/data_analysis/05_output/CDR3_0.15/m32/all_YFP_MIDs/m32_all_YFP_IGHV1-4-01_IGHJ3-01_48_1.aln.fasta') 
-fa.new <- readDNAStringSet('/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1/VDJ_output/03_output/FASTA_output/220701_etc_biopsies/VDJ_output_0.85/m32/all/IGHV1-4_IGHJ3_48_1.fasta')

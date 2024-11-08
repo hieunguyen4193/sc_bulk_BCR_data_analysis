@@ -10,9 +10,9 @@ for (pkg in new.pkgs){
 #   install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)  
 # }
 
-if (packageVersion("igraph") != "2.1.1"){
-  install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
-}
+# if (packageVersion("igraph") != "2.1.1"){
+#   install.packages("https://cran.r-project.org/src/contrib/igraph_2.1.1.tar.gz", type = "source", repos = NULL)
+# }
 if (packageVersion("ggplot2") != "3.4.4"){
   install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.4.tar.gz", type = "source", repos = NULL)
 }
@@ -461,11 +461,15 @@ generate_fasta <- function(clonesets,
     } else if (ref.gene == "IMGT"){
       s.V.genes <- readDNAStringSet(ref.genes$IMGT$V.gene)
       names(s.V.genes) <- lapply(names(s.V.genes), function(x){
-        str_split(x, "[|]")[[1]][[2]]
+        x <- str_split(x, "[|]")[[1]][[2]]
+        x <- str_split(x, "[*]")[[1]][[1]]
+        return(x)
       })
       s.J.genes <- readDNAStringSet(ref.genes$IMGT$J.gene)
       names(s.J.genes) <- lapply(names(s.J.genes), function(x){
-        str_split(x, "[|]")[[1]][[2]]
+        x <- str_split(x, "[|]")[[1]][[2]]
+        x <- str_split(x, "[*]")[[1]][[1]]
+        return(x)
       })
     }
     for (input.VJ.combi in unique(clonesets[[sprintf("VJcombi_CDR3_%s", thres)]])){
@@ -507,7 +511,7 @@ generate_fasta <- function(clonesets,
         # merge the clone sequences with the reference sequence. 
         all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
         
-        if (nrow(fasta.output) > 1){
+        if (length(all.seqs) > 1){
           ##### multiple alignment sequences, package MSA. 
           MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
           msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
