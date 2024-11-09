@@ -121,38 +121,38 @@ if (ref.gene == "10x"){
   })
 }
 
-save_fasta <- TRUE
-path.to.save.output <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1/VDJ_output/test"
-all.saved.files <- Sys.glob(file.path(path.to.save.output, "*"))
-all.saved.files <- to_vec(
-  for (item in all.saved.files){
-    str_replace(basename(item), ".fasta", "")
-  }
-)
-
-path.to.old.files <- "/media/hieunguyen/GSHD_HN01/raw_data/mixcr_gctree_archived_output/mixcr_pipeline_output/data_analysis/05_output/CDR3_0.15/m11/all_YFP_MIDs"
-old.saved.files <- Sys.glob(file.path(path.to.old.files, "*.fasta"))
-old.saved.files <- to_vec(
-  for (item in old.saved.files){
-    str_replace(basename(item), ".aln.fasta", "") %>% str_replace("m11_all_YFP_", "") %>% 
-      str_replace_all("-01", "") %>% 
-      str_replace_all("-02", "") %>% 
-      str_replace_all("-03", "") %>% 
-      str_replace_all("-04", "")
-  }
-)
-
-setdiff(clonesets$VJcombi_CDR3_0.85, all.saved.files)
-
-setdiff(old.saved.files, all.saved.files)
-
-setdiff(all.saved.files, clonesets$VJcombi_CDR3_0.85)
-
-for (i in setdiff(old.saved.files, all.saved.files)){
-  print(subset(old.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow())   
-}
-
-for (i in setdiff(old.saved.files, all.saved.files)){
-  print(subset(new.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow()) 
-}
+# save_fasta <- TRUE
+# path.to.save.output <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1/VDJ_output/test"
+# all.saved.files <- Sys.glob(file.path(path.to.save.output, "*"))
+# all.saved.files <- to_vec(
+#   for (item in all.saved.files){
+#     str_replace(basename(item), ".fasta", "")
+#   }
+# )
+# 
+# path.to.old.files <- "/media/hieunguyen/GSHD_HN01/raw_data/mixcr_gctree_archived_output/mixcr_pipeline_output/data_analysis/05_output/CDR3_0.15/m11/all_YFP_MIDs"
+# old.saved.files <- Sys.glob(file.path(path.to.old.files, "*.fasta"))
+# old.saved.files <- to_vec(
+#   for (item in old.saved.files){
+#     str_replace(basename(item), ".aln.fasta", "") %>% str_replace("m11_all_YFP_", "") %>% 
+#       str_replace_all("-01", "") %>% 
+#       str_replace_all("-02", "") %>% 
+#       str_replace_all("-03", "") %>% 
+#       str_replace_all("-04", "")
+#   }
+# )
+# 
+# setdiff(clonesets$VJcombi_CDR3_0.85, all.saved.files)
+# 
+# setdiff(old.saved.files, all.saved.files)
+# 
+# setdiff(all.saved.files, clonesets$VJcombi_CDR3_0.85)
+# 
+# for (i in setdiff(old.saved.files, all.saved.files)){
+#   print(subset(old.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow())   
+# }
+# 
+# for (i in setdiff(old.saved.files, all.saved.files)){
+#   print(subset(new.clonesets, clonesets$VJcombi_CDR3_0.85 == i) %>% nrow()) 
+# }
 

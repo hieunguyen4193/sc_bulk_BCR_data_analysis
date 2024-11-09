@@ -124,10 +124,10 @@ formatBulkVDJtable <- function(cloneset_files,
     clonesets <- clonesets %>% rowwise() %>%
       mutate(V.gene = str_split(str_split(allVHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(V.gene = paste(str_split(V.gene, "-")[[1]][1:2], collapse = "-")) %>% 
-      mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]] , V.gene)) %>%
+      # mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]] , V.gene)) %>%
       mutate(J.gene = str_split(str_split(allJHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(J.gene = str_split(J.gene, "-")[[1]][[1]]) %>%
-      mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]] , J.gene)) %>%
+      # mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]] , J.gene)) %>%
       mutate(D.gene = str_split(str_split(allDHitsWithScore, ",")[[1]][[1]], "[()]")[[1]][[1]]) %>%
       mutate(D.gene = paste(str_split(D.gene, "-")[[1]][1:2], collapse = "-")) %>% 
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
@@ -287,9 +287,9 @@ formatScVDJtable <- function(all.VDJ.files,
       rowwise() %>%
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", v_gene, j_gene, cdr3, cdr3_nt)) %>%
       mutate(V.gene = v_gene) %>%
-      mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]] , V.gene)) %>%
+      # mutate(V.gene = ifelse(grepl("*", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]] , V.gene)) %>%
       mutate(J.gene = j_gene) %>%
-      mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]] , J.gene)) %>%
+      # mutate(J.gene = ifelse(grepl("*", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]] , J.gene)) %>%
       mutate(D.gene = d_gene) %>% 
       mutate(nSeqCDR1 = cdr1_nt) %>%
       mutate(nSeqCDR2 = cdr2_nt) %>%
@@ -462,13 +462,13 @@ generate_fasta <- function(clonesets,
       s.V.genes <- readDNAStringSet(ref.genes$IMGT$V.gene)
       names(s.V.genes) <- lapply(names(s.V.genes), function(x){
         x <- str_split(x, "[|]")[[1]][[2]]
-        x <- str_split(x, "[*]")[[1]][[1]]
+        # x <- str_split(x, "[*]")[[1]][[1]]
         return(x)
       })
       s.J.genes <- readDNAStringSet(ref.genes$IMGT$J.gene)
       names(s.J.genes) <- lapply(names(s.J.genes), function(x){
         x <- str_split(x, "[|]")[[1]][[2]]
-        x <- str_split(x, "[*]")[[1]][[1]]
+        # x <- str_split(x, "[*]")[[1]][[1]]
         return(x)
       })
     }
@@ -478,7 +478,7 @@ generate_fasta <- function(clonesets,
       CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
       # remove the * sign in the file name
       path.to.fasta.file <- file.path(path.to.save.output, 
-                                      sprintf("%s.fasta", input.VJ.combi))
+                                      sprintf("%s.fasta", str_replace_all(input.VJ.combi, "*", "-")))
       if (file.exists(path.to.fasta.file) == FALSE){
         fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
                                                                                                                 "uniqueMoleculeCount", 
@@ -511,7 +511,7 @@ generate_fasta <- function(clonesets,
         # merge the clone sequences with the reference sequence. 
         all.seqs <- c(fasta.output %>% pull(`seq`), GL.seq)
         
-        if (length(all.seqs) > 1){
+        if (nrow(fasta.output) > 1){
           ##### multiple alignment sequences, package MSA. 
           MiXCRtreeVDJ <- all.seqs %>% DNAStringSet()
           msaMiXCRtreeVDJ <- msa(inputSeqs = MiXCRtreeVDJ, verbose = TRUE)
