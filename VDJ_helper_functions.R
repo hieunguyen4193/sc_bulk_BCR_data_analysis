@@ -478,7 +478,7 @@ generate_fasta <- function(clonesets,
       CDR3.length <- as.numeric(str_split(input.VJ.combi , "_")[[1]][[3]])
       # remove the * sign in the file name
       path.to.fasta.file <- file.path(path.to.save.output, 
-                                      sprintf("%s.fasta", str_replace_all(input.VJ.combi, "*", "-")))
+                                      sprintf("%s.fasta", str_replace_all(input.VJ.combi, "[*]", "-")))
       if (file.exists(path.to.fasta.file) == FALSE){
         fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
                                                                                                                 "uniqueMoleculeCount", 
