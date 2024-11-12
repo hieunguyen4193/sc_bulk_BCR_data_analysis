@@ -1,5 +1,5 @@
 library(circlize)
-df <- data.frame(table(clonesets.filtered$id_hashtag, clonesets.filtered$VJ.len.combi))
+df <- data.frame(table(input.clonesets$id_hashtag, input.clonesets$VJ.len.combi))
 colnames(df) <- c("SampleID", "Clone", "Count") 
 
 alldf <- list()
