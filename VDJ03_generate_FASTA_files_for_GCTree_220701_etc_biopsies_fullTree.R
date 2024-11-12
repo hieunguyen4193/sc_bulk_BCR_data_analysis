@@ -35,18 +35,14 @@ dir.create(path.to.save.fasta, showWarnings = FALSE, recursive = TRUE)
 ##### METADATA
 #####----------------------------------------------------------------------#####
 mid.metadata <- read.csv("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/220701_etc_biopsies/metadata.csv", sep =";")
-count.mid.in.mouse <- table(mid.metadata$population, mid.metadata$mouse) %>% colSums()
-if (file.exists(file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds")) == FALSE){
+if (file.exists(file.path(path.to.save.fasta, "sample_list_all.rds")) == FALSE){
   yfp.mids <- list()
-  for (mouse.id in names(count.mid.in.mouse[count.mid.in.mouse >= 4])){
-    yfp.mids[[mouse.id]] <- list(all = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP", mid.metadata$population) == TRUE)$X,
-                                 pos = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[+]", mid.metadata$population) == TRUE)$X,
-                                 neg = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[-]", mid.metadata$population) == TRUE)$X,
-                                 biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id & mid.metadata$population == "biopsy")$X)   
+  for (mouse.id in unique(mid.metadata$mouse)){
+    yfp.mids[[mouse.id]] <- list(all_samples_including_biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id)$X)
   }
-  saveRDS(yfp.mids, file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds"))
+  saveRDS(yfp.mids, file.path(path.to.save.fasta, "sample_list_all.rds"))
 } else {
-  yfp.mids <- readRDS(file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds"))
+  yfp.mids <- readRDS(file.path(path.to.save.fasta, "sample_list_all.rds"))
 }
 
 #####----------------------------------------------------------------------#####
@@ -71,15 +67,8 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
 clonesets <- clone.output$clonesets
 
 for (mouse.id in names(yfp.mids)){
-  for (input.case in c("all", "neg", "pos", "biopsy")){
-    if (input.case == "biopsy"){
-      save.folder.name <- input.case
-    } else {
-      save.folder.name <- sprintf("%s_YFP", input.case)
-    }
-    
+  for (input.case in c(all_samples_including_biopsy)){
     input.clonesets <- subset(clonesets, clonesets$id %in% yfp.mids[[mouse.id]][[input.case]])
-    
     ##### This script might not run when in RSTUDIO, run in BASH command line. 
     output.all.fasta <- generate_fasta(
       clonesets = input.clonesets, 
