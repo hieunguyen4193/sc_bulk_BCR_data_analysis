@@ -19,13 +19,12 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
-rerun <- FALSE
+rerun <- TRUE
 output <- list()
-# for (PROJECT in c("1st_2nd_BSimons_Datasets",
-#                   "240805_BSimons",
-#                   "241002_BSimons",
-#                   "241104_BSimons")){
-for (PROJECT in c("241104_BSimons")){
+for (PROJECT in c("1st_2nd_BSimons_Datasets",
+                  "240805_BSimons",
+                  "241002_BSimons",
+                  "241104_BSimons")){
   print("#####----------------------------------#####")
   print(sprintf("Working on project %s", PROJECT))
   print("#####----------------------------------#####")
@@ -38,6 +37,6 @@ for (PROJECT in c("241104_BSimons")){
                                                      thres = thres, 
                                                      thres.dis = thres.dis,
                                                      savefile = TRUE,
-                                                     rerun = FALSE,
+                                                     rerun = rerun,
                                                      define.clone.clusters =  FALSE)  
 }

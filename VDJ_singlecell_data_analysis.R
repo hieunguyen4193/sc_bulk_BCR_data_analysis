@@ -30,3 +30,5 @@ clone.obj <- run_preprocessing_all_sc_data(path.to.VDJ.output = path.to.VDJ.outp
                                                    savefile = TRUE,
                                                    rerun = FALSE,
                                                    define.clone.clusters =  FALSE) 
+
+clonesets <- clone.obj$clonesets

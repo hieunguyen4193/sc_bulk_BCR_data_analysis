@@ -33,7 +33,9 @@ dataset.origin <- list(
   `220701_etc_biopsies` = "bulk",
   `240805_BSimons` = "sc",
   `240826_BSimons` = "bulk",
-  `241002_BSimons` = "sc"
+  `241002_BSimons` = "sc",
+  `241031_BSimons` = "bulk",
+  `241104_BSimons` = "sc"
 )
 
 names(all.clone.files) <- to_vec(

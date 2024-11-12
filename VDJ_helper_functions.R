@@ -503,7 +503,7 @@ generate_fasta <- function(clonesets,
           GL.V.gene <- s.V.genes[[V.gene]] %>% as.character()
           GL.J.gene <- s.J.genes[[J.gene]] %>% as.character()
         } else if (ref.gene == "10x"){
-          GL.V.gene <- ref.fasta[[V.gene]] %>% as.character()
+          GL.V.gene <- c[[V.gene]] %>% as.character()
           GL.J.gene <- ref.fasta[[J.gene]] %>% as.character()
         }
         
