@@ -76,18 +76,7 @@ if (file.exists(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.cs
     tmpdf$dataset <- dataset.name
     dataset.type <- dataset.origin[[dataset.name]]
     if (dataset.type == "sc"){
-      tmpdf <- tmpdf[, c(setdiff(selected.cols, c("targetSequences", "uniqueMoleculeCount")), "barcode")]
-      tmpdf <- tmpdf %>% rowwise() %>%
-        mutate(targetSequences = paste0(c(
-          nSeqFR1,
-          nSeqCDR1,
-          nSeqFR2,
-          nSeqCDR2,
-          nSeqFR3,
-          nSeqCDR3,
-          nSeqFR4
-        ), collapse = ""))
-      tmpdf$uniqueMoleculeCount <- NA
+      tmpdf <- tmpdf[, c(selected.cols, "barcode")]
     } else {
       tmpdf <- tmpdf[, selected.cols]
       tmpdf$barcode <- to_vec( for (i in seq(1, nrow(tmpdf))) sprintf("%s_%s", dataset.name, i))

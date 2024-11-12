@@ -42,7 +42,7 @@ if (file.exists(file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds")) =
     yfp.mids[[mouse.id]] <- list(
       all_samples_including_biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id)$X,
       all = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP", mid.metadata$population) == TRUE)$X,
-      pos = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[+]", mid.metadata$population) == TRUE)$
+      pos = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[+]", mid.metadata$population) == TRUE)$X,
       neg = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[-]", mid.metadata$population) == TRUE)$X,
       biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id & mid.metadata$population == "biopsy")$X)   
   }

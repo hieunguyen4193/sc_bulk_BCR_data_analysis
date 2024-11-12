@@ -79,7 +79,6 @@ for (sampleid in names(all.VDJ.files)){
                                      cdr3_nt,
                                      fwr4_nt)) %>%
       mutate(check.seqs = ifelse(grepl(prep.full.seq, fasta_seq) == TRUE, "yes", "no")) %>%
-      mutate(in.final.data = ifelse(prep_barcode %in% full.metadata$barcode, "yes", "no") ) %>%
       mutate(prefix_and_suffix = ifelse(check.seqs == "yes", str_replace(fasta_seq, prep.full.seq, "_"), "none")) %>%
       mutate(prefix = ifelse(check.seqs == "yes", str_split(prefix_and_suffix, "_")[[1]][[1]], "none")) %>%
       mutate(suffix = ifelse(check.seqs == "yes", str_split(prefix_and_suffix, "_")[[1]][[2]], "none")) %>%

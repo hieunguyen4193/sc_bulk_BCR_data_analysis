@@ -308,7 +308,17 @@ formatScVDJtable <- function(all.VDJ.files,
       mutate(VJseq.combi = sprintf("%s_%s_%s_%s", V.gene, J.gene, aaSeqCDR3, nSeqCDR3)) %>%
       mutate(VJ.combi = sprintf("%s_%s", V.gene, J.gene)) %>%
       mutate(VJ.len.combi = sprintf("%s_%s_%s", V.gene, J.gene,  nchar(nSeqCDR3)))
-    
+    clonesets$uniqueMoleculeCount <- NA
+    clonesets <- clonesets %>% rowwise() %>%
+      mutate(targetSequences = paste0(c(
+        nSeqFR1,
+        nSeqCDR1,
+        nSeqFR2,
+        nSeqCDR2,
+        nSeqFR3,
+        nSeqCDR3,
+        nSeqFR4
+      ), collapse = ""))
     if (define.clone.clusters == TRUE){
       ##### Group sequences + Gene usages to clones
       new.clonesets <- data.frame()
