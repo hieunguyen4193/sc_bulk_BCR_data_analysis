@@ -51,6 +51,7 @@ circos.initialize(factors = newdf$SampleID, x = newdf$accumRelCount)
 circos.track(
   factors = newdf$SampleID, x = newdf$Freq, y = newdf$accumRelCount, bg.border = NA,
   panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[2] + mm_y(4),  unique(df$SampleID)[CELL_META$sector.numeric.index], niceFacing = TRUE)
     circos.lines(c(CELL_META$xlim[1], CELL_META$xlim[2]), c((CELL_META$ylim[1] + CELL_META$ycenter) * 0.5, (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
     for (index in 1:length(x)) {
       circos.lines(c(y[index], y[index]), c(CELL_META$ylim[1], (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
