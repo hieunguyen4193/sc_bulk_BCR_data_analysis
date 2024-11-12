@@ -454,8 +454,9 @@ generate_fasta <- function(clonesets,
       }
       clonesets <- new.clonesets
       print("IMPORTANT NOTE: THE CLONE CLUSTERS ARE GENERATED BASED ON SAMPLES/MIDS IN THIS SELECTED MOUSE/SAMPLE ONLY; NOT THE AGGREGATED TABLE.")
+      print(sprintf("Saving new cloneset files after assign clones to clusters to %s", file.path(path.to.save.output, "clonesets.csv")))
+      write.csv(clonesets, file.path(path.to.save.output, "clonesets.csv"))
     }
-    
     source(ref.gene.config) # path to the configuration file for the input BCR reference genes
     if (ref.gene == "10x"){
       ref.fasta <- readDNAStringSet(ref.genes$`10x`)
@@ -480,6 +481,7 @@ generate_fasta <- function(clonesets,
       # remove the * sign in the file name
       path.to.fasta.file <- file.path(path.to.save.output, 
                                       sprintf("%s.fasta", str_replace_all(input.VJ.combi, "[*]", "-")))
+      
       if (file.exists(path.to.fasta.file) == FALSE){
         fasta.output <- subset(clonesets, clonesets[[sprintf("VJcombi_CDR3_%s", thres)]] == input.VJ.combi)[, c("targetSequences", 
                                                                                                                 "uniqueMoleculeCount", 

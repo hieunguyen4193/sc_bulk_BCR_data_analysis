@@ -48,16 +48,23 @@ path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output
 path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
 dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
 
+re_define_clone_cluster <- TRUE
+rerun <- FALSE
+savefile <- TRUE
+verbose <- TRUE
+save_fasta <- TRUE
+define.clone.clusters <- FALSE
+
 clone.output <- run_preprocessing_all_bulk_VDJ_data(
   path.to.mid.output = path.to.mid.output, 
   path.to.save.output = path.to.save.output,
   PROJECT = PROJECT,
   thres = thres, 
   thres.dis = thres.dis,
-  savefile = TRUE,
-  verbose = TRUE,
-  rerun = FALSE,
-  define.clone.clusters = FALSE
+  savefile = savefile,
+  verbose = verbose,
+  rerun = rerun,
+  define.clone.clusters = define.clone.clusters
 )  
 
 clonesets <- clone.output$clonesets
@@ -73,6 +80,6 @@ for (mouse.id in names(sample.list)){
                                      PROJECT = PROJECT,
                                      thres = 0.85,
                                      thres.dis = 0.15,
-                                     save_fasta = TRUE,
-                                     re_define_clone_cluster = TRUE)
+                                     save_fasta = save_fasta,
+                                     re_define_clone_cluster = re_define_clone_cluster)
 }
