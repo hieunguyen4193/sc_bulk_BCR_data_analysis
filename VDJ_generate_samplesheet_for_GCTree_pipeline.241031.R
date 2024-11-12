@@ -1,6 +1,8 @@
 gc()
 rm(list = ls())
 
+# to start docker: sudo bash run_docker_GCTree.sh 8181 rstudio1 genov4
+
 #####----------------------------------------------------------------------#####
 ##### packages
 #####----------------------------------------------------------------------#####
@@ -37,21 +39,18 @@ planned.outdir <- "/home/hieu/storage"
 countdf <- data.frame()
 for (input.file in all.files){
   filename <- str_replace(basename(input.file), ".fasta", "")
-  input.case <- dirname(input.file) %>% basename()
-  mouse.id <- dirname(dirname(input.file)) %>% basename()
+  mouse.id <- dirname(input.file) %>% basename()
   c <-readDNAStringSet(input.file) %>% as.data.frame() %>% nrow()
   path.to.file <- file.path(planned.outdir, 
                             PROJECT,
                             sprintf("VDJ_output_%s", thres),
                             mouse.id, 
-                            input.case,
                             basename(input.file)
   )
   tmpdf <- data.frame(
     filename = c(filename),
     path = c(path.to.file),
     mouse.id = c(mouse.id),
-    input.case = c(input.case),
     count = c(c)
   )
   countdf <- rbind(countdf, tmpdf)
