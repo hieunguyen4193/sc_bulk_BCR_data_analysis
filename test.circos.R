@@ -60,7 +60,9 @@ circos.track(
 )
 
 all.combi <- combn(names(alldf), 2)
+all.colors <- c("red", "blue", "green")
 for (i in seq(1, ncol(all.combi))){
+  col <- all.colors[[i]]
   sample1 <- all.combi[1, i]
   sample2 <- all.combi[2, i]
   
@@ -74,9 +76,8 @@ for (i in seq(1, ncol(all.combi))){
     sample2.freq <- plotdf[j, ]$freq2
     sample1.accumFreq <- plotdf[j, ]$accumFreq1
     sample2.accumFreq <- plotdf[j, ]$accumFreq2
-    circos.link(sample1, c(sample1.accumFreq - sample1.freq, sample1.accumFreq), sample2, c(sample2.accumFreq - sample2.freq, sample2.accumFreq))  
+    circos.link(sample1, c(sample1.accumFreq - sample1.freq, sample1.accumFreq), sample2, c(sample2.accumFreq - sample2.freq, sample2.accumFreq),
+                col = col)  
   }
 }
-
-
 circos.clear()
