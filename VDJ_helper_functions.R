@@ -406,6 +406,7 @@ run_preprocessing_all_sc_data <- function(path.to.VDJ.output,
     saveRDS(output, file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   } else { 
     print(sprintf("File %s exists", file.path(path.to.save.output, sprintf("%s.rds", PROJECT))))
+    output <- readRDS(file.path(path.to.save.output, sprintf("%s.rds", PROJECT)))
   }
   return(output)
 }

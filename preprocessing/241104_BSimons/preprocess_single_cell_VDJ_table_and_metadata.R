@@ -10,7 +10,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 library("Biostrings")
 
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-PROJECT <- "241002_BSimons"
+PROJECT <- "241104_BSimons"
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 thres <- 0.85
 
@@ -34,7 +34,7 @@ dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
 #####----------------------------------------------------------------------#####
 ##### read file "filtered_contig_annotations.csv" from the raw CellRanger pipeline
 #####----------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
+path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.main.input <- file.path(path.to.storage, PROJECT, "VDJ")
 all.raw.VDJ.files <- Sys.glob(file.path(path.to.main.input, "*", "filtered_contig_annotations.csv"))
 names(all.raw.VDJ.files) <- to_vec(

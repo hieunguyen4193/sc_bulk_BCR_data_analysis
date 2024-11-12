@@ -20,10 +20,9 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 PROJECT <- "241002_BSimons"
-
 path.to.VDJ.output <- file.path( outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
 path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-output[[PROJECT]] <- run_preprocessing_all_sc_data(path.to.VDJ.output = path.to.VDJ.output, 
+clone.obj <- run_preprocessing_all_sc_data(path.to.VDJ.output = path.to.VDJ.output, 
                                                    path.to.save.output = path.to.save.output, 
                                                    PROJECT = PROJECT,
                                                    thres = thres, 
