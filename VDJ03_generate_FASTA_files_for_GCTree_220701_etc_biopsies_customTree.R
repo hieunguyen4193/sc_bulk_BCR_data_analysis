@@ -39,10 +39,12 @@ count.mid.in.mouse <- table(mid.metadata$population, mid.metadata$mouse) %>% col
 if (file.exists(file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds")) == FALSE){
   yfp.mids <- list()
   for (mouse.id in names(count.mid.in.mouse[count.mid.in.mouse >= 4])){
-    yfp.mids[[mouse.id]] <- list(all = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP", mid.metadata$population) == TRUE)$X,
-                                 pos = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[+]", mid.metadata$population) == TRUE)$X,
-                                 neg = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[-]", mid.metadata$population) == TRUE)$X,
-                                 biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id & mid.metadata$population == "biopsy")$X)   
+    yfp.mids[[mouse.id]] <- list(
+      all_samples_including_biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id)$X,
+      all = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP", mid.metadata$population) == TRUE)$X,
+      pos = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[+]", mid.metadata$population) == TRUE)$
+      neg = subset(mid.metadata, mid.metadata$mouse == mouse.id & grepl("YFP[-]", mid.metadata$population) == TRUE)$X,
+      biopsy = subset(mid.metadata, mid.metadata$mouse == mouse.id & mid.metadata$population == "biopsy")$X)   
   }
   saveRDS(yfp.mids, file.path(path.to.save.fasta, "sample_list_based_on_YFP.rds"))
 } else {
