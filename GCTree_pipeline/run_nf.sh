@@ -27,8 +27,8 @@ nextflow run GCtree_pipeline_input_SampleSheet.nf \
 # /home/hieu/src/241031_${mouseID}/sc_bulk_BCR_data_analysis/work_${mouseID};
 # rm -rf /home/hieu/src/241031_${mouseID}/sc_bulk_BCR_data_analysis/work_${mouseID};
 
-# inputCase="all";
-# mouseID="m2";
+# inputCase="without_colon_sample";
+# mouseID="m3";
 # bash run_nf.sh \
 # /home/hieu/src/${mouseID}_all/sc_bulk_BCR_data_analysis/SampleSheet_GCTree_nextflow_240826_BSimons/SampleSheet_GCTree_240826_BSimons_${mouseID}_${inputCase}.nextflow.csv \
 # /home/hieu/outdir/${mouseID}_${inputCase} \
