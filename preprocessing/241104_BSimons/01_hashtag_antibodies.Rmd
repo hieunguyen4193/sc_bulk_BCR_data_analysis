@@ -1,0 +1,201 @@
+---
+title: "`r params$PROJECT` Quality Control Hashtag-Antibody 1, 2, 3, count cells with hashtags (Sample: `r params$sample.id`, quantile `r params$chosen.quantile`)"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    keep_md: no
+    df_print: paged
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+params:
+  PROJECT: NA
+  sample.id: NA
+  outdir: NA
+  chosen.quantile: NA
+---
+
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+$(document).ready(function() {
+  $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+  // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.width=20, fig.height=12}
+# gc()
+# rm(list = ls())
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+
+PROJECT <- params$PROJECT
+sample.id <- params$sample.id
+outdir <- params$outdir
+chosen.quantile <- params$chosen.quantile
+
+path.to.project.src <- file.path("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing", PROJECT)
+source(file.path(path.to.project.src, "hashtag_notes.R"))
+
+# outdir <- "/home/hieunguyen/CRC1382/outdir"
+# PROJECT <- "241002_BSimons"
+# sample.id <- "M1"
+# chosen.quantile <- 0.99
+
+path.to.main.input <- file.path(outdir, PROJECT, "1st_round")
+
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
+
+path.to.01.output <- file.path(path.to.main.output, "01_output")
+dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
+
+# Use the output in s1_output, this is the raw Seurat object of the data. 
+path.to.before.filter.sobj <- file.path(path.to.main.input, sprintf("%s_1st_round/s1_output", sample.id), sprintf("%s.output.s1.rds", PROJECT))
+
+before.filter.s.obj <- readRDS(path.to.before.filter.sobj)
+
+print(sprintf("Chosen quantile threshold: %s", chosen.quantile))
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+DefaultAssay(before.filter.s.obj) <- "ADT"
+
+all.hts <- num.hashtags[[sample.id]]
+counts.adt <- GetAssayData(before.filter.s.obj, slot = "counts", assay = "ADT")
+s.obj.HTO <- CreateSeuratObject(counts = counts.adt[all.hts, ] + 1, assay = "HTO") #### add pseudo count + 1 to avoide error "Cells with zero counts exist as a cluster"
+s.obj.HTO <- NormalizeData(s.obj.HTO, normalization.method = "CLR")
+
+```
+
+Note: In this analysis, we keep all cells obtained from the output of `CellRanger`; conditions on the percentage of Mitochondrial and Ambient RNA contamination have not been applied yet. 
+
+# Cell hashtags demultiplexing
+
+## Histogram: Raw count number of hashtags per cell {.tabset}
+Histogram: Raw count number of hashtags per cell: 
+
+- x-axis: Number of hashtags per cell
+
+- y-axis: Number of cells
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (ht in all.hts){
+  hashtag.counts <- counts.adt[ht, ] %>% as.data.frame()
+  colnames(hashtag.counts) <- c("count")
+  cat(sprintf("### Hashtag: %s \n", ht))
+  p <- ggplot(subset(hashtag.counts, hashtag.counts$count >= 0), aes(x = count)) + geom_histogram(bins = max(hashtag.counts$count)) + ggtitle(ht) + 
+    theme(text = element_text(size=20), 
+          axis.text.x = element_text(hjust=1, size = 20),
+          axis.text.y = element_text(hjust=1, size = 20)) 
+  print(p)
+  cat("\n \n")
+}
+```
+
+
+## Histogram: log-transformed raw counts of hashtags per cell {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+for (ht in all.hts){
+  counts.adt.ht123 <- GetAssayData(s.obj.HTO, slot = "counts")
+  hashtag.counts <- log2(counts.adt.ht123)[ht, ] %>% as.data.frame()
+  colnames(hashtag.counts) <- c("count")
+  cat(sprintf("### Hashtag: %s \n", ht))
+  p <- ggplot(subset(hashtag.counts, hashtag.counts$count >= 0), aes(x = count)) + geom_histogram(bins = 10) + 
+    ggtitle(ht)  + 
+    theme(text = element_text(size=20), 
+          axis.text.x = element_text(hjust=1, size = 20),
+          axis.text.y = element_text(hjust=1, size = 20)) 
+  print(p)
+  cat("\n \n")
+}
+```
+
+## Assigned cut-off 
+```{r echo=FALSE}
+s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quantile)
+
+```
+
+## Summary table: Number of cells in each classified hashtag group
+
+We perform a k-medoid clustering on the normalized Hashtag values, which initially separates cells into K(# of samples)+1 clusters. For each hashtag, we use the cluster with the lowest average value as the negative group. (Reference: https://satijalab.org/seurat/articles/hashing_vignette.html#8-hto-dataset-from-human-pbmcs)
+
+- `Negative`: Cells that are classified as `negative` in all 3 hashtags.
+
+- `Doublet`: Cells that are expressed in more than 1 hashtag based on the assigned cut-off.
+
+- `Singlet`: Cells that are expressed in only 1 hashtag based on the assigned cut-off.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+sum.table <- table(s.obj.HTO$HTO_classification.global) %>% as.data.frame()
+colnames(sum.table) <- c("assigned_group", "# cells")
+sum.table %>% create_dt()
+```
+
+## Summary table: Detailed number of cells in each hashtag
+
+Note: `Hashtag1-TotalSeqC_Hashtag2-TotalSeqC`: This name indicates that the cell is a *doublet*; it is expressed in both `Hashtag1` and `Hashtag2`. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+detail.sum.table <- table(s.obj.HTO$HTO_classification) %>% as.data.frame()
+colnames(detail.sum.table) <- c("Classified hashtag", "# cells")
+detail.sum.table %>% create_dt()
+```
+
+## Illustration by a heatmap
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+HTOHeatmap(object = s.obj.HTO, assay = "HTO")
+```
+
+## Illustration by Ridge plots, Hashtag normalized count {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=12}
+for (i in seq(1, length(all.hts))){
+  cat(sprintf("### Hashtag %s \n", i))
+  p <- RidgePlot(s.obj.HTO, assay = "HTO", features = rownames(s.obj.HTO[["HTO"]])[i], ncol = 3)
+  print(p)
+  cat("\n \n")
+}
+```
+
+## Illustration by Ridge plots, Hashtag raw count {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=12}
+for (i in seq(1, length(all.hts))){
+  cat(sprintf("### Hashtag %s \n", i))
+  p <- RidgePlot(s.obj.HTO, assay = "HTO", features = rownames(s.obj.HTO[["HTO"]])[i], ncol = 3, slot = "counts")
+  print(p)
+  cat("\n \n")
+}
+```
+
+# Save objects
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=12}
+hashtag.123.output <-s.obj.HTO@meta.data %>% as.data.frame 
+
+write.csv(x = hashtag.123.output, file = file.path(path.to.01.output, sprintf("Hashtag_123_summary_table_Sample_%s.csv", sample.id)))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=12, fig.height=12}
+```

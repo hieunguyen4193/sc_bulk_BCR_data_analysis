@@ -22,9 +22,10 @@ thres <- 0.85
 thres.dis <- 0.15
 
 output <- list()
-for (PROJECT in c("240826_BSimons",
-                  "220701_etc_biopsies")){
-# for (PROJECT in c("240826_BSimons")){
+# for (PROJECT in c("240826_BSimons",
+#                   "220701_etc_biopsies",
+#                   "241031_BSimons")){
+for (PROJECT in c("241031_BSimons")){
   print("#####----------------------------------#####")
   print(sprintf("Working on project %s", PROJECT))
   print("#####----------------------------------#####")
