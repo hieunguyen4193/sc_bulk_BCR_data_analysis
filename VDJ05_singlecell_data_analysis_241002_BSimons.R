@@ -106,11 +106,12 @@ for (sample.id in sort(unique(clonesets.filtered$id_hashtag))){
   ))
 }
 
+#####----------------------------------------------------------------------#####
 ##### PLOT CIRCOS 
+#####----------------------------------------------------------------------#####
 write.csv(new.clonesets, file.path(path.to.05.output, sprintf("%s.clonesets.xlsx", PROJECT)))
 source(file.path(path.to.main.src, "VDJ_generate_circos_plots.R"))
 dir.create(file.path(path.to.05.output, "circos_plot"), showWarnings = FALSE, recursive = TRUE)
 generate_circos_plot(input.clonesets = new.clonesets, 
                      path.to.save.svg = file.path(path.to.05.output, "circos_plot"),
                      svg.name = sprintf("%s_all_samples_hashtags.svg", PROJECT))
-

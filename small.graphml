@@ -1,0 +1,332 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d0" for="edge" attr.name="weight" attr.type="double"/>
+<graph edgedefault="undirected"><node id="GL"/>
+<node id="seq71"/>
+<node id="seq72"/>
+<node id="3"/>
+<node id="4"/>
+<node id="seq69"/>
+<node id="seq70"/>
+<node id="7"/>
+<node id="seq67"/>
+<node id="9"/>
+<node id="seq68"/>
+<node id="11"/>
+<node id="seq65"/>
+<node id="seq64"/>
+<node id="seq66"/>
+<node id="seq63"/>
+<node id="16"/>
+<node id="seq60"/>
+<node id="seq61"/>
+<node id="seq59"/>
+<node id="seq58"/>
+<node id="seq54"/>
+<node id="seq53"/>
+<node id="seq52"/>
+<node id="seq51"/>
+<node id="seq57"/>
+<node id="seq56"/>
+<node id="seq55"/>
+<node id="seq48"/>
+<node id="seq50"/>
+<node id="seq49"/>
+<node id="31"/>
+<node id="seq47"/>
+<node id="33"/>
+<node id="seq8"/>
+<node id="seq7"/>
+<node id="seq5"/>
+<node id="seq6"/>
+<node id="seq1"/>
+<node id="seq4"/>
+<node id="seq3"/>
+<node id="seq2"/>
+<node id="seq44"/>
+<node id="seq43"/>
+<node id="seq46"/>
+<node id="seq45"/>
+<node id="seq42"/>
+<node id="seq41"/>
+<node id="seq40"/>
+<node id="seq35"/>
+<node id="seq34"/>
+<node id="seq31"/>
+<node id="seq28"/>
+<node id="seq29"/>
+<node id="seq30"/>
+<node id="seq27"/>
+<node id="seq26"/>
+<node id="seq17"/>
+<node id="seq18"/>
+<node id="59"/>
+<node id="seq25"/>
+<node id="seq24"/>
+<node id="seq23"/>
+<node id="seq21"/>
+<node id="seq19"/>
+<node id="seq20"/>
+<node id="seq37"/>
+<node id="seq11"/>
+<node id="seq14"/>
+<node id="seq16"/>
+<node id="seq13"/>
+<node id="seq15"/>
+<node id="seq12"/>
+<node id="seq10"/>
+<node id="seq9"/>
+<node id="75"/>
+<node id="seq22"/>
+<node id="seq62"/>
+<node id="seq39"/>
+<node id="seq38"/>
+<node id="seq36"/>
+<node id="seq32"/>
+<node id="seq33"/>
+<edge source="GL" target="seq71">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq71" target="seq72">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq71" target="3">
+  <data key="d0">5.0</data>
+</edge>
+<edge source="3" target="4">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="3" target="31">
+  <data key="d0">8.0</data>
+</edge>
+<edge source="4" target="seq69">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="4" target="7">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq69" target="seq70">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="7" target="seq67">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="7" target="9">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="9" target="seq68">
+  <data key="d0">39.0</data>
+</edge>
+<edge source="9" target="11">
+  <data key="d0">7.0</data>
+</edge>
+<edge source="11" target="seq65">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="11" target="16">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq65" target="seq64">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq65" target="seq66">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq65" target="seq63">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="16" target="seq60">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="16" target="seq54">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq60" target="seq61">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq60" target="seq59">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq60" target="seq58">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq53">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq52">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq51">
+  <data key="d0">4.0</data>
+</edge>
+<edge source="seq54" target="seq57">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq56">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq55">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq54" target="seq48">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq48" target="seq50">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq48" target="seq49">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="31" target="seq47">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="31" target="33">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="33" target="seq8">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="33" target="seq44">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq8" target="seq7">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="seq8" target="seq5">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq8" target="seq1">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq5" target="seq6">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq1" target="seq4">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq1" target="seq3">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq1" target="seq2">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq44" target="seq43">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq44" target="seq46">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq44" target="seq42">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq44" target="seq41">
+  <data key="d0">5.0</data>
+</edge>
+<edge source="seq46" target="seq45">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="seq41" target="seq40">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq40" target="seq35">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq34">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq31">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq28">
+  <data key="d0">2.0</data>
+</edge>
+<edge source="seq35" target="seq27">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq37">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq11">
+  <data key="d0">4.0</data>
+</edge>
+<edge source="seq35" target="seq39">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq36">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq35" target="seq32">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq28" target="seq29">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq28" target="seq30">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq27" target="seq26">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq26" target="seq17">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq17" target="seq18">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="seq17" target="59">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="59" target="seq25">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="59" target="seq21">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq25" target="seq24">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq25" target="seq23">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq21" target="seq19">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq19" target="seq20">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq14">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq16">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq13">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq15">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq12">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq11" target="seq10">
+  <data key="d0">17.0</data>
+</edge>
+<edge source="seq10" target="seq9">
+  <data key="d0">42.0</data>
+</edge>
+<edge source="seq9" target="75">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="75" target="seq22">
+  <data key="d0">3.0</data>
+</edge>
+<edge source="75" target="seq62">
+  <data key="d0">44.0</data>
+</edge>
+<edge source="seq39" target="seq38">
+  <data key="d0">1.0</data>
+</edge>
+<edge source="seq32" target="seq33">
+  <data key="d0">1.0</data>
+</edge>
+</graph></graphml>
