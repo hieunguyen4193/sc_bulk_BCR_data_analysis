@@ -268,17 +268,17 @@ class GCtree(CollapsedTree):
         seqdf = self.seqdf.copy()
         seqdf = seqdf.merge(self.idmapseqdf, right_on = "seq", left_on = "seq")
         Tree = Phylo.read(self.nk_path, 'newick')
-        plt.figure(figsize=(20, 20))
         G = Phylo.to_networkx(Tree)
         pos = nx.spring_layout(G, seed = 42)  # Define the layout for the nodes
         if show_plot:  
+            plt.figure(figsize=(20, 20))
             nx.draw_networkx(G, pos=pos)
             plt.show()
 
-        plt.figure(figsize=(20, 20))
         partition = community_louvain.best_partition(G, random_state = 42, resolution = cluster_resolution)
         cmap = cm.get_cmap('viridis', max(partition.values()) + 1)
         if show_plot:
+            plt.figure(figsize=(20, 20))
             nx.draw_networkx_nodes(G, pos, partition.keys(), node_size=40,
                             cmap=cmap, node_color=list(partition.values()))
             nx.draw_networkx_edges(G, pos, alpha=0.5)
