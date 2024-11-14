@@ -5,12 +5,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from tqdm import tqdm
+from typing import List, Union, Optional, Callable
+import pickle
+from Bio import AlignIO, SeqIO
 from ete3 import Tree, TreeNode
 from gctree import CollapsedTree, CollapsedForest
-from typing import List, Union, Optional, Callable
-from Bio import AlignIO, SeqIO
-from ete3 import Tree, faces, TreeStyle, NodeStyle, TextFace, SequenceFace, COLOR_SCHEMES
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import umap
+from ete3 import Tree, faces, TreeStyle, NodeStyle, TextFace, SequenceFace, COLOR_SCHEMES, CircleFace
+import warnings
+
+from Bio import Phylo
 import math
+import community as community_louvain
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# sklearn
+from sklearn import metrics
+
+warnings.filterwarnings("ignore")
 #####---------------------------------------------------------------------------------------#####
 ##### CONFIGURATIONS
 #####---------------------------------------------------------------------------------------#####
@@ -219,8 +236,7 @@ class GCtree(CollapsedTree):
         self.count_single_node = count_single_node
         self.count_mix_node = count_mix_node
         self.mixed_nodes = mixed_nodes
-        self.single_nodes = single_nodes
-        
+        self.single_nodes = single_nodes        
 
     def generate_tree_style(self, color_path: str):
         abund_pct = self.abund_pct
@@ -248,6 +264,36 @@ class GCtree(CollapsedTree):
         ts.show_leaf_name = False
         return ts
         
+    def cluster_samples_on_branches(self, cluster_resolution, show_plot):
+        seqdf = self.seqdf.copy()
+        seqdf = seqdf.merge(self.idmapseqdf, right_on = "seq", left_on = "seq")
+        Tree = Phylo.read(self.nk_path, 'newick')
+        plt.figure(figsize=(20, 20))
+        G = Phylo.to_networkx(Tree)
+        pos = nx.spring_layout(G, seed = 42)  # Define the layout for the nodes
+        if show_plot:  
+            nx.draw_networkx(G, pos=pos)
+            plt.show()
+
+        plt.figure(figsize=(20, 20))
+        partition = community_louvain.best_partition(G, random_state = 42, resolution = cluster_resolution)
+        cmap = cm.get_cmap('viridis', max(partition.values()) + 1)
+        if show_plot:
+            nx.draw_networkx_nodes(G, pos, partition.keys(), node_size=40,
+                            cmap=cmap, node_color=list(partition.values()))
+            nx.draw_networkx_edges(G, pos, alpha=0.5)
+            plt.show()
+
+        clusterdf = pd.DataFrame.from_dict(
+            {
+                "seq": [list(partition.keys())[i].name for i in range(len(partition.keys()))],
+                "cluster": list(partition.values())
+            }
+        )
+        seqdf["cluster"] = seqdf["seqid"].apply(lambda x: clusterdf[clusterdf["seq"] == x]["cluster"].values[0] 
+                                            if clusterdf[clusterdf["seq"] == x]["cluster"].shape[0] != 0 else "error")
+        rand_index = metrics.rand_score(seqdf.cluster.values, seqdf.MID.values)
+        return(rand_index)
 
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.
