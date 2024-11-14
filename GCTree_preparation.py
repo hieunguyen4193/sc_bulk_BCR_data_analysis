@@ -263,8 +263,12 @@ class GCtree(CollapsedTree):
         ts.rotation = 90
         ts.show_leaf_name = False
         return ts
-        
+    
     def cluster_samples_on_branches(self, cluster_resolution, show_plot):
+        # this function detects community in the tree using louvain algorithm
+        # from the py package community and networkx
+        # # https://stackoverflow.com/questions/43541376/how-to-draw-communities-with-networkx
+        # should consider https://barahona-research-group.github.io/PyGenStability/
         seqdf = self.seqdf.copy()
         seqdf = seqdf.merge(self.idmapseqdf, right_on = "seq", left_on = "seq")
         Tree = Phylo.read(self.nk_path, 'newick')
