@@ -1,13 +1,23 @@
-generate_circos_plot <- function(input.clonesets, 
-                                 path.to.save.svg, 
-                                 svg.name){
-  # input.clonesets <- new.clonesets
-  # path.to.save.svg < NA
-  # svg.name <- NA
-  
-  df <- data.frame(table(input.clonesets$id_hashtag, input.clonesets$VJ.len.combi))
-  colnames(df) <- c("SampleID", "Clone", "Count") 
-  
+generate_circos_plot <- function(input.clonesets,
+                                 path.to.save.svg,
+                                 svg.name,
+                                 clone.def,
+                                 data.type = "sc",
+                                 populations = c()){
+  dir.create(path.to.save.svg, showWarnings = FALSE, recursive = TRUE)
+  if (data.type == "sc"){
+    df <- data.frame(table(input.clonesets$id_hashtag, input.clonesets[[clone.def]]))    
+  } else if (data.type == "bulk"){
+    df <- data.frame(table(input.clonesets$id, input.clonesets[[clone.def]]))
+  }
+
+  colnames(df) <- c("tmp.SampleID", "Clone", "Count") 
+  df$tmp.SampleID <- unfactor(df$tmp.SampleID)
+  if (length(populations) >= 2){
+    df <- df %>% 
+      rowwise() %>%
+      mutate(SampleID = populations[[tmp.SampleID]])
+  }
   alldf <- list()
   newdf <- data.frame()
   for (sample.id in unique(df$SampleID)){
@@ -38,7 +48,6 @@ generate_circos_plot <- function(input.clonesets,
     alldf[[sample.id]] <- tmpdf
   }
   
-  # all.colors <- c("red", "blue", "green")
   countColors <- c("#FFFFFFFF", "#0000FFFF")
   maxCount <- max(newdf$Freq)
   countRamp <- function(x) {
@@ -63,12 +72,14 @@ generate_circos_plot <- function(input.clonesets,
   maindf[is.na(maindf)] <- 0
   
   svg(file.path(path.to.save.svg, svg.name))
+  newdf$SampleID <- factor(newdf$SampleID, levels = names(alldf))
+  
   circos.par(cell.padding = c(0, 0, 0, 0), gap.degree = 5, track.height = 0.1, start.degree = -2.5, points.overflow.warning = FALSE)
   circos.initialize(factors = newdf$SampleID, x = newdf$accumRelCount)
   circos.track(
     factors = newdf$SampleID, x = newdf$Freq, y = newdf$accumRelCount, bg.border = NA,
     panel.fun = function(x, y) {
-      circos.text(CELL_META$xcenter, CELL_META$ylim[2] + mm_y(4),  unique(df$SampleID)[CELL_META$sector.numeric.index], niceFacing = TRUE)
+      circos.text(CELL_META$xcenter, CELL_META$ylim[2] + mm_y(4), levels(newdf$SampleID)[CELL_META$sector.numeric.index], niceFacing = TRUE)
       circos.lines(c(CELL_META$xlim[1], CELL_META$xlim[2]), c((CELL_META$ylim[1] + CELL_META$ycenter) * 0.5, (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
       for (index in 1:length(x)) {
         circos.lines(c(y[index], y[index]), c(CELL_META$ylim[1], (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
@@ -84,22 +95,29 @@ generate_circos_plot <- function(input.clonesets,
     col <- "#FF000080"
     sample1 <- all.combi[1, i]
     sample2 <- all.combi[2, i]
-    
+    print(sprintf("%s vs %s", sample1, sample2))
     plotdf <- maindf[, c("Clone",
                          sprintf("%s_Freq", sample1), sprintf("%s_accumRelCount", sample1),
                          sprintf("%s_Freq", sample2), sprintf("%s_accumRelCount", sample2))]
     colnames(plotdf) <- c("Clone", "freq1", "accumFreq1", "freq2", "accumFreq2")
     plotdf <- subset(plotdf, plotdf$freq1 > 0 & plotdf$freq2 > 0)
-    for (j in seq(1, nrow(plotdf))){
-      sample1.freq <- plotdf[j, ]$freq1
-      sample2.freq <- plotdf[j, ]$freq2
-      sample1.accumFreq <- plotdf[j, ]$accumFreq1
-      sample2.accumFreq <- plotdf[j, ]$accumFreq2
-      circos.link(sample1, c(sample1.accumFreq - sample1.freq, sample1.accumFreq), sample2, c(sample2.accumFreq - sample2.freq, sample2.accumFreq),
-                  col = col)  
+    if (nrow(plotdf) != 0){
+      for (j in seq(1, nrow(plotdf))){
+        sample1.freq <- plotdf[j, ]$freq1
+        sample2.freq <- plotdf[j, ]$freq2
+        sample1.accumFreq <- plotdf[j, ]$accumFreq1
+        sample2.accumFreq <- plotdf[j, ]$accumFreq2
+        circos.link(sample1, 
+                    c(sample1.accumFreq - sample1.freq, 
+                      sample1.accumFreq), 
+                    sample2, 
+                    c(sample2.accumFreq - sample2.freq, 
+                      sample2.accumFreq),
+                    col = col)  
+      }
     }
   }
   circos.clear()
   dev.off()
 }
-
+  
