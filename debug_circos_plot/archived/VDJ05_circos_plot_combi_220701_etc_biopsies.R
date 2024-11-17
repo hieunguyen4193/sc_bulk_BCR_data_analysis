@@ -64,15 +64,45 @@ clone.obj <- run_preprocessing_all_bulk_VDJ_data(path.to.mid.output = path.to.mi
 count.mice <- table(mid.metadata$mouse)
 all.mice <- count.mice[count.mice >= 2] %>% names()
 
+all.mid.clones <- clone.obj$clonesets
+all.mid.clones <- subset(all.mid.clones, all.mid.clones$aaSeqCDR3 != "region_not_covered")
+tmpdf.old <- read.csv("/media/hieunguyen/HNSD01/storage/all_BSimons_datasets/test_circos_inputs/mid10_clones.csv", sep = "\t")
+path.to.save.mid <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets/test_circos_inputs_new"
+all.mids <- list()
+for (i in unique(all.mid.clones$id)){
+  tmpdf <- subset(all.mid.clones, all.mid.clones$id == i)
+  tmpdf <- subset(tmpdf, 
+                  select = c(
+                    nSeqCDR3,
+                    aaSeqCDR3,
+                    V.gene,
+                    J.gene,
+                    VJ.len.combi
+                  ))
+  tmpdf <- tmpdf %>% rowwise() %>%
+    mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3))
+  tmp.countdf <- data.frame(table(tmpdf$VJnt))
+  colnames(tmp.countdf) <- c("id", "cloneCount")
+  tmp.countdf <- tmp.countdf %>% rowwise() %>%
+    mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
+    mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
+    mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
+    arrange(desc(cloneCount))
+  write.table(tmp.countdf  %>%
+                subset(select = -c(id)), 
+              file.path(path.to.save.mid, sprintf("%s_clones.csv", tolower(i))), quote = FALSE, sep = "\t")
+  all.mids[[i]] <- tmp.countdf
+}
+
 #####----------------------------------------------------------------------#####
 ##### generate clonesets and assign clones to clusters for each set 
 #####----------------------------------------------------------------------#####
 # for (mouse.id in all.mice){
 #   for (input.case in setdiff(names(yfp.mids[[mouse.id]]), c("biopsy"))  ){
 #     selected.mids <- yfp.mids[[mouse.id]][[input.case]]
-#     
+#     dir.create(file.path(path.to.05.output, mouse.id, input.case), showWarnings = FALSE, recursive = TRUE)
 #     clonesets <- subset(clone.obj$clonesets, clone.obj$clonesets$id %in% selected.mids)
-#     if (file.exists(file.path(path.to.05.output, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case))) == FALSE){
+#     if (file.exists(file.path(path.to.05.output, mouse.id, input.case, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case))) == FALSE){
 #       new.clonesets <- data.frame()
 #       for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
 #         tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
@@ -84,80 +114,82 @@ all.mice <- count.mice[count.mice >= 2] %>% names()
 #             tmpdf$aaSeqCDR3, function(x){
 #               return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
 #             }
-#           ))    
+#           ))
 #         } else {
 #           tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
 #         }
 #         new.clonesets <- rbind(new.clonesets, tmpdf)
 #       }
-#       
+# 
 #       clonedf <- table(new.clonesets$VJcombi_CDR3_0.85) %>% data.frame()
 #       colnames(clonedf) <- c("clone", "count")
 #       clonedf <- clonedf %>% arrange(desc(count))
-#       
+# 
 #       #####----------------------------------------------------------------------#####
-#       ##### PLOT CIRCOS 
+#       ##### PLOT CIRCOS
 #       #####----------------------------------------------------------------------#####
-#       write.csv(new.clonesets, file.path(path.to.05.output, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case)))
+#       write.csv(new.clonesets, file.path(path.to.05.output, mouse.id, input.case, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case)))
 #     } else {
-#       new.clonesets <- read.csv(file.path(path.to.05.output, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case)))
+#       new.clonesets <- read.csv(file.path(path.to.05.output, mouse.id, input.case, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case)))
 #     }
 #   }
 # }
 
+    
 #####----------------------------------------------------------------------#####
-##### MAIN RUN
+##### MAIN RUN: GENERATE CIRCOS PLOTS
 #####----------------------------------------------------------------------#####
 # mouse.id <- "m12"
 # input.case <- "all_w_biopsy"
 # clone.def <- "VJnt"
+# for (mouse.id in all.mice){
+#   for (input.case in c("all_w_biopsy",
+#                        "all_yfp",
+#                        "neg",
+#                        "pos")){
+#     for (clone.def in c("VJnt",
+#                         "VJnt",
+#                         sprintf("VJcombi_CDR3_%s", thres))){
+#       selected.mids <- yfp.mids[[mouse.id]][[input.case]]
+#       new.clonesets <- read.csv(file.path(path.to.05.output, mouse.id, input.case, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case))) %>%
+#         subset(aaSeqCDR3 != "region_not_covered") %>%
+#         rowwise() %>%
+#         mutate(VJnt = sprintf("%s_%s", VJ.combi, nSeqCDR3)) %>%
+#         mutate(VJnt = sprintf("%s_%s", VJ.combi, aaSeqCDR3))
+# 
+#       populations <- to_vec(
+#         for (item in subset(mid.metadata, mid.metadata$X %in% selected.mids)$population %>% unique()){
+#           sprintf("%s_%s", mouse.id, item)
+#         }
+#       )
+#       names(populations) <- unlist(lapply(
+#         populations, function(x){
+#           subset(mid.metadata, mid.metadata$population == str_split(x, "_")[[1]][[2]] & mid.metadata$mouse == mouse.id)$X
+#         }
+#       ))
+# 
+#       input.clonesets <- new.clonesets
+#       path.to.save.svg <- file.path(path.to.05.output, "circos_plot", mouse.id, input.case, clone.def)
+#       svg.name <- sprintf("%s_mouse_%s_input_%s.%s.svg", PROJECT, mouse.id, input.case, clone.def)
+#       clone.def <- clone.def
+#       data.type <- "bulk"
+#       populations <- populations
+#       if (file.exists(file.path(path.to.save.svg, svg.name)) == FALSE){
+#         generate_circos_plot(input.clonesets = new.clonesets,
+#                              path.to.save.svg = path.to.save.svg,
+#                              svg.name = svg.name,
+#                              clone.def = clone.def,
+#                              data.type = data.type,
+#                              populations = populations)
+#       } else {
+#         print(sprintf("File %s exists", file.path(path.to.save.svg, svg.name)))
+#       }
+#     }
+#   }
+# }
 
-for (mouse.id in all.mice){
-  for (input.case in c("all_w_biopsy",
-                       "all_yfp",
-                       "neg",
-                       "pos")){
-    for (clone.def in c("VJnt",
-                        "VJaa",
-                        sprintf("VJcombi_CDR3_%s", thres))){
-      selected.mids <- yfp.mids[[mouse.id]][[input.case]]
-      new.clonesets <- read.csv(file.path(path.to.05.output, sprintf("%s_%s_%s.clonesets.csv", PROJECT, mouse.id, input.case))) %>%
-        subset(aaSeqCDR3 != "region_not_covered") %>%
-        rowwise() %>%
-        mutate(VJnt = sprintf("%s_%s", VJ.combi, nSeqCDR3)) %>%
-        mutate(VJaa = sprintf("%s_%s", VJ.combi, aaSeqCDR3))
-      
-      populations <- to_vec(
-        for (item in subset(mid.metadata, mid.metadata$X %in% selected.mids)$population %>% unique()){
-          sprintf("%s_%s", mouse.id, item)
-        }
-      )
-      names(populations) <- unlist(lapply(
-        populations, function(x){
-          subset(mid.metadata, mid.metadata$population == str_split(x, "_")[[1]][[2]] & mid.metadata$mouse == mouse.id)$X
-        }
-      ))
-      
-      input.clonesets <- new.clonesets
-      path.to.save.svg <- file.path(path.to.05.output, "circos_plot", mouse.id, input.case, clone.def)
-      svg.name <- sprintf("%s_mouse_%s_input_%s.%s.svg", PROJECT, mouse.id, input.case, clone.def)
-      clone.def <- clone.def
-      data.type <- "bulk"
-      populations <- populations
-      if (file.exists(file.path(path.to.save.svg, svg.name)) == FALSE){
-        generate_circos_plot(input.clonesets = new.clonesets,
-                             path.to.save.svg = path.to.save.svg,
-                             svg.name = svg.name,
-                             clone.def = clone.def,
-                             data.type = data.type,
-                             populations = populations)        
-      } else {
-        print(sprintf("File %s exists", file.path(path.to.save.svg, svg.name)))
-      }
-    }
-  }
-}
-
-
-
+intersect(all.mids$MID2$id, all.mids$MID23$id)
+intersect(all.mids$MID2$id, all.mids$MID24$id)
+intersect(all.mids$MID2$id, all.mids$MID25$id)
+intersect(all.mids$MID2$id, all.mids$MID26$id)
 

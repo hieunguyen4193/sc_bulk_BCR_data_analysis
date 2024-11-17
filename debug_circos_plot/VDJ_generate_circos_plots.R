@@ -1,10 +1,3 @@
-generate_circos_plot <- function(input.clonesets,
-                                 path.to.save.svg,
-                                 svg.name,
-                                 clone.def,
-                                 data.type = "sc",
-                                 populations = c()){
-  dir.create(path.to.save.svg, showWarnings = FALSE, recursive = TRUE)
   if (data.type == "sc"){
     df <- data.frame(table(input.clonesets$id_hashtag, input.clonesets[[clone.def]]))    
   } else if (data.type == "bulk"){
@@ -71,7 +64,6 @@ generate_circos_plot <- function(input.clonesets,
     maindf <- maindf[, c("Clone", keep.cols)]
     maindf[is.na(maindf)] <- 0
     
-    svg(file.path(path.to.save.svg, svg.name))
     newdf$SampleID <- factor(newdf$SampleID, levels = names(alldf))
     
     circos.par(cell.padding = c(0, 0, 0, 0), gap.degree = 5, track.height = 0.1, start.degree = -2.5, points.overflow.warning = FALSE)
@@ -118,7 +110,5 @@ generate_circos_plot <- function(input.clonesets,
       }
     }
     circos.clear()
-    dev.off()
   }
-}
   
