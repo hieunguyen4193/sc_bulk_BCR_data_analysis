@@ -134,169 +134,35 @@ count.mice <- table(mid.metadata$mouse)
 #####----------------------------------------------------------------------#####
 ##### GENERATE CIRCOS PLOT WITH HIEU SCRIPT
 #####----------------------------------------------------------------------#####
-mouse.id <- "m11"
-input.case <- "all_w_biopsy"
-selected.mids <- yfp.mids[[mouse.id]][[input.case]]
-filter.clone <- FALSE
-filter.clone.cutoff <- 10
-saveFileName <- sprintf("%s_%s_circos.svg", mouse.id, paste(selected.mids, collapse = "_"))
-
-if (filter.clone == TRUE){
-  path.to.save.svg <- file.path(path.to.05.output, 
-                                "circos_plot", 
-                                "Hieu_version", 
-                                sprintf("filter_clone_%s",filter.clone), 
-                                sprintf("filter_cutoff_%s", filter.clone.cutoff),
-                                saveFileName)
-  dir.create(file.path(path.to.05.output, 
-                       "circos_plot", 
-                       "Hieu_version", 
-                       sprintf("filter_clone_%s",filter.clone),
-                       sprintf("filter_cutoff_%s", filter.clone.cutoff),),
-             showWarnings = FALSE, 
-             recursive = TRUE)
-} else {
-  path.to.save.svg <- file.path(path.to.05.output, 
-                                "circos_plot", 
-                                "Hieu_version", 
-                                sprintf("filter_clone_%s",filter.clone), 
-                                saveFileName)
-  dir.create(file.path(path.to.05.output, 
-                       "circos_plot", 
-                       "Hieu_version", 
-                       sprintf("filter_clone_%s",filter.clone)),
-             showWarnings = FALSE, 
-             recursive = TRUE)
-}
-
-
-cloneCountdf <- data.frame()
-for (input.mid in selected.mids){
-  tmp.clonedf <- read_tsv(all.mid.files[input.mid])
-  if (filter.clone == TRUE){
-    tmp.clonedf <- subset(tmp.clonedf, tmp.clonedf$cloneCount > filter.clone.cutoff)
-  }
-  totalCloneCount <- tmp.clonedf$cloneCount %>% sum()
-  tmp.clonedf <- tmp.clonedf %>%
-    rowwise() %>%
-    mutate(Freq = cloneCount/totalCloneCount) %>%
-    arrange(Freq)
-  accum.sum <- 0
-  all.accum.sum <- list()
-  for (i in seq(1, nrow(tmp.clonedf))){
-    accum.sum <- tmp.clonedf[i, ][["Freq"]] + accum.sum
-    all.accum.sum <- c(all.accum.sum, c(accum.sum))
-  }
-  tmp.clonedf$accum.Freq <- unlist(all.accum.sum)
-  tmp.clonedf <- subset(tmp.clonedf, select = c(id, Freq, accum.Freq))
-  tmp.clonedf$SampleID <- input.mid
-  cloneCountdf <- rbind(cloneCountdf, tmp.clonedf)
-}
-cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = unique(cloneCountdf$SampleID))
-
-plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
-  subset(select = c(id, Freq, accum.Freq))
-colnames(plotdf) <- c("id", 
-                      sprintf("%s_Freq", levels(cloneCountdf$SampleID)[[1]]), 
-                      sprintf("%s_accumFreq", levels(cloneCountdf$SampleID)[[1]]))
-
-for (sample.id in levels(cloneCountdf$SampleID)[2: length(levels(cloneCountdf$SampleID))]){
-  tmpdf <- subset(cloneCountdf, cloneCountdf$SampleID == sample.id) %>%
-    subset(select = c(id, Freq, accum.Freq))
-  colnames(tmpdf) <- c("id", 
-                        sprintf("%s_Freq", sample.id), 
-                        sprintf("%s_accumFreq", sample.id))
-  plotdf <- merge(plotdf, tmpdf, by.x = "id", by.y = "id", all.x = TRUE, all.y = TRUE)
-}
-plotdf[is.na(plotdf)] <- 0
-
-fileAliases <- to_vec(
-  for (item in levels(cloneCountdf$SampleID)){
-    subset(mid.metadata, mid.metadata$X == item)$population
-  }
-)
-
-##### Define COUNT colors
-countColors <- c("#FFFFFFFF", "#0000FFFF")
-maxCount <- cloneCountdf$Freq %>% max()
-countRamp <- function(x) {
-  ramp <- colorRamp(c(countColors[1], countColors[2]), alpha = TRUE)
-  color <- ramp(x / maxCount)
-  rgb(color, alpha = color[4], maxColorValue = 255)
-}
-
-##### Define LINK colors
-linkColors <- c("#FF000080", "#FF000080")
-linkRampAB <- function(x, maxLinkSize) {
-  ramp <- colorRamp(c(linkColors[1], linkColors[2]), alpha = TRUE)
-  color <- ramp(x / maxLinkSize)
-  rgb(color, alpha = color[4], maxColorValue = 255)
-}
-  
-##### initialize the structure of CIRCOS plot. 
-svg(path.to.save.svg)
-circos.par(cell.padding = c(0, 0, 0, 0), gap.degree = 5, track.height = 0.1, start.degree = -2.5, points.overflow.warning = FALSE)
-circos.initialize(factors = cloneCountdf$SampleID, x = cloneCountdf$accum.Freq)
-
-# Add ring with labels, ticks and colored boxes
-circos.track(
-  factors = cloneCountdf$SampleID, 
-  x = cloneCountdf$Freq, 
-  y = cloneCountdf$accum.Freq, 
-  bg.border = NA,
-  panel.fun = function(x, y) {
-    circos.text(CELL_META$xcenter, 
-                CELL_META$ylim[2] + mm_y(4), 
-                fileAliases[CELL_META$sector.numeric.index], 
-                niceFacing = TRUE)
-    circos.lines(c(CELL_META$xlim[1], 
-                   CELL_META$xlim[2]), 
-                 c((CELL_META$ylim[1] + CELL_META$ycenter) * 0.5, 
-                   (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
-    for (index in 1:length(x)) {
-      circos.lines(c(y[index], 
-                     y[index]), 
-                   c(CELL_META$ylim[1], (CELL_META$ylim[1] + CELL_META$ycenter) * 0.5))
+plot.mice <- count.mice[count.mice >= 2] %>% names()
+for (mouse.id in plot.mice){
+  input.case <- "all_w_biopsy"
+  filter.clone <- FALSE
+  filter.clone.cutoff <- 1
+  selected.mids <- yfp.mids[[mouse.id]][[input.case]]
+  input.files <- all.mid.files[selected.mids]
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      subset(mid.metadata, mid.metadata$X == item)$population
     }
-    n <- length(x) - 1
-    circos.rect(y[2:(n + 1)] - x[2:(n + 1)], 
-                rep(CELL_META$ycenter, n), 
-                y[2:(n + 1)], 
-                rep(CELL_META$ylim[2], n), 
-                col = countRamp(x[2:(n + 1)]), 
-                border = NA)
-  }
-)
-
-all.combi <- combn(levels(cloneCountdf$SampleID), 2)
-for (j in seq(1, ncol(all.combi))){
-  sample1 <- all.combi[, j][[1]]
-  sample2 <- all.combi[, j][[2]]
+  )
+  saveFileName <- sprintf("%s_%s_circos.svg", mouse.id, paste(selected.mids, collapse = "_"))
+  outputdir <- file.path(path.to.05.output, 
+                         "circos_plot", 
+                         "Hieu_version")
   
-  tmp.plotdf <- plotdf[, c( 
-    sprintf("%s_Freq", sample1), sprintf("%s_accumFreq", sample1),
-    sprintf("%s_Freq", sample2), sprintf("%s_accumFreq", sample2)
-  )]
-  colnames(tmp.plotdf) <- c("sample1_Freq", "sample1_accumFreq",
-                            "sample2_Freq", "sample2_accumFreq")
-  tmp.plotdf <- subset(tmp.plotdf, tmp.plotdf$sample1_Freq > 0 & tmp.plotdf$sample2_Freq > 0)
-  maxLinkSize <- max(tmp.plotdf$sample1_Freq + tmp.plotdf$sample2_Freq)
+  source(file.path(path.to.main.src, "circos_helper.R"))
   
-  for (index in seq(1, nrow(tmp.plotdf))){
-    circos.link(sample1, 
-                c(tmp.plotdf$sample1_accumFreq[index] - tmp.plotdf$sample1_Freq[index], 
-                  tmp.plotdf$sample1_accumFreq[index]),
-                sample2, 
-                c(tmp.plotdf$sample2_accumFreq[index] - tmp.plotdf$sample2_Freq[index], 
-                  tmp.plotdf$sample2_accumFreq[index]), 
-                col = linkRampAB(tmp.plotdf$sample1_Freq[index] + tmp.plotdf$sample2_Freq[index], maxLinkSize),
-                border = NA)
-  }  
+  generate_circos(
+    input = input.files,
+    fileAliases = fileAliases,
+    saveFileName = saveFileName,
+    outputdir = outputdir,
+    filter.clone = filter.clone,
+    filter.clone.cutoff = filter.clone.cutoff
+  )
 }
-# Close diagramm and output file
-circos.clear()
-dev.off()
 
-  
+
 
 
