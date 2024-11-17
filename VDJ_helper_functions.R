@@ -559,4 +559,21 @@ generate_fasta <- function(clonesets,
         } 
       }
     }
+} 
+
+##### thresholds
+# low mutated 0-3 
+# intermediate 4-15
+# highly mutated >15 
+asssign_mutation_to_group <- function(x){
+  if (is.na(x) == TRUE){
+    return(NA)
+  }
+  if (x <= 3){
+    return("low")
+  } else if (x <= 15){
+    return("intermediate")
+  } else if (x > 15){
+    return("high")
   } 
+}

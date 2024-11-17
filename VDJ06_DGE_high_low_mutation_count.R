@@ -17,13 +17,46 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 #####---------------------------------------------------------------------------#####
 path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
-input.dataset <- "240805_BSimons"
+input.dataset <- "1st_2nd_BSimons_Datasets"
+input.dataset.1or2 <- "1st_dataset"
 path.to.04.output <- file.path(outdir, "VDJ_output", "04_output")
-path.to.06.output <- file.path(outdir, "VDJ_output", "06_output", input.dataset)
-dir.create(path.to.06.output, showWarnings = FALSE, recursive = TRUE)
+
+if (input.dataset == "1st_2nd_BSimons_Datasets"){
+  sample.lists <- list(
+    `1st_dataset` = c(
+      "17_MM9_Ecoli",
+      "20_MM9_Ecoli",
+      "21_MM9_Ecoli_SPF",
+      "MM9_S2",
+      "MM9_S4",
+      "MM9_SPF_S3",
+      "MM9_SPF_S9"),
+    `2nd_dataset` = c("Sample_132",
+                      "Sample_133" )
+  )
+  s.obj <- readRDS(path.to.all.s.obj[[input.dataset.1or2]])
+  path.to.06.output <- file.path(outdir, "VDJ_output", "06_output", input.dataset.1or2)
+  dir.create(path.to.06.output, showWarnings = FALSE, recursive = TRUE)
+  clonedf <- read.csv(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv"), row.names = "X") %>%
+    subset(dataset.name == input.dataset) %>%
+    rowwise() %>%
+    mutate(group_mutation = asssign_mutation_to_group(num_mutation)) %>%
+    mutate(barcode_full = sprintf("%s_%s_%s", id, id, barcode)) %>%
+    subset(id %in% sample.lists[[input.dataset.1or2]]) 
+  
+} else{
+  path.to.06.output <- file.path(outdir, "VDJ_output", "06_output", input.dataset)
+  dir.create(path.to.06.output, showWarnings = FALSE, recursive = TRUE)
+  clonedf <- read.csv(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv"), row.names = "X") %>%
+    subset(dataset.name == input.dataset) %>%
+    rowwise() %>%
+    mutate(group_mutation = asssign_mutation_to_group(num_mutation)) %>%
+    mutate(barcode_full = sprintf("%s_%s", id, barcode))
+}
 
 thres <- 0.85
 
@@ -31,8 +64,6 @@ thres <- 0.85
 ##### GENERATE A BIG DATAFRAME CONTAINING ALL CLONES FROM ALL DATASETS
 #####---------------------------------------------------------------------------#####
 all.clone.files <- Sys.glob(file.path(outdir, "VDJ_output", "*", sprintf("VDJ_output_%s", thres), "preprocessed_files", "clonesets*.split_clones.xlsx" ))
-
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
 dataset.origin <- list(
   `1st_2nd_BSimons_Datasets` = "sc",
@@ -48,30 +79,6 @@ names(all.clone.files) <- to_vec(
   for (item in all.clone.files) str_replace(str_replace(basename(item), "clonesets_", ""), ".split_clones.xlsx", "")
 )
 
-##### thresholds
-# low mutated 0-3 
-# intermediate 4-15
-# highly mutated >15 
-asssign_mutation_to_group <- function(x){
-  if (is.na(x) == TRUE){
-    return(NA)
-  }
-  if (x <= 3){
-    return("low")
-  } else if (x <= 15){
-    return("intermediate")
-  } else if (x > 15){
-    return("high")
-  } 
-}
-
-clonedf <- read.csv(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv"), row.names = "X") %>%
-  subset(dataset.name == input.dataset) %>%
-  rowwise() %>%
-  mutate(group_mutation = asssign_mutation_to_group(num_mutation)) %>%
-  mutate(barcode_full = sprintf("%s_%s", id, barcode))
-  
-s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
 meta.data <- s.obj@meta.data %>% 
   rownames_to_column("input_barcode")
 meta.data <- meta.data %>%
@@ -124,6 +131,9 @@ if (file.exists(file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds")) 
 }
 
 for (n in names(dge.mutation)){
-  writexl::write_xlsx(dge.mutation[[n]] %>% arrange(desc(abs_avg_log2FC)), file.path(path.to.06.output, sprintf("DGE_test_result_%s.xlsx", n)))
+  writexl::write_xlsx(dge.mutation[[n]] %>% 
+                        arrange(desc(abs_avg_log2FC)) %>% 
+                        arrange(desc(abs_avg_log2FC)), 
+                      file.path(path.to.06.output, sprintf("DGE_test_result_%s.xlsx", n)))
 }
 
