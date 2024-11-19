@@ -34,3 +34,5 @@ path.to.07.output <- file.path(outdir, "VDJ_output", "07_output", PROJECT)
 dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 
 s.obj <- readRDS(path.to.all.s.obj[[PROJECT]])
+
+all.cells <- GetAssayData(object = s.obj, assay = "RNA", slot = "data")["YFP", ]

@@ -15,9 +15,9 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 #####----------------------------------------------------------------------#####
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
+path.to.storage <- "/media/hieunguyen/HNHD01/storage/all_BSimons_datasets"
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 rerun <- TRUE
 output <- list()
