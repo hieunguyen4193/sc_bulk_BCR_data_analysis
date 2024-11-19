@@ -11,6 +11,7 @@ source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 library(circlize)
+
 #####----------------------------------------------------------------------#####
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
@@ -220,12 +221,14 @@ for (mouse.id in c("m1", "m2", "m3")){
   filter.clone.cutoff <- NA
   source(file.path(path.to.main.src, "circos_helper.R"))
   
-  generate_circos(
-    input = input.files,
-    fileAliases = fileAliases,
-    saveFileName = saveFileName,
-    outputdir = outputdir,
-    filter.clone = filter.clone,
-    filter.clone.cutoff = filter.clone.cutoff
-  )
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
 }
