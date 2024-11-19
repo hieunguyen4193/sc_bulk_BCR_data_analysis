@@ -32,8 +32,6 @@ bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_da
 list.of.PROJECT <- c("240805_BSimons", "240826_BSimons")
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.PROJECT, collapse = "_"))
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(path.to.05.output, "circos_plot", "Hieu_version"), showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(path.to.05.output, "circos_plot", "Fabio_version"), showWarnings = FALSE, recursive = TRUE)
 
 #####----------------------------------------------------------------------#####
 #### read the Seurat object of single cell dataset
@@ -109,15 +107,14 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
                                                    nSeqCDR3, 
                                                    uniqueMoleculeCount)) %>%
           rowwise() %>%
-          mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
-          group_by(VJnt) %>%
-          summarise(cloneCount = sum(uniqueMoleculeCount)) %>% 
-          arrange(desc(cloneCount))
+          mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3))
+        input.circos <- data.frame(table(input.circos$VJnt))
         colnames(input.circos) <- c("id", "cloneCount")
         input.circos <- input.circos %>% rowwise() %>%
           mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
           mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
-          mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]])
+          mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
+          arrange(desc(cloneCount))
         write.table(input.circos, 
                     file.path(path.to.save.output, 
                               "single_MID_clone_df", 
@@ -125,6 +122,7 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
                     quote = FALSE, 
                     sep = "\t", 
                     row.names = FALSE) 
+        all.data[[sprintf("%s_%s", PROJECT, mid)]] <- input.circos
       } else {
         print(sprintf("File exists at %s, reading in ...", 
                       file.path(path.to.save.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid))))
@@ -147,15 +145,14 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
                                                      nSeqCDR3, 
                                                      uniqueMoleculeCount)) %>%
             rowwise() %>%
-            mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
-            group_by(VJnt) %>%
-            summarise(cloneCount = sum(uniqueMoleculeCount)) %>% 
-            arrange(desc(cloneCount))
+            mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3))
+          input.circos <- data.frame(table(input.circos$VJnt))
           colnames(input.circos) <- c("id", "cloneCount")
           input.circos <- input.circos %>% rowwise() %>%
             mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
             mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
-            mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]])
+            mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
+            arrange(desc(cloneCount))
           write.table(input.circos, 
                       file.path(path.to.save.output, 
                                 "single_MID_clone_df", 
@@ -163,6 +160,7 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
                       quote = FALSE, 
                       sep = "\t", 
                       row.names = FALSE) 
+          all.data[[sprintf("%s_%s", PROJECT, mid)]] <- input.circos
         } else {
           print(sprintf("File exists at %s, reading in ...", 
                         file.path(path.to.save.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid))))
@@ -206,28 +204,28 @@ names(all.input.files) <- to_vec(for (item in all.input.files){
 exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 meta.data <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
 
-
-mouse.id <- "m1"
-selected.mids <- subset(meta.data, meta.data$mouse == mouse.id)$SampleID
-input.files <- all.input.files[selected.mids]
-
-fileAliases <- to_vec(
-  for (item in names(input.files)){
-    subset(meta.data, meta.data$SampleID == item)$organ
-  }
-)
-saveFileName <- sprintf("%s_circos.svg", mouse.id)
-outputdir <- file.path(path.to.05.output,
-                       "circos_plot")
-filter.clone <- FALSE
-filter.clone.cutoff <- NA
-source(file.path(path.to.main.src, "circos_helper.R"))
-
-generate_circos(
-  input = input.files,
-  fileAliases = fileAliases,
-  saveFileName = saveFileName,
-  outputdir = outputdir,
-  filter.clone = filter.clone,
-  filter.clone.cutoff = filter.clone.cutoff
-)
+for (mouse.id in c("m1", "m2", "m3")){
+  selected.mids <- subset(meta.data, meta.data$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+  
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data, meta.data$SampleID == item)$organ)
+    }
+  )
+  saveFileName <- sprintf("%s_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  generate_circos(
+    input = input.files,
+    fileAliases = fileAliases,
+    saveFileName = saveFileName,
+    outputdir = outputdir,
+    filter.clone = filter.clone,
+    filter.clone.cutoff = filter.clone.cutoff
+  )
+}

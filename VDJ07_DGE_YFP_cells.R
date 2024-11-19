@@ -28,7 +28,7 @@ define.clone.clusters <- FALSE
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
-PROJECT <- "240805_BSimons"
+PROJECT <- "241002_BSimons"
 
 path.to.07.output <- file.path(outdir, "VDJ_output", "07_output", PROJECT)
 dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
