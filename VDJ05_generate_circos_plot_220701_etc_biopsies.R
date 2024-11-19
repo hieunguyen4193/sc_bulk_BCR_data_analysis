@@ -48,8 +48,7 @@ path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_out
 #####----------------------------------------------------------------------#####
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", PROJECT)
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(path.to.05.output, "circos_plot", "Hieu_version"), showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(path.to.05.output, "circos_plot", "Fabio_version"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(path.to.05.output, "circos_plot"), showWarnings = FALSE, recursive = TRUE)
 
 path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output/v0.2/mid_based_output")
 path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
@@ -134,34 +133,33 @@ count.mice <- table(mid.metadata$mouse)
 #####----------------------------------------------------------------------#####
 ##### GENERATE CIRCOS PLOT WITH HIEU SCRIPT
 #####----------------------------------------------------------------------#####
-# plot.mice <- count.mice[count.mice >= 2] %>% names()
-# for (mouse.id in plot.mice){
-#   input.case <- "all_w_biopsy"
-#   filter.clone <- FALSE
-#   filter.clone.cutoff <- 1
-#   selected.mids <- yfp.mids[[mouse.id]][[input.case]]
-#   input.files <- all.mid.files[selected.mids]
-#   fileAliases <- to_vec(
-#     for (item in names(input.files)){
-#       subset(mid.metadata, mid.metadata$X == item)$population
-#     }
-#   )
-#   saveFileName <- sprintf("%s_%s_circos.svg", mouse.id, paste(selected.mids, collapse = "_"))
-#   outputdir <- file.path(path.to.05.output, 
-#                          "circos_plot", 
-#                          "Hieu_version")
-#   
-#   source(file.path(path.to.main.src, "circos_helper.R"))
-#   
-#   generate_circos(
-#     input = input.files,
-#     fileAliases = fileAliases,
-#     saveFileName = saveFileName,
-#     outputdir = outputdir,
-#     filter.clone = filter.clone,
-#     filter.clone.cutoff = filter.clone.cutoff
-#   )
-# }
+plot.mice <- count.mice[count.mice >= 2] %>% names()
+for (mouse.id in plot.mice){
+  input.case <- "all_w_biopsy"
+  filter.clone <- FALSE
+  filter.clone.cutoff <- 1
+  selected.mids <- yfp.mids[[mouse.id]][[input.case]]
+  input.files <- all.mid.files[selected.mids]
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      subset(mid.metadata, mid.metadata$X == item)$population
+    }
+  )
+  saveFileName <- sprintf("%s_%s_circos.svg", mouse.id, paste(selected.mids, collapse = "_"))
+  outputdir <- file.path(path.to.05.output,
+                         "circos_plot")
+
+  source(file.path(path.to.main.src, "circos_helper.R"))
+
+  generate_circos(
+    input = input.files,
+    fileAliases = fileAliases,
+    saveFileName = saveFileName,
+    outputdir = outputdir,
+    filter.clone = filter.clone,
+    filter.clone.cutoff = filter.clone.cutoff
+  )
+}
 
 ##### Get number of clones per sample
 mid.metadata <- subset(mid.metadata, select = -c(X.1, X.2))

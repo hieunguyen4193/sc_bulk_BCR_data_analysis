@@ -172,19 +172,62 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
     }
   }
   saveRDS(all.data, file.path(path.to.05.output, "all_data.rds"))
+  meta.data <- data.frame(MID = names(all.data))
+  meta.data <- meta.data  %>% rowwise() %>% 
+    mutate(PROJECT = paste(str_split(MID, "_")[[1]][1:2], collapse = "_") ) %>%
+    mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
+    mutate(mouse = ifelse(
+      PROJECT == "240805_BSimons",
+      sprintf("m%s", str_split(SampleID, "")[[1]][[2]]),
+      subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse
+    )) %>%
+    mutate(organ = ifelse(
+      PROJECT == "240805_BSimons",
+      str_split(SampleID, "")[[1]][[1]],
+      subset(bulk.metadata, bulk.metadata$MID == SampleID)$organ
+    ))
+  writexl::write_xlsx(meta.data, file.path(path.to.05.output, "all_data_metadata.xlsx"))
 } else {
   print(sprintf("All samples data exists, reading in ..."))
   all.data <- readRDS(file.path(path.to.05.output, "all_data.rds"))
+  meta.data <- readxl::read_excel(file.path(path.to.05.output, "all_data_metadata.xlsx"))
 }
 
-# bulk.metadata$PROJECT <- "240826_BSimons"
-# all.ht.samples <- c()
-# for (sample.id in names(list.of.ht)){
-#   tmp <- all.data[[sprintf("240805_BSimons_%s", sample.id)]] 
-# }
-# sc.meta.data <- data.frame(MID = all.ht.samples) %>%
-#   rowwise() %>%
-#   mutate(mouse = sprintf("m%s", str_split(MID, "")[[1]][[2]]))
-# sc.meta.data$PROJECT <- "240805_BSimons"
-# 
-# meta.data <- rbind(bulk.metadata[, c("MID", "mouse", "PROJECT")], sc.meta.data)
+all.input.files <- Sys.glob(file.path(outdir, "VDJ_output", 
+                                      "*", 
+                                      sprintf("VDJ_output_%s", thres), 
+                                      "preprocessed_files", 
+                                      "single_MID_clone_df", 
+                                      "*"))
+names(all.input.files) <- to_vec(for (item in all.input.files){
+  str_replace(basename(item), ".simplified.csv", "")
+})
+
+exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
+meta.data <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
+
+
+mouse.id <- "m1"
+selected.mids <- subset(meta.data, meta.data$mouse == mouse.id)$SampleID
+input.files <- all.input.files[selected.mids]
+
+fileAliases <- to_vec(
+  for (item in names(input.files)){
+    subset(meta.data, meta.data$SampleID == item)$organ
+  }
+)
+saveFileName <- sprintf("%s_circos.svg", mouse.id)
+outputdir <- file.path(path.to.05.output,
+                       "circos_plot")
+filter.clone <- FALSE
+filter.clone.cutoff <- NA
+source(file.path(path.to.main.src, "circos_helper.R"))
+
+generate_circos(
+  input = input.files,
+  fileAliases = fileAliases,
+  saveFileName = saveFileName,
+  outputdir = outputdir,
+  filter.clone = filter.clone,
+  filter.clone.cutoff = filter.clone.cutoff
+)
