@@ -50,6 +50,7 @@ if (input.dataset == "1st_2nd_BSimons_Datasets"){
   
 } else{
   path.to.06.output <- file.path(outdir, "VDJ_output", "06_output", input.dataset)
+  s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   dir.create(path.to.06.output, showWarnings = FALSE, recursive = TRUE)
   clonedf <- read.csv(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv"), row.names = "X") %>%
     subset(dataset.name == input.dataset) %>%

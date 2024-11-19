@@ -18,7 +18,7 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
 # outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-outdir <- "/media/hieunguyen/HNHD01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 thres.dis <- 0.15
 savefile <- TRUE
@@ -174,4 +174,5 @@ tmpdf <- subset(raw.newdf, select = c(VJ, VJnt, uniqueMoleculeCount))
 # "TGTGCAAGAGAGGGAATTACTACGGTACCATTTGTTTACTGG"
 # "TGTGCAAGAGAGGGRATTACTWCGGTACCATTTGTTTACTGG"
 
-olddf.notshare
+subset(olddf.notshare, grepl("TGTGCAAGAGAGGGRATTACTWCGGTACCATTTGTTTACTGG", olddf.notshare$id))
+subset(newdf, grepl("IGHV1-53_IGHJ3", newdf$id))$nSeqCDR3 %>% unique()
