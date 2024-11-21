@@ -28,6 +28,37 @@ import networkx as nx
 from sklearn import metrics
 
 warnings.filterwarnings("ignore")
+
+#####---------------------------------------------------------------------------------------#####
+##### INTERPOLATION COLORS
+#####---------------------------------------------------------------------------------------#####
+def hex_to_rgb(hex_color):
+    """
+    Convert hex to RGB.
+    
+    Parameters:
+    - hex_color: String representing the hexadecimal color code.
+    
+    Returns:
+    - A tuple of integers representing the RGB values.
+    """
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+def interpolate_color(color_start_rgb, color_end_rgb, t):
+    """
+    Interpolate between two RGB colors.
+    
+    Parameters:
+    - color_start_rgb: Tuple of integers representing the starting RGB color.
+    - color_end_rgb: Tuple of integers representing the ending RGB color.
+    - t: Float representing the interpolation factor between 0 and 1.
+    
+    Returns:
+    - A tuple representing the interpolated RGB color.
+    """
+    return tuple(int(start_val + (end_val - start_val) * t) for start_val, end_val in zip(color_start_rgb, color_end_rgb))
+
+
 #####---------------------------------------------------------------------------------------#####
 ##### CONFIGURATIONS
 #####---------------------------------------------------------------------------------------#####
@@ -254,6 +285,42 @@ class GCtree(CollapsedTree):
                 F.border.width = None
                 # F.opacity = 0.6
                 faces.add_face_to_node(F, n, 0, position="branch-right")
+                
+                name_face = TextFace(n.name, fsize=10)
+                faces.add_face_to_node(name_face, n, column=1, position="branch-right")
+                
+                ns = NodeStyle()
+                ns["size"] = 0
+                n.set_style(ns)
+        ts = TreeStyle()
+        ts.layout_fn = layout
+        ts.mode = "r"
+        ts.rotation = 90
+        ts.show_leaf_name = False
+        return ts
+    
+    def generate_tree_style_with_dist(self, bulkdf, color_start_rgb, color_end_rgb):
+        abund_pct = self.abund_pct
+        abund_pct["GL"] = {'GL': np.float64(100.0)}
+        
+        def layout(n):
+            size = max(1, 10 * math.sqrt(n.abundance))
+            if n.abundance > 1:
+                dist = bulkdf[bulkdf["seqid"] == n.name]["min_dist_to_a_cell"].values[0]
+                interpolate_c = interpolate_color(color_start_rgb, 
+                                                color_end_rgb, 
+                                                dist)
+                c = '#{:02x}{:02x}{:02x}'.format(*interpolate_c)
+                cols = [c for mid in abund_pct[n.name].keys()]
+                values = [abund_pct[n.name][mid] for mid in abund_pct[n.name].keys()]
+                F = faces.PieChartFace(values, colors=cols,
+                                        width=size * 2, height=size * 2)
+                F.border.width = None
+                faces.add_face_to_node(F, n, 0, position="branch-right")
+                
+                name_face = TextFace(n.name, fsize=10)
+                faces.add_face_to_node(name_face, n, column=1, position="branch-right")
+                
                 ns = NodeStyle()
                 ns["size"] = 0
                 n.set_style(ns)
