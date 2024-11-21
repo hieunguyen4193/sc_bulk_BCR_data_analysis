@@ -64,7 +64,12 @@ thres <- 0.85
 #####---------------------------------------------------------------------------#####
 ##### GENERATE A BIG DATAFRAME CONTAINING ALL CLONES FROM ALL DATASETS
 #####---------------------------------------------------------------------------#####
-all.clone.files <- Sys.glob(file.path(outdir, "VDJ_output", "*", sprintf("VDJ_output_%s", thres), "preprocessed_files", "clonesets*.split_clones.xlsx" ))
+all.clone.files <- Sys.glob(file.path(outdir, 
+                                      "VDJ_output", 
+                                      "*", 
+                                      sprintf("VDJ_output_%s", thres), 
+                                      "preprocessed_files", 
+                                      "clonesets*.split_clones.xlsx" ))
 
 dataset.origin <- list(
   `1st_2nd_BSimons_Datasets` = "sc",
