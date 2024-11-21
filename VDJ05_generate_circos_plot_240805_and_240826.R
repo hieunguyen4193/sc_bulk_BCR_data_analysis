@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- circos.group.type
+circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -105,12 +105,12 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
         mutate(id = sprintf("%s_%s", id, HT))
     }
     
-    dir.create(file.path(path.to.save.output, "VJnt"), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(path.to.save.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
     
     ##### split the full clone dataframe to smaller dataframe for each MID/each single cell sample hashtag
     for (mid in unique(full.clonedf$id)){
       if (file.exists(file.path(path.to.save.output, 
-                                "VJnt", 
+                                circos.group.type, 
                                 sprintf("%s.simplified.csv", mid))) == FALSE){
         
         print(sprintf("Working on sample MID %s", mid))
@@ -159,7 +159,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     if (PROJECT %in% sc.projects){
       for (mid in unique(full.clonedf$id.origin)){
         if (file.exists(file.path(path.to.save.output, 
-                                  "VJnt", 
+                                  circos.group.type, 
                                   sprintf("%s.simplified.csv", mid))) == FALSE){
           
           print(sprintf("Working on sample MID %s", mid))
@@ -258,6 +258,7 @@ for (mouse.id in c("m1", "m2", "m3")){
   )
   saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
+                         circos.group.type,
                          "circos_plot")
   filter.clone <- FALSE
   filter.clone.cutoff <- NA
@@ -287,6 +288,7 @@ for (mouse.id in c("m1", "m2", "m3")){
   )
   saveFileName <- sprintf("%s_circos.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
+                         circos.group.type,
                          "circos_plot")
   filter.clone <- FALSE
   filter.clone.cutoff <- NA

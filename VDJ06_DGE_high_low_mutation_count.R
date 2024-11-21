@@ -103,34 +103,42 @@ s.obj <- AddMetaData(object = s.obj, metadata = meta.data$num_mutation, col.name
 
 if (file.exists(file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds")) == FALSE){
   dge.mutation <- list()
-  dge.mutation[["high_vs_low"]] <- FindMarkers(object = s.obj, 
+  dge.mutation.raw <- list()
+  
+  dge.mutation.raw[["high_vs_low"]] <- FindMarkers(object = s.obj, 
                                                assay = "RNA",
                                                ident.1 = "high", 
                                                ident.2 = "low",
-                                               group.by = "group_mutation") %>% 
-    subset(p_val_adj <= 0.05) %>%
-    rownames_to_column("Gene") %>%
-    rowwise() %>%
-    mutate(abs_avg_log2FC = abs(avg_log2FC))
-  dge.mutation[["intermediate_vs_low"]] <- FindMarkers(object = s.obj, 
-                                                       assay = "RNA",
-                                                       ident.1 = "intermediate", 
-                                                       ident.2 = "low",
-                                                       group.by = "group_mutation") %>% 
-    subset(p_val_adj <= 0.05) %>%
-    rownames_to_column("Gene") %>%
-    rowwise() %>%
-    mutate(abs_avg_log2FC = abs(avg_log2FC))
-  dge.mutation[["high_vs_intermediate"]] <- FindMarkers(object = s.obj, 
-                                                        assay = "RNA",
-                                                        ident.1 = "high", 
-                                                        ident.2 = "intermediate",
-                                                        group.by = "group_mutation") %>% 
+                                               group.by = "group_mutation") 
+  dge.mutation[["high_vs_low"]] <- dge.mutation.raw[["high_vs_low"]] %>%
     subset(p_val_adj <= 0.05) %>%
     rownames_to_column("Gene") %>%
     rowwise() %>%
     mutate(abs_avg_log2FC = abs(avg_log2FC))
   
+  dge.mutation.raw[["high_vs_intermediate"]] <- FindMarkers(object = s.obj, 
+                                                   assay = "RNA",
+                                                   ident.1 = "high", 
+                                                   ident.2 = "intermediate",
+                                                   group.by = "group_mutation") 
+  dge.mutation[["high_vs_intermediate"]] <- dge.mutation.raw[["high_vs_intermediate"]] %>%
+  subset(p_val_adj <= 0.05) %>%
+    rownames_to_column("Gene") %>%
+    rowwise() %>%
+    mutate(abs_avg_log2FC = abs(avg_log2FC))
+  
+  dge.mutation.raw[["intermediate_vs_low"]] <- FindMarkers(object = s.obj, 
+                                                            assay = "RNA",
+                                                            ident.1 = "intermediate", 
+                                                            ident.2 = "low",
+                                                            group.by = "group_mutation") 
+  dge.mutation[["intermediate_vs_low"]] <- dge.mutation.raw[["intermediate_vs_low"]] %>%
+  subset(p_val_adj <= 0.05) %>%
+    rownames_to_column("Gene") %>%
+    rowwise() %>%
+    mutate(abs_avg_log2FC = abs(avg_log2FC))
+  
+  saveRDS(dge.mutation.raw, file.path(path.to.06.output, "DGE_high_low_mutation_rate.raw.rds"))
   saveRDS(dge.mutation, file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds"))
 } else {
   dge.mutation <- readRDS(file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds"))
