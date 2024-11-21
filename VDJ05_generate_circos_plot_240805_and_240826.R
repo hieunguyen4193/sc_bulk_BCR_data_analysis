@@ -61,6 +61,7 @@ for (PROJECT in sc.projects){
 ##### READ CLONE DATA -----> NEW DATA
 #####----------------------------------------------------------------------#####
 if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds")) == FALSE){
+  print("GENERATING NEW DATA!!!!!")
   all.data <- list()
   for (PROJECT in list.of.PROJECT){
     path.to.VDJ.output <- file.path( outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")

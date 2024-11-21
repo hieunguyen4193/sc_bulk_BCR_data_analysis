@@ -32,7 +32,9 @@ circos.group.type <- "VJaa"
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
-bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
+bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241031_BSimons/241031_sample_sheet.xlsx") %>%
+  rowwise() %>%
+  mutate(MID = sprintf("MID%s", MID))
 sc.projects <- c("241002_BSimons", "241104_BSimons")
 bulk.projects <- c("241031_BSimons")
 list.of.PROJECT <- c(sc.projects, bulk.projects)
@@ -61,6 +63,7 @@ for (PROJECT in sc.projects){
 ##### READ CLONE DATA -----> NEW DATA
 #####----------------------------------------------------------------------#####
 if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds")) == FALSE){
+  print("GENERATING NEW DATA!!!!!")
   all.data <- list()
   for (PROJECT in list.of.PROJECT){
     path.to.VDJ.output <- file.path( outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
@@ -203,7 +206,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
     mutate(mouse = ifelse(
       PROJECT %in% sc.projects,
-      sprintf("m%s", str_split(SampleID, "")[[1]][[2]]),
+      sprintf("m%s", str_split(SampleID, "")[[1]][[3]]),
       subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse
     )) %>%
     mutate(organ = ifelse(
@@ -247,7 +250,7 @@ exclude.samples <- c("PP3", "PP7")
 meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
 meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 
-for (mouse.id in c("m1", "m2", "m3")){
+for (mouse.id in c("m3", "m7")){
   selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
   input.files <- all.input.files[selected.mids]
   
@@ -277,7 +280,7 @@ for (mouse.id in c("m1", "m2", "m3")){
 }
 
 ##### generate circos plot for mice only, no hashtag information
-for (mouse.id in c("m1", "m2", "m3")){
+for (mouse.id in c("m3", "m7")){
   selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
   input.files <- all.input.files[selected.mids]
   
