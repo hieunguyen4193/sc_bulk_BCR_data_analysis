@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- circos.group.type
+circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -105,12 +105,12 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
         mutate(id = sprintf("%s_%s", id, HT))
     }
     
-    dir.create(file.path(path.to.save.output, "VJnt"), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(path.to.save.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
     
     ##### split the full clone dataframe to smaller dataframe for each MID/each single cell sample hashtag
     for (mid in unique(full.clonedf$id)){
       if (file.exists(file.path(path.to.save.output, 
-                                "VJnt", 
+                                circos.group.type, 
                                 sprintf("%s.simplified.csv", mid))) == FALSE){
         
         print(sprintf("Working on sample MID %s", mid))
@@ -159,7 +159,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     if (PROJECT %in% sc.projects){
       for (mid in unique(full.clonedf$id.origin)){
         if (file.exists(file.path(path.to.save.output, 
-                                  "VJnt", 
+                                  circos.group.type, 
                                   sprintf("%s.simplified.csv", mid))) == FALSE){
           
           print(sprintf("Working on sample MID %s", mid))
@@ -221,3 +221,87 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
 #####----------------------------------------------------------------------#####
 ##### MAIN FUNCTIONS GENERATE CIRCOS PLOT
 #####----------------------------------------------------------------------#####
+all.input.files <- Sys.glob(file.path(outdir, "VDJ_output",
+                                      "*",
+                                      sprintf("VDJ_output_%s", thres),
+                                      "preprocessed_files",
+                                      circos.group.type,
+                                      "*"))
+
+input.metadata <- data.frame(
+  path = all.input.files,
+  SampleID = to_vec(for (item in all.input.files){
+    str_replace(basename(item), ".simplified.csv", "") 
+  }),
+  PROJECT = to_vec(for (item in all.input.files){
+    str_split(item, "/")[[1]][[8]]
+  })
+) %>%
+  subset(PROJECT %in% list.of.PROJECT)
+
+all.input.files <- input.metadata$path
+names(all.input.files) <- input.metadata$SampleID
+
+##### generate circos plot for all hashtags
+exclude.samples <- c("PP3", "PP7")
+meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
+meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
+
+for (mouse.id in c("m1", "m2", "m3")){
+  selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+  
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+    }
+  )
+  saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         circos.group.type,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
+}
+
+##### generate circos plot for mice only, no hashtag information
+for (mouse.id in c("m1", "m2", "m3")){
+  selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+  
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+    }
+  )
+  saveFileName <- sprintf("%s_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         circos.group.type,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
+}
