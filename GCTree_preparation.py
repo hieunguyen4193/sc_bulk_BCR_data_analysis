@@ -299,7 +299,9 @@ class GCtree(CollapsedTree):
         ts.show_leaf_name = False
         return ts
     
-    def generate_tree_style_with_dist(self, bulkdf, color_start_rgb, color_end_rgb):
+    def generate_tree_style_with_dist(self, bulkdf, hex_min, hex_max):
+        color_start_rgb = hex_to_rgb(hex_min)
+        color_end_rgb = hex_to_rgb(hex_max)
         abund_pct = self.abund_pct
         abund_pct["GL"] = {'GL': np.float64(100.0)}
         
