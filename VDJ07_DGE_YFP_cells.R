@@ -34,5 +34,23 @@ path.to.07.output <- file.path(outdir, "VDJ_output", "07_output", PROJECT)
 dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 
 s.obj <- readRDS(path.to.all.s.obj[[PROJECT]])
+DefaultAssay(s.obj) <- "RNA"
+all.genes <- row.names(s.obj)
 
 all.cells <- GetAssayData(object = s.obj, assay = "RNA", slot = "data")["YFP", ]
+
+yfp.cells <- all.cells[all.cells != 0] %>% names()
+non.yfp.cells <- all.cells[all.cells == 0] %>% names()
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode") %>%
+  rowwise() %>%
+  mutate(YFP = ifelse(barcode %in% yfp.cells, "yes", "no")) %>%
+  column_to_rownames("barcode")
+
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+s.obj <- AddMetaData(object = s.obj, metadata = meta.data$YFP, col.name = "YFP")
+
+yfp.de.markers <- FindMarkers(object = s.obj, group.by = "YFP", ident.1 = "yes", ident.2 = "no", assay = "RNA", test.use = "wilcox",
+                              features = setdiff(all.genes, "YFP"))
+saveRDS(yfp.de.markers, file.path(path.to.07.output, "yfp.de.markers.raw.rds"))
+

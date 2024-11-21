@@ -29,7 +29,9 @@ define.clone.clusters <- FALSE
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
-bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
+bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241031_BSimons/241031_sample_sheet.xlsx") %>%
+  rowwise() %>%
+  mutate(MID = sprintf("MID%s", MID))
 list.of.PROJECT <- c("241002_BSimons", "241031_BSimons", "241104_BSimons")
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.PROJECT, collapse = "_"))
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
@@ -180,4 +182,87 @@ if (file.exists(file.path(path.to.05.output, "all_data.rds")) == FALSE){
 } else {
   print(sprintf("All samples data exists, reading in ..."))
   all.data <- readRDS(file.path(path.to.05.output, "all_data.rds"))
+}
+
+
+meta.data <- data.frame(MID = names(all.data)) %>%
+  rowwise() %>%
+  mutate(PROJECT = paste(str_split(MID, "_")[[1]][1:2], collapse = "_")) %>%
+  mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
+  mutate(mouse = ifelse(PROJECT == "241031_BSimons",
+                        subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse,
+                        sprintf("m%s", str_replace(str_split(SampleID, "_")[[1]][[1]], "PP", "")))) %>%
+  mutate(organ = ifelse(PROJECT == "241031_BSimons",
+                        subset(bulk.metadata, bulk.metadata$MID == SampleID)$organ,
+                        "PP"))
+
+all.input.files <- Sys.glob(file.path(outdir, "VDJ_output", 
+                                      "*", 
+                                      sprintf("VDJ_output_%s", thres), 
+                                      "preprocessed_files", 
+                                      "single_MID_clone_df", 
+                                      "*"))
+names(all.input.files) <- to_vec(for (item in all.input.files){
+  str_replace(basename(item), ".simplified.csv", "")
+})
+
+exclude.samples <- c("PP3", "PP7")
+meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
+meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
+
+for (mouse.id in c("m3", "m7")){
+  selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+  
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+    }
+  )
+  saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
+}
+
+
+for (mouse.id in c("m3", "m7")){
+  selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+  
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+    }
+  )
+  saveFileName <- sprintf("%s_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
 }
