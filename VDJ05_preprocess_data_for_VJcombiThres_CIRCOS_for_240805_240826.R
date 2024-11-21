@@ -26,7 +26,7 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
+circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -264,13 +264,59 @@ filter.clone <- FALSE
 filter.clone.cutoff <- NA
 source(file.path(path.to.main.src, "circos_helper.R"))
 
-################################################################################
-maindf <- read_tsv(input.files, id = "fileName") %>%
-  rowwise() %>%
-  mutate(fileName = basename(fileName) %>% str_replace(".simplified.csv", "")) %>%
-  mutate(bestVHit = str_replace_all(bestVHit, "[*]", "-")) %>%
-  mutate(bestJHit = str_replace_all(bestJHit, "[*]", "-")) %>%
-  mutate(len = nchar(nSeqCDR3))
+#####----------------------------------------------------------------------#####
+##### PREPROCESS DATA: GROUP CLONES TO CLUSTERS, 0.85% SIMILARITY
+#####----------------------------------------------------------------------#####
+if (file.exists(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), "all.data.VJ.combi.rds")) == FALSE){
+  all.data.VJ.combi <- list()
+  thres.dis <- 0.15
+  thres <- 0.85
   
+  clonesets <- read_tsv(input.files, id = "fileName") %>%
+    rowwise() %>%
+    mutate(fileName = basename(fileName) %>% str_replace(".simplified.csv", "")) %>%
+    mutate(bestVHit = str_replace_all(bestVHit, "[*]", "-")) %>%
+    mutate(bestJHit = str_replace_all(bestJHit, "[*]", "-")) %>%
+    mutate(len = nchar(nSeqCDR3)) %>%
+    mutate(VJ.len.combi = sprintf("%s_%s_%s", bestVHit, bestJHit, len ))
+  
+  colnames(clonesets) <- c("fileName", "id", "cloneCount", "bestVHit", "bestJHit", "seq", "len", "VJ.len.combi")
+  ##### Group sequences + Gene usages to clones
+  new.clonesets <- data.frame()
+  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+    seqs <- unique(tmpdf$seq)
+    print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
+    if (length(seqs) >= 2){
+      cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+        tmpdf$seq, function(x){
+          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+        }
+      ))    
+    } else {
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    }
+    new.clonesets <- rbind(new.clonesets, tmpdf)
+  }
+  
+  dir.create(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres)), showWarnings = FALSE, recursive = TRUE)
+  for (input.mid in unique(new.clonesets$fileName)){
+    tmpdf <- subset(new.clonesets, new.clonesets$fileName == input.mid)[, c(sprintf("VJcombi_CDR3_%s", thres),
+                                                                            "cloneCount", 
+                                                                            "bestVHit",
+                                                                            "bestJHit",
+                                                                            "seq")]
+    colnames(tmpdf) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
+    write.table(tmpdf, 
+                file.path(path.to.05.output, 
+                          sprintf("VJcombi_CDR3_%s", thres), 
+                          sprintf("%s.simplified.csv", input.mid)), 
+                quote = FALSE, 
+                sep = "\t", 
+                row.names = FALSE) 
+    all.data.VJ.combi[[input.mid]] <- tmpdf
+  }
+  saveRDS(all.data.VJ.combi, file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), "all.data.VJ.combi.rds"))
+}
 
-maindf

@@ -26,7 +26,6 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-# circos.group.type <- "VJnt"
 circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
@@ -122,8 +121,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                    J.gene, 
                                                    aaSeqCDR3, 
                                                    nSeqCDR3, 
-                                                   uniqueMoleculeCount,
-                                                   VJ.len.combi)) %>%
+                                                   uniqueMoleculeCount)) %>%
           rowwise() %>%
           mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
           mutate(VJaa = sprintf("%s_%s_%s", V.gene, J.gene, aaSeqCDR3))
@@ -172,8 +170,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                      J.gene, 
                                                      aaSeqCDR3, 
                                                      nSeqCDR3, 
-                                                     uniqueMoleculeCount,
-                                                     VJ.len.combi)) %>%
+                                                     uniqueMoleculeCount)) %>%
             rowwise() %>%
             mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
             mutate(VJaa = sprintf("%s_%s_%s", V.gene, J.gene, aaSeqCDR3)) 
@@ -208,7 +205,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
     mutate(mouse = ifelse(
       PROJECT %in% sc.projects,
-      sprintf("m%s", str_split(SampleID, "")[[1]][[3]]),
+      sprintf("m%s", str_split(SampleID, "")[[1]][[2]]),
       subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse
     )) %>%
     mutate(organ = ifelse(
@@ -248,65 +245,80 @@ all.input.files <- input.metadata$path
 names(all.input.files) <- input.metadata$SampleID
 
 ##### generate circos plot for all hashtags
-exclude.samples <- c("PP3", "PP7")
+exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
 meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
+mouse.id <- "m1"
 
-for (mouse.id in c("m3", "m7")){
-  selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
-  input.files <- all.input.files[selected.mids]
-  
-  fileAliases <- to_vec(
-    for (item in names(input.files)){
-      sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
-    }
-  )
-  saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
-  outputdir <- file.path(path.to.05.output,
-                         circos.group.type,
-                         "circos_plot")
-  filter.clone <- FALSE
-  filter.clone.cutoff <- NA
-  source(file.path(path.to.main.src, "circos_helper.R"))
-  
-  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
-    generate_circos(
-      input = input.files,
-      fileAliases = fileAliases,
-      saveFileName = saveFileName,
-      outputdir = outputdir,
-      filter.clone = filter.clone,
-      filter.clone.cutoff = filter.clone.cutoff
-    )
+selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+input.files <- all.input.files[selected.mids]
+
+fileAliases <- to_vec(
+  for (item in names(input.files)){
+    sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
   }
+)
+saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+outputdir <- file.path(path.to.05.output,
+                       circos.group.type,
+                       "circos_plot")
+filter.clone <- FALSE
+filter.clone.cutoff <- NA
+source(file.path(path.to.main.src, "circos_helper.R"))
+
+#####----------------------------------------------------------------------#####
+##### PREPROCESS DATA: GROUP CLONES TO CLUSTERS, 0.85% SIMILARITY
+#####----------------------------------------------------------------------#####
+if (file.exists(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), "all.data.VJ.combi.rds")) == FALSE){
+  all.data.VJ.combi <- list()
+  thres.dis <- 0.15
+  thres <- 0.85
+  
+  clonesets <- read_tsv(input.files, id = "fileName") %>%
+    rowwise() %>%
+    mutate(fileName = basename(fileName) %>% str_replace(".simplified.csv", "")) %>%
+    mutate(bestVHit = str_replace_all(bestVHit, "[*]", "-")) %>%
+    mutate(bestJHit = str_replace_all(bestJHit, "[*]", "-")) %>%
+    mutate(len = nchar(nSeqCDR3)) %>%
+    mutate(VJ.len.combi = sprintf("%s_%s_%s", bestVHit, bestJHit, len ))
+  
+  colnames(clonesets) <- c("fileName", "id", "cloneCount", "bestVHit", "bestJHit", "seq", "len", "VJ.len.combi")
+  ##### Group sequences + Gene usages to clones
+  new.clonesets <- data.frame()
+  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+    seqs <- unique(tmpdf$seq)
+    print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
+    if (length(seqs) >= 2){
+      cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+        tmpdf$seq, function(x){
+          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+        }
+      ))    
+    } else {
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    }
+    new.clonesets <- rbind(new.clonesets, tmpdf)
+  }
+  
+  dir.create(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres)), showWarnings = FALSE, recursive = TRUE)
+  for (input.mid in unique(new.clonesets$fileName)){
+    tmpdf <- subset(new.clonesets, new.clonesets$fileName == input.mid)[, c(sprintf("VJcombi_CDR3_%s", thres),
+                                                                            "cloneCount", 
+                                                                            "bestVHit",
+                                                                            "bestJHit",
+                                                                            "seq")]
+    colnames(tmpdf) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
+    write.table(tmpdf, 
+                file.path(path.to.05.output, 
+                          sprintf("VJcombi_CDR3_%s", thres), 
+                          sprintf("%s.simplified.csv", input.mid)), 
+                quote = FALSE, 
+                sep = "\t", 
+                row.names = FALSE) 
+    all.data.VJ.combi[[input.mid]] <- tmpdf
+  }
+  saveRDS(all.data.VJ.combi, file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), "all.data.VJ.combi.rds"))
 }
 
-##### generate circos plot for mice only, no hashtag information
-for (mouse.id in c("m3", "m7")){
-  selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
-  input.files <- all.input.files[selected.mids]
-  
-  fileAliases <- to_vec(
-    for (item in names(input.files)){
-      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
-    }
-  )
-  saveFileName <- sprintf("%s_circos.svg", mouse.id)
-  outputdir <- file.path(path.to.05.output,
-                         circos.group.type,
-                         "circos_plot")
-  filter.clone <- FALSE
-  filter.clone.cutoff <- NA
-  source(file.path(path.to.main.src, "circos_helper.R"))
-  
-  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
-    generate_circos(
-      input = input.files,
-      fileAliases = fileAliases,
-      saveFileName = saveFileName,
-      outputdir = outputdir,
-      filter.clone = filter.clone,
-      filter.clone.cutoff = filter.clone.cutoff
-    )
-  }
-}
