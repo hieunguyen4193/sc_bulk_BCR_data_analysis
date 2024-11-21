@@ -316,8 +316,8 @@ class GCtree(CollapsedTree):
                 cols = [c for mid in abund_pct[n.name].keys()]
                 values = [abund_pct[n.name][mid] for mid in abund_pct[n.name].keys()]
                 F = faces.PieChartFace(values, colors=cols,
-                                        width=size * 2, height=size * 2)
-                F.border.width = 1
+                                        width=size * 2, height=size * 2, line_color = "black")
+                F.border.width = None
                 faces.add_face_to_node(F, n, 0, position="branch-right")
                 
                 name_face = TextFace(n.name, fsize=10)
