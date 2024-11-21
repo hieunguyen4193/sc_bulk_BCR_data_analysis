@@ -299,7 +299,7 @@ class GCtree(CollapsedTree):
         ts.show_leaf_name = False
         return ts
     
-    def generate_tree_style_with_dist(self, bulkdf, hex_min, hex_max):
+    def generate_tree_style_with_dist(self, bulkdf, hex_min, hex_max, dist_to_cell = "min_dist_to_a_cell"):
         color_start_rgb = hex_to_rgb(hex_min)
         color_end_rgb = hex_to_rgb(hex_max)
         abund_pct = self.abund_pct
@@ -308,7 +308,7 @@ class GCtree(CollapsedTree):
         def layout(n):
             size = max(1, 10 * math.sqrt(n.abundance))
             if n.abundance > 1:
-                dist = bulkdf[bulkdf["seqid"] == n.name]["min_dist_to_a_cell"].values[0]
+                dist = bulkdf[bulkdf["seqid"] == n.name][dist_to_cell].values[0]
                 interpolate_c = interpolate_color(color_start_rgb, 
                                                 color_end_rgb, 
                                                 dist)
