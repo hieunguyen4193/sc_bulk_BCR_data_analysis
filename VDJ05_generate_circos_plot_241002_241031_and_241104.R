@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-# circos.group.type <- circos.group.type
-circos.group.type <- "VJaa"
+circos.group.type <- "VJnt"
+# circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -122,7 +122,8 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                    J.gene, 
                                                    aaSeqCDR3, 
                                                    nSeqCDR3, 
-                                                   uniqueMoleculeCount)) %>%
+                                                   uniqueMoleculeCount,
+                                                   VJ.len.combi)) %>%
           rowwise() %>%
           mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
           mutate(VJaa = sprintf("%s_%s_%s", V.gene, J.gene, aaSeqCDR3))
@@ -171,7 +172,8 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                      J.gene, 
                                                      aaSeqCDR3, 
                                                      nSeqCDR3, 
-                                                     uniqueMoleculeCount)) %>%
+                                                     uniqueMoleculeCount,
+                                                     VJ.len.combi)) %>%
             rowwise() %>%
             mutate(VJnt = sprintf("%s_%s_%s", V.gene, J.gene, nSeqCDR3)) %>%
             mutate(VJaa = sprintf("%s_%s_%s", V.gene, J.gene, aaSeqCDR3)) 
