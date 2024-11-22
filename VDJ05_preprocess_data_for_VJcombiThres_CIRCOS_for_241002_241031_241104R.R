@@ -221,7 +221,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
 }
 
 #####----------------------------------------------------------------------#####
-##### MAIN FUNCTIONS GENERATE CIRCOS PLOT
+##### PREPROCESS FILE: ASSIGN CLONES TO CLUSTERS 0.85 SIMILARITY
 #####----------------------------------------------------------------------#####
 all.input.files <- Sys.glob(file.path(outdir, "VDJ_output",
                                       "*",
@@ -323,7 +323,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
         all.data.VJ.combi[[input.mid]] <- tmpdf
       }
     }
-    saveRDS(all.data.VJ.combi, file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), "all.data.VJ.combi.rds"))
+    saveRDS(all.data.VJ.combi, file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), meta.data.name, "all.data.VJ.combi.rds"))
   }
 }
 
