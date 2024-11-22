@@ -313,6 +313,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
         write.table(tmpdf, 
                     file.path(path.to.05.output, 
                               sprintf("VJcombi_CDR3_%s", thres), 
+                              meta.data.name,
                               sprintf("%s.simplified.csv", input.mid)), 
                     quote = FALSE, 
                     sep = "\t", 
