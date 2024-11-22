@@ -330,6 +330,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
 #####----------------------------------------------------------------------#####
 
 for (meta.data.name in names(meta.data.splitted.or.not)){
+  tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
   all.input.files <- Sys.glob(file.path(path.to.05.output, 
                                         sprintf("VJcombi_CDR3_%s", thres), 
                                         meta.data.name,
@@ -348,18 +349,13 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   all.input.files <- input.metadata$path
   names(all.input.files) <- input.metadata$SampleID
   
-  ##### generate circos plot for all hashtags
-  exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
-  meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
-  meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
-  
   for (mouse.id in c("m1", "m2", "m3")){
-    selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+    selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
     input.files <- all.input.files[selected.mids]
     
     fileAliases <- to_vec(
       for (item in names(input.files)){
-        sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+        sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
       }
     )
     if (meta.data.name == "with_hashtags"){
@@ -367,7 +363,6 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     } else {
       saveFileName <- sprintf("%s_circos.svg", mouse.id)
     }
-    saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
     outputdir <- file.path(path.to.05.output,
                            sprintf("VJcombi_CDR3_%s", thres),
                            "circos_plot")
