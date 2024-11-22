@@ -26,6 +26,7 @@ import networkx as nx
 
 # sklearn
 from sklearn import metrics
+from sklearn.cluster import KMeans
 
 warnings.filterwarnings("ignore")
 
@@ -370,6 +371,7 @@ class GCtree(CollapsedTree):
                                             if clusterdf[clusterdf["seq"] == x]["cluster"].shape[0] != 0 else "error")
         rand_index = metrics.rand_score(seqdf.cluster.values, seqdf.MID.values)
         return(rand_index)
+
 
     def node_depth(self, node: TreeNode, topo: bool = False) -> float:
         """ The (topological) path length from the root to a given node.

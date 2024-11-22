@@ -329,5 +329,66 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
 
 
 
+#####----------------------------------------------------------------------#####
+##### GENERATE CIRCOS PLOT FOR THRES 0.85
+#####----------------------------------------------------------------------#####
 
+for (meta.data.name in names(meta.data.splitted.or.not)){
+  all.input.files <- Sys.glob(file.path(path.to.05.output, 
+                                        sprintf("VJcombi_CDR3_%s", thres), 
+                                        meta.data.name,
+                                        "*.simplified.csv"))
+  
+  input.metadata <- data.frame(
+    path = all.input.files,
+    SampleID = to_vec(for (item in all.input.files){
+      str_replace(basename(item), ".simplified.csv", "") 
+    }),
+    PROJECT = to_vec(for (item in all.input.files){
+      str_split(item, "/")[[1]][[8]]
+    })
+  ) 
+  
+  all.input.files <- input.metadata$path
+  names(all.input.files) <- input.metadata$SampleID
+  
+  ##### generate circos plot for all hashtags
+  exclude.samples <- c("PP3", "PP7")
+  meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
+  meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
+  
+  for (mouse.id in c("m3", "m7")){
+    selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+    input.files <- all.input.files[selected.mids]
+    
+    fileAliases <- to_vec(
+      for (item in names(input.files)){
+        sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+      }
+    )
+    if (meta.data.name == "with_hashtags"){
+      saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+    } else {
+      saveFileName <- sprintf("%s_circos.svg", mouse.id)
+    }
+    saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+    outputdir <- file.path(path.to.05.output,
+                           sprintf("VJcombi_CDR3_%s", thres),
+                           "circos_plot")
+    filter.clone <- FALSE
+    filter.clone.cutoff <- NA
+    source(file.path(path.to.main.src, "circos_helper.R"))
+    
+    if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+      generate_circos(
+        input = input.files,
+        fileAliases = fileAliases,
+        saveFileName = saveFileName,
+        outputdir = outputdir,
+        filter.clone = filter.clone,
+        filter.clone.cutoff = filter.clone.cutoff
+      )
+    }
+  }
+}
 
