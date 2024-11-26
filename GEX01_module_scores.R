@@ -43,13 +43,17 @@ if (input.dataset == "1st_2nd_BSimons_Datasets"){
   s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   }
 
+DefaultAssay(s.obj) <- "RNA"
+
 path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
 dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(path.to.01.output, "svg"), showWarnings = FALSE, recursive = TRUE)
 
 tmpdf <- readxl::read_excel(file.path(path.to.project.src, "module_score_Bcells.xlsx"))
 module.gene.list <- list() 
 for (g in colnames(tmpdf)){
   tmp <- tmpdf[[g]] %>% unique()
+  g <- str_replace_all(g, " ", "_")
   module.gene.list[[g]] <- tmp[is.na(tmp) == FALSE]
 }
 
@@ -96,3 +100,10 @@ heatmap.plot <- heatmapdf.scaled %>% rownames_to_column("cluster") %>%
   ggplot(aes(x = cluster, y = signature, fill = z_score)) + geom_tile() + 
   scale_fill_distiller(palette = "RdBu") + 
   theme(axis.text = element_text(size = 22))
+
+ggsave(plot = feature.plot, filename = sprintf("feature_plot_module_scores.svg"), 
+       path = file.path(path.to.01.output, "svg", "module_scores"), device = "svg", width = 20, height = 14)
+ggsave(plot = violin.plot, filename = sprintf("violin_plot_module_scores.svg"), 
+       path = file.path(path.to.01.output, "svg", "module_scores"), device = "svg", width = 20, height = 14)
+ggsave(plot = heatmap.plot, filename = sprintf("heatmap_module_scores.svg"), 
+       path = file.path(path.to.01.output, "svg", "module_scores"), device = "svg", width = 10, height = 10)
