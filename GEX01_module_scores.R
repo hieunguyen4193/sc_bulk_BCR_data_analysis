@@ -47,7 +47,7 @@ DefaultAssay(s.obj) <- "RNA"
 
 path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
 dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
-dir.create(file.path(path.to.01.output, "svg"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
 
 tmpdf <- readxl::read_excel(file.path(path.to.project.src, "module_score_Bcells.xlsx"))
 module.gene.list <- list() 
