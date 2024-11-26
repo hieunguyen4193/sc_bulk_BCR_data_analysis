@@ -52,8 +52,12 @@ for (input.dataset in names(path.to.all.s.obj)){
   if ("svglite" %in% installed.packages() == FALSE){
     install.packages("svglite")
   }
-  
-  reduction.name <- "INTE_UMAP"
+  if (input.dataset == "1st_dataset"){
+    reduction.name <- "RNA_UMAP"
+  } else {
+    reduction.name <- "INTE_UMAP"
+  }
+
   DefaultAssay(s.obj) <- "RNA"
   Idents(s.obj) <- "seurat_clusters"
   
