@@ -52,7 +52,7 @@ for (input.dataset in names(path.to.all.s.obj)){
   if ("svglite" %in% installed.packages() == FALSE){
     install.packages("svglite")
   }
-  if (input.dataset == "1st_dataset"){
+  if (input.dataset %in% c("241002_BSimons", "241104_BSimons")){
     reduction.name <- "RNA_UMAP"
   } else {
     reduction.name <- "INTE_UMAP"
