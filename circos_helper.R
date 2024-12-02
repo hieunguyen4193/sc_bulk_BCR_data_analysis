@@ -47,7 +47,7 @@ generate_circos <- function(
       all.accum.sum <- c(all.accum.sum, c(accum.sum))
     }
     tmp.clonedf$accum.Freq <- unlist(all.accum.sum)
-    tmp.clonedf <- subset(tmp.clonedf, select = c(id, Freq, accum.Freq))
+    tmp.clonedf <- subset(tmp.clonedf, select = c(id, cloneCount, Freq, accum.Freq))
     tmp.clonedf$SampleID <- input.mid
     cloneCountdf <- rbind(cloneCountdf, tmp.clonedf)
   }
@@ -58,15 +58,17 @@ generate_circos <- function(
   cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = setdiff(names(input.files), exclude.samples))
   
   plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
-    subset(select = c(id, Freq, accum.Freq))
+    subset(select = c(id, cloneCount, Freq, accum.Freq))
   colnames(plotdf) <- c("id", 
+                        sprintf("%s_Count", levels(cloneCountdf$SampleID)[[1]]),
                         sprintf("%s_Freq", levels(cloneCountdf$SampleID)[[1]]), 
                         sprintf("%s_accumFreq", levels(cloneCountdf$SampleID)[[1]]))
   
   for (sample.id in levels(cloneCountdf$SampleID)[2: length(levels(cloneCountdf$SampleID))]){
     tmpdf <- subset(cloneCountdf, cloneCountdf$SampleID == sample.id) %>%
-      subset(select = c(id, Freq, accum.Freq))
+      subset(select = c(id, cloneCount, Freq, accum.Freq))
     colnames(tmpdf) <- c("id", 
+                         sprintf("%s_Count", sample.id),
                          sprintf("%s_Freq", sample.id), 
                          sprintf("%s_accumFreq", sample.id))
     plotdf <- merge(plotdf, tmpdf, by.x = "id", by.y = "id", all.x = TRUE, all.y = TRUE)
