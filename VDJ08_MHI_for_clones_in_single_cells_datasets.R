@@ -43,49 +43,52 @@ for (input.file in all.files){
   print(sprintf("Working on sample %s", input.file))
   tmpdf <- read.csv(input.file) %>% subset(select = -c(X))
   colnames(tmpdf) <- c("CloneID", colnames(tmpdf)[2:length(colnames(tmpdf))])
-  
-  mhidf <- data.frame(MID = to_vec(
-    for (item in colnames(tmpdf)){
-      if (grepl("_Freq", item) == TRUE){
-        str_replace(item, "_Freq", "")
+  filename <- basename(input.file) %>% str_replace(".csv", "")
+  if (file.exists(file.path(path.to.08.output, sprintf("%s.MHI.csv", filename))) == FALSE){
+    mhidf <- data.frame(MID = to_vec(
+      for (item in colnames(tmpdf)){
+        if (grepl("_Freq", item) == TRUE){
+          str_replace(item, "_Freq", "")
+        }
       }
+    ))
+    
+    for (input.mid1 in mhidf$MID){
+      print(sprintf("working on %s", input.mid1))
+      mhidf[[input.mid1]] <- unlist(
+        lapply(mhidf$MID, function(input.mid2){
+          X <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid1)]] != 0,] %>% nrow()
+          Y <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid2)]] != 0,] %>% nrow()
+          
+          x <- unlist(lapply(
+            tmpdf$CloneID %>% unique(),
+            function(x){
+              return(subset(tmpdf, 
+                            tmpdf[[sprintf("%s_Count", input.mid1)]]!= 0 & 
+                              tmpdf$CloneID == x) %>% nrow())
+            }
+          ))
+          y <- unlist(lapply(
+            tmpdf$CloneID %>% unique(),
+            function(x){
+              return(subset(tmpdf, 
+                            tmpdf[[sprintf("%s_Count", input.mid2)]]!= 0 &
+                              tmpdf$CloneID == x) %>% nrow())
+            }
+          ))
+          
+          nom <- 2 * sum(x * y)
+          det <- (sum(x^2)/X^2) + (sum(y^2)/Y^2)
+          mhi <- nom/(X*Y * det)
+          return(mhi)
+        })
+      )
     }
-  ))
-  
-  for (input.mid1 in mhidf$MID){
-    print(sprintf("working on %s", input.mid1))
-    mhidf[[input.mid1]] <- unlist(
-      lapply(mhidf$MID, function(input.mid2){
-        X <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid1)]] != 0,] %>% nrow()
-        Y <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid2)]] != 0,] %>% nrow()
-        
-        x <- unlist(lapply(
-          tmpdf$CloneID %>% unique(),
-          function(x){
-            return(subset(tmpdf, 
-                          tmpdf[[sprintf("%s_Count", input.mid1)]]!= 0 & 
-                            tmpdf$CloneID == x) %>% nrow())
-          }
-        ))
-        y <- unlist(lapply(
-          tmpdf$CloneID %>% unique(),
-          function(x){
-            return(subset(tmpdf, 
-                          tmpdf[[sprintf("%s_Count", input.mid2)]]!= 0 &
-                            tmpdf$CloneID == x) %>% nrow())
-          }
-        ))
-        
-        nom <- 2 * sum(x * y)
-        det <- (sum(x^2)/X^2) + (sum(y^2)/Y^2)
-        mhi <- nom/(X*Y * det)
-        return(mhi)
-      })
-    )
+    write.csv(mhidf, file.path(path.to.08.output, sprintf("%s.MHI.csv", filename)))
+  }else {
+    mhidf <- read.csv(file.path(path.to.08.output, sprintf("%s.MHI.csv", filename)))
   }
   
-  filename <- basename(input.file) %>% str_replace(".csv", "")
-  write.csv(mhidf, file.path(path.to.08.output, sprintf("%s.MHI.csv", filename)))
 }
 
 
