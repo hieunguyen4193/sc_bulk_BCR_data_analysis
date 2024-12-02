@@ -41,46 +41,38 @@ mhidf <- data.frame(MID = to_vec(
   }
 ))
 
-input.mid1 <- "P1"
-input.mid2 <- "M1"
+for (input.mid1 in mhidf$MID){
+  print(sprintf("working on %s", input.mid1))
+  mhidf[[input.mid1]] <- unlist(
+    lapply(mhidf$MID, function(input.mid2){
+      X <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid1)]] != 0,] %>% nrow()
+      Y <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid2)]] != 0,] %>% nrow()
+      
+      x <- unlist(lapply(
+        tmpdf$CloneID %>% unique(),
+        function(x){
+          return(subset(tmpdf, 
+                        tmpdf[[sprintf("%s_Count", input.mid1)]]!= 0 & 
+                          tmpdf$CloneID == x) %>% nrow())
+        }
+      ))
+      
+      y <- unlist(lapply(
+        tmpdf$CloneID %>% unique(),
+        function(x){
+          return(subset(tmpdf, 
+                        tmpdf[[sprintf("%s_Count", input.mid2)]]!= 0 &
+                          tmpdf$CloneID == x) %>% nrow())
+        }
+      ))
+      
+      nom <- 2 * sum(x * y)
+      det <- (sum(x^2)/X^2) + (sum(y^2)/Y^2)
+      mhi <- nom/(X*Y * det)
+      return(mhi)
+    })
+  )
+}
 
-X <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid1)]] != 0,] %>% nrow()
-Y <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid2)]] != 0,] %>% nrow()
 
-x <- unlist(lapply(
-  tmpdf$CloneID %>% unique(),
-  function(x){
-    return(subset(tmpdf, tmpdf[[sprintf("%s_Freq", input.mid1)]]!= 0 & tmpdf$CloneID == x) %>% nrow())
-  }
-))
-y <- unlist(lapply(
-  subset(clonesetsdf, clonesetsdf$id %in% c(input.mid1, input.mid2))$CloneID %>% unique(),
-  function(x){
-    return(subset(clonesetsdf, clonesetsdf$id == input.mid2 & clonesetsdf$CloneID == x) %>% nrow())
-  }
-))
 
-mhidf[[input.mid1]] <- unlist(lapply(
-  mhidf$MID, function(input.mid2){
-    S <- subset(clonesetsdf, clonesetsdf$id %in% c(input.mid1, input.mid2))$CloneID %>% unique() %>% length()
-    X <- subset(clonesetsdf, clonesetsdf$id == input.mid1) %>% nrow()
-    Y <- subset(clonesetsdf, clonesetsdf$id == input.mid2) %>% nrow()
-    
-    x <- unlist(lapply(
-      subset(clonesetsdf, clonesetsdf$id %in% c(input.mid1, input.mid2))$CloneID %>% unique(),
-      function(x){
-        return(subset(clonesetsdf, clonesetsdf$id == input.mid1 & clonesetsdf$CloneID == x) %>% nrow())
-      }
-    ))
-    y <- unlist(lapply(
-      subset(clonesetsdf, clonesetsdf$id %in% c(input.mid1, input.mid2))$CloneID %>% unique(),
-      function(x){
-        return(subset(clonesetsdf, clonesetsdf$id == input.mid2 & clonesetsdf$CloneID == x) %>% nrow())
-      }
-    ))
-    nom <- 2 * sum(x * y)
-    det <- (sum(x^2)/X^2) + (sum(y^2)/Y^2)
-    mhi <- nom/(X*Y * det)
-    return(mhi)
-  }
-))
