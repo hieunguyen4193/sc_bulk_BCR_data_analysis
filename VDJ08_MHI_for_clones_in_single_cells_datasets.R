@@ -86,9 +86,20 @@ for (input.file in all.files){
     }
     write.csv(mhidf, file.path(path.to.08.output, sprintf("%s.MHI.csv", filename)))
   }else {
+    print("File exists, reading in....")
     mhidf <- read.csv(file.path(path.to.08.output, sprintf("%s.MHI.csv", filename)))
   }
-  
+  library(viridis)
+  if ("X" %in% colnames(mhidf)){
+    mhidf <- subset(mhidf, select = -c(X))
+  }
+  mhi.plot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") %>%
+    ggplot(aes(x = MID, y = SampleID, fill = MHI)) + 
+    geom_tile(color = "white") + 
+    theme(axis.text.x = element_text(angle = 90)) + 
+    scale_fill_gradient(high = "#eb4034", low = "#348feb")
+  ggsave(plot = mhi.plot, filename = sprintf("%s.MHI.svg", filename),
+         path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
 }
 
 
