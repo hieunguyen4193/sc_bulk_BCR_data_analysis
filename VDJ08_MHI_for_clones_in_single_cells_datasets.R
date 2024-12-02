@@ -19,8 +19,8 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
-circos.group.type <- "VJaa"
 input.PROJECT <- "240805_BSimons_240826_BSimons"
+circos.group.type <- "VJaa"
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output")
@@ -40,7 +40,7 @@ path.to.input <- file.path(path.to.05.output,
 all.files <- Sys.glob(file.path(path.to.input, "*.csv"))
 
 for (input.file in all.files){
-  print(sprintf("Workiong on sample %s", input.file))
+  print(sprintf("Working on sample %s", input.file))
   tmpdf <- read.csv(input.file) %>% subset(select = -c(X))
   colnames(tmpdf) <- c("CloneID", colnames(tmpdf)[2:length(colnames(tmpdf))])
   
