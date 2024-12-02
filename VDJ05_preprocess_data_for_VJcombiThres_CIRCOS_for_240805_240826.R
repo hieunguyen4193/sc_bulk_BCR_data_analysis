@@ -64,14 +64,12 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
   all.data <- list()
   for (PROJECT in list.of.PROJECT){
     path.to.VDJ.output <- file.path( outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-    path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
     
     path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output/v0.2/mid_based_output")
-    path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
     
     if (PROJECT %in% bulk.projects){
       clone.obj <- run_preprocessing_all_bulk_VDJ_data(path.to.mid.output = path.to.mid.output,
-                                                       path.to.save.output = path.to.save.output,
+                                                       path.to.save.output = path.to.05.output,
                                                        PROJECT = PROJECT,
                                                        thres = thres, 
                                                        thres.dis = thres.dis,
@@ -81,7 +79,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                        define.clone.clusters = define.clone.clusters) 
     } else if (PROJECT %in% sc.projects){
       clone.obj <- run_preprocessing_all_sc_data( path.to.VDJ.output = path.to.VDJ.output, 
-                                                  path.to.save.output = path.to.save.output, 
+                                                  path.to.save.output = path.to.05.output, 
                                                   PROJECT = PROJECT,
                                                   thres = thres, 
                                                   thres.dis = thres.dis,
@@ -91,6 +89,10 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     }
     
     full.clonedf <- clone.obj$clonesets
+    full.clonedf <- full.clonedf %>%
+      rowwise() %>%
+      mutate(V.gene = ifelse(grepl("[*]", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]], V.gene )) %>%
+      mutate(J.gene = ifelse(grepl("[*]", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]], J.gene ))
     full.clonedf <- subset(full.clonedf, full.clonedf$aaSeqCDR3 != "region_not_covered")
     if (PROJECT %in% sc.projects){
       full.clonedf <- full.clonedf %>% rowwise() %>%
@@ -105,11 +107,11 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
         mutate(id = sprintf("%s_%s", id, HT))
     }
     
-    dir.create(file.path(path.to.save.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(path.to.05.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
     
     ##### split the full clone dataframe to smaller dataframe for each MID/each single cell sample hashtag
     for (mid in unique(full.clonedf$id)){
-      if (file.exists(file.path(path.to.save.output, 
+      if (file.exists(file.path(path.to.05.output, 
                                 circos.group.type, 
                                 sprintf("%s.simplified.csv", mid))) == FALSE){
         
@@ -141,7 +143,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
           mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
           arrange(desc(cloneCount))
         write.table(input.circos, 
-                    file.path(path.to.save.output, 
+                    file.path(path.to.05.output, 
                               circos.group.type, 
                               sprintf("%s.simplified.csv", mid)), 
                     quote = FALSE, 
@@ -150,15 +152,15 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
         all.data[[sprintf("%s_%s", PROJECT, mid)]] <- input.circos
       } else {
         print(sprintf("File exists at %s, reading in ...", 
-                      file.path(path.to.save.output, circos.group.type, sprintf("%s.simplified.csv", mid))))
-        all.data[[sprintf("%s_%s", PROJECT, mid)]] <- read.csv(file.path(path.to.save.output, circos.group.type, sprintf("%s.simplified.csv", mid)), sep = "\t")
+                      file.path(path.to.05.output, circos.group.type, sprintf("%s.simplified.csv", mid))))
+        all.data[[sprintf("%s_%s", PROJECT, mid)]] <- read.csv(file.path(path.to.05.output, circos.group.type, sprintf("%s.simplified.csv", mid)), sep = "\t")
       }
     }
     
     ##### if the dataset is a single cell dataset, get clonedf for all hashtag in a mouse sample. 
     if (PROJECT %in% sc.projects){
       for (mid in unique(full.clonedf$id.origin)){
-        if (file.exists(file.path(path.to.save.output, 
+        if (file.exists(file.path(path.to.05.output, 
                                   circos.group.type, 
                                   sprintf("%s.simplified.csv", mid))) == FALSE){
           
@@ -181,7 +183,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
             mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
             arrange(desc(cloneCount))
           write.table(input.circos, 
-                      file.path(path.to.save.output, 
+                      file.path(path.to.05.output, 
                                 circos.group.type, 
                                 sprintf("%s.simplified.csv", mid)), 
                       quote = FALSE, 
@@ -190,8 +192,8 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
           all.data[[sprintf("%s_%s", PROJECT, mid)]] <- input.circos
         } else {
           print(sprintf("File exists at %s, reading in ...", 
-                        file.path(path.to.save.output, circos.group.type, sprintf("%s.simplified.csv", mid))))
-          all.data[[sprintf("%s_%s", PROJECT, mid)]] <- read.csv(file.path(path.to.save.output, circos.group.type, sprintf("%s.simplified.csv", mid)), sep = "\t")
+                        file.path(path.to.05.output, circos.group.type, sprintf("%s.simplified.csv", mid))))
+          all.data[[sprintf("%s_%s", PROJECT, mid)]] <- read.csv(file.path(path.to.05.output, circos.group.type, sprintf("%s.simplified.csv", mid)), sep = "\t")
         }
       }
     }
@@ -221,10 +223,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
 #####----------------------------------------------------------------------#####
 ##### PREPROCESS FILE: ASSIGN CLONES TO CLUSTERS 0.85 SIMILARITY
 #####----------------------------------------------------------------------#####
-all.input.files <- Sys.glob(file.path(outdir, "VDJ_output",
-                                      "*",
-                                      sprintf("VDJ_output_%s", thres),
-                                      "preprocessed_files",
+all.input.files <- Sys.glob(file.path(path.to.05.output,
                                       circos.group.type,
                                       "*"))
 
@@ -232,12 +231,7 @@ input.metadata <- data.frame(
   path = all.input.files,
   SampleID = to_vec(for (item in all.input.files){
     str_replace(basename(item), ".simplified.csv", "") 
-  }),
-  PROJECT = to_vec(for (item in all.input.files){
-    str_split(item, "/")[[1]][[8]]
-  })
-) %>%
-  subset(PROJECT %in% list.of.PROJECT)
+  }))
 
 all.input.files <- input.metadata$path
 names(all.input.files) <- input.metadata$SampleID

@@ -73,6 +73,7 @@ generate_circos <- function(
   }
   plotdf[is.na(plotdf)] <- 0
   
+  write.csv(plotdf, str_replace(path.to.save.svg, ".svg", ".csv"))
   ##### Define COUNT colors
   countColors <- c("#FFFFFFFF", "#0000FFFF")
   maxCount <- cloneCountdf$Freq %>% max()
