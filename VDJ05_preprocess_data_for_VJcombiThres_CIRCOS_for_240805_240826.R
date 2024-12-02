@@ -278,8 +278,10 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
       clonesets <- read_tsv(input.files, id = "fileName") %>%
         rowwise() %>%
         mutate(fileName = basename(fileName) %>% str_replace(".simplified.csv", "")) %>%
-        mutate(bestVHit = str_replace_all(bestVHit, "[*]", "-")) %>%
-        mutate(bestJHit = str_replace_all(bestJHit, "[*]", "-")) %>%
+        # mutate(bestVHit = str_replace_all(bestVHit, "[*]", "-")) %>%
+        # mutate(bestJHit = str_replace_all(bestJHit, "[*]", "-")) %>%
+        mutate(bestVHit = str_split(bestVHit, "[*]")[[1]][[1]]) %>%
+        mutate(bestJHit = str_split(bestJHit, "[*]")[[1]][[1]]) %>%
         mutate(len = nchar(nSeqCDR3)) %>%
         mutate(VJ.len.combi = sprintf("%s_%s_%s", bestVHit, bestJHit, len ))
       

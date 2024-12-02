@@ -1,0 +1,9 @@
+- Run `VDJ05_generate_circos_plot_220701_etc_biopsies.R` to generate `circos` plot for the dataset 220701 (biopsy, YFP+- and Ly6c+-) dataset. 
+
+- Run `VDJ05_generate_circos_plot_240805_and_240826.R`: This script pre-process the input clone dataframe, generate a `.simplified.csv` dataframe for each `MID` or each `hashtag-mouseID`. Depending on the input `circos.group.type`, we save different type of information of the sequence (`VJaa`: AA sequence, `VJnt`: nucleotide sequence).
+
+- Run `VDJ05_generate_circos_plot_241002_241031_and_241104.R`: similar to `VDJ05_generate_circos_plot_240805_and_240826.R`.
+
+- Run `VDJ05_preprocess_data_for_VJcombiThres_CIRCOS_for_240805_240826.R`: use the `VJaa` information generated from `VDJ05_generate_circos_plot_240805_and_240826.R` to continue to assign clones to clusters based on LV distance between AA sequences. 
+
+- Run `VDJ05_preprocess_data_for_VJcombiThres_CIRCOS_for_241002_241031_241104R.R`: similar to `VDJ05_preprocess_data_for_VJcombiThres_CIRCOS_for_240805_240826.R`.

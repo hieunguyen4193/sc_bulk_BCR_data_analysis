@@ -41,7 +41,6 @@ for (mouse.id in unique(mid.metadata$mouse)){
 
 PROJECT <- "220701_etc_biopsies"
 path.to.VDJ.output <- file.path( outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
 
 #####----------------------------------------------------------------------#####
 ##### READ CLONE DATA -----> NEW DATA
@@ -51,12 +50,10 @@ dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(path.to.05.output, "circos_plot"), showWarnings = FALSE, recursive = TRUE)
 
 path.to.mid.output <- file.path(path.to.storage, PROJECT, "mixcr_pipeline_output/v0.2/mid_based_output")
-path.to.save.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres), "preprocessed_files")
-
-dir.create(file.path(path.to.save.output, "single_MID_clone_df"), showWarnings = FALSE, recursive = TRUE)
+dir.create(file.path(path.to.05.output, "single_MID_clone_df"), showWarnings = FALSE, recursive = TRUE)
 
 clone.obj <- run_preprocessing_all_bulk_VDJ_data(path.to.mid.output = path.to.mid.output,
-                                                 path.to.save.output = path.to.save.output,
+                                                 path.to.save.output = path.to.VDJ.output,
                                                  PROJECT = PROJECT,
                                                  thres = thres, 
                                                  thres.dis = thres.dis,
@@ -70,7 +67,7 @@ full.clonedf <- clone.obj$clonesets
 full.clonedf <- subset(full.clonedf, full.clonedf$aaSeqCDR3 != "region_not_covered")
 
 for (mid in unique(mid.metadata$X)){
-  if (file.exists(file.path(path.to.save.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid))) == FALSE){
+  if (file.exists(file.path(path.to.05.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid))) == FALSE){
     print(sprintf("Working on sample MID %s", mid))
     clonedf <- subset(full.clonedf, full.clonedf$id == mid)
     input.circos <- subset(clonedf, select = c(V.gene, 
@@ -88,11 +85,11 @@ for (mid in unique(mid.metadata$X)){
       mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
       mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
       mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]])
-    write.table(input.circos, file.path(path.to.save.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid)), quote = FALSE, sep = "\t", row.names = FALSE)  
+    write.table(input.circos, file.path(path.to.05.output, "single_MID_clone_df", sprintf("%s.simplified.csv", mid)), quote = FALSE, sep = "\t", row.names = FALSE)  
   }
 }
 
-all.mid.files <- Sys.glob(file.path(path.to.save.output, "single_MID_clone_df", "*.simplified.csv"))
+all.mid.files <- Sys.glob(file.path(path.to.05.output, "single_MID_clone_df", "*.simplified.csv"))
 names(all.mid.files) <- to_vec(
   for (item in all.mid.files){
     str_replace(basename(item), ".simplified.csv", "")
@@ -115,12 +112,12 @@ count.mice <- table(mid.metadata$mouse)
 #   input.sort <- FALSE
 #   countColors <- c("#FFFFFFFF", "#0000FFFF")
 #   linkColors <- rep("#FF000080", ifelse(length(files) == 1, 1, length(combn(length(files), 2))))
-#   dir.create(file.path(path.to.save.output, "circos_plots_FT_script", mouse.id), showWarnings = FALSE, recursive = TRUE)
-#   dir.create(file.path(path.to.save.output, "circos_plots_Hieu_script", mouse.id), showWarnings = FALSE, recursive = TRUE)
+#   dir.create(file.path(path.to.05.output, "circos_plots_FT_script", mouse.id), showWarnings = FALSE, recursive = TRUE)
+#   dir.create(file.path(path.to.05.output, "circos_plots_Hieu_script", mouse.id), showWarnings = FALSE, recursive = TRUE)
 #   
 #   circos(files = files,
 #          fileAliases = fileAliases,
-#          saveFolder = file.path(path.to.save.output, "circos_plots_FT_script", sprintf("%s/", mouse.id)),
+#          saveFolder = file.path(path.to.05.output, "circos_plots_FT_script", sprintf("%s/", mouse.id)),
 #          cutoff = cutoff,
 #          sort = input.sort,
 #          countColors = countColors,
@@ -166,5 +163,4 @@ mid.metadata <- subset(mid.metadata, select = -c(X.1, X.2))
 mid.metadata <- mid.metadata %>% rowwise() %>%
   mutate(total.cloneCount = read.csv(all.mid.files[[X]], sep = "\t")$cloneCount %>% sum()) %>%
   mutate(num.clone = nrow(read.csv(all.mid.files[[X]], sep = "\t")))
-
-subset(mid.metadata, grepl("YFP", mid.metadata$population)) %>% view()
+write.csv(mid.metadata, file.path(path.to.05.output, "number_of_clones_per_samples.csv"))

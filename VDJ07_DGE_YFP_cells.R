@@ -31,7 +31,7 @@ define.clone.clusters <- FALSE
 sc.projects <-  c("241002_BSimons", "241104_BSimons")
 
 for (PROJECT in sc.projects){
-  
+  print(sprintf("Working on project %s", PROJECT))
   path.to.07.output <- file.path(outdir, "VDJ_output", "07_output", PROJECT)
   dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
   
@@ -71,6 +71,7 @@ for (PROJECT in sc.projects){
   
   cutoff.adjp <- 0.05
   
+  write.csv(input.df, file.path(path.to.07.output, sprintf("input_VolcanoPlot_YFP_%s_cells_vs_nonYFP_%s_cells.svg", length(yfp.cells), length(non.yfp.cells))))
   volcano.plot <- ggplot(data=input.df, 
                          aes(x=avg_log2FC, y=-log10(p_val_adj), col=sig, label=show.gene.name)) + 
     geom_point() + 
@@ -89,6 +90,4 @@ for (PROJECT in sc.projects){
          dpi = 300, 
          width = 14, 
          height = 10)
-  
-  
 }
