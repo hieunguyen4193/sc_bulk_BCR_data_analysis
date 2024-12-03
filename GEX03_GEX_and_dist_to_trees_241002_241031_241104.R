@@ -44,9 +44,9 @@ for (mouseid in c("m3", "m7")){
   
   path.to.distdf <- file.path(outdir, sprintf("tree_analysis/07_output/241031_BSimons_241104_BSimons_241002_BSimons/%s/scdistdf.csv", mouseid))
   
-  if (mouseid == "m7"){
+  if (mouseid == "m3"){
     s.obj <- readRDS(path.to.all.s.obj[["241002_BSimons"]])
-  } else if (mouseid == "m3"){
+  } else if (mouseid == "m7"){
     s.obj <- readRDS(path.to.all.s.obj[["241104_BSimons"]])
   }
   distdf <- read.csv(Sys.glob(path.to.distdf)) %>%

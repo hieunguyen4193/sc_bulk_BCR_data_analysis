@@ -81,8 +81,15 @@ for (input.dataset in names(path.to.all.s.obj)){
     for (item in all.clone.files) str_replace(str_replace(basename(item), "clonesets_", ""), ".split_clones.xlsx", "")
   )
   
+  
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("input_barcode")
+  if (length(intersect(meta.data$input_barcode, clonedf$barcode_full)) == 0){
+    print("rename barcode")
+    meta.data <- meta.data %>%
+      rowwise() %>%
+      mutate(input_barcode = str_replace(input_barcode, sprintf("%s_%s", name, name), name))
+  }
   meta.data <- meta.data %>%
     rowwise() %>%
     mutate(num_mutation = ifelse(
