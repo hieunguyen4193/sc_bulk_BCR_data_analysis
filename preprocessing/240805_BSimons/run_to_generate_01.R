@@ -2,7 +2,7 @@ gc()
 rm(list = ls())
 
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 
 path.to.rmd1 <- file.path(path.to.project.src, "01_hashtag_antibodies.Rmd")

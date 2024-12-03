@@ -1,6 +1,8 @@
 gc()
 rm(list = ls())
-
+if ("svglite" %in% installed.packages() == FALSE){
+  install.pacakges("svglite")
+}
 #####----------------------------------------------------------------------#####
 ##### packages
 #####----------------------------------------------------------------------#####
@@ -17,7 +19,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "VDJ_path_to_output.R"))
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 

@@ -25,7 +25,11 @@ for (mouseid in c("m3", "m7")){
   source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
   
   outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
-  input.dataset <- "240805_BSimons"
+  if (mouseid == "m3"){
+    input.dataset <- "241104_BSimons"
+  } else if (mouseid == "m7"){
+    input.dataset <- "241002_BSimons"
+  }
   
   if (input.dataset %in% c("241104_BSimons", "241002_BSimons")){
     reduction.name <- "RNA_UMAP"
