@@ -24,6 +24,12 @@ source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
 for (input.dataset in names(path.to.all.s.obj)){
+  if (input.dataset %in% c("241002_BSimons", "241104_BSimons")){
+    reduction.name <- "RNA_UMAP"
+  } else {
+    reduction.name <- "INTE_UMAP"
+  }
+  
   path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
   dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
   dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
@@ -60,7 +66,7 @@ for (input.dataset in names(path.to.all.s.obj)){
     c.gene.barcodes[[g]] <- subset(meta.data, meta.data$C.gene == g) %>% row.names()
   }
   
-  c.gene.umap <- DimPlot(object = s.obj, 
+  c.gene.umap <- DimPlot(object = s.obj, reduction = reduction.name, 
                          label = TRUE, label.box = TRUE, 
                          cells.highlight = c.gene.barcodes, 
                          cols.highlight = hue_pal()(length(names(c.gene.barcodes))))
@@ -68,7 +74,7 @@ for (input.dataset in names(path.to.all.s.obj)){
          path = file.path(path.to.01.output, "svg", "module_scores"), device = "svg", width = 14, height = 10)
   
   for (g in names(c.gene.barcodes)){
-    c.gene.umap <- DimPlot(object = s.obj, cells.highlight = c.gene.barcodes[[g]], 
+    c.gene.umap <- DimPlot(object = s.obj, cells.highlight = c.gene.barcodes[[g]], reduction = reduction.name,
                            cols.highlight = "red", label = TRUE, label.box = TRUE) + theme(legend.position = "none") + ggtitle(g)
     ggsave(plot = c.gene.umap, filename = sprintf("all_C_genes_marked_cells_%s.svg", g), 
            path = file.path(path.to.01.output, "svg", "module_scores"), device = "svg", width = 14, height = 10)
@@ -100,11 +106,6 @@ for (input.dataset in names(path.to.all.s.obj)){
   library(viridis)
   if ("svglite" %in% installed.packages() == FALSE){
     install.packages("svglite")
-  }
-  if (input.dataset %in% c("241002_BSimons", "241104_BSimons")){
-    reduction.name <- "RNA_UMAP"
-  } else {
-    reduction.name <- "INTE_UMAP"
   }
 
   DefaultAssay(s.obj) <- "RNA"

@@ -6,7 +6,7 @@ if (packageVersion("Matrix") != "1.5.4.1"){
   install.packages("https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.3.tar.gz", type = "source", repos = NULL)
 }
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240805_BSimons"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "240805_BSimons"
 
 path.to.rmd1 <- file.path(path.to.project.src, "03_downstream_analysis_singlet_only.Rmd")
