@@ -51,7 +51,7 @@ for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
     
     meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
     ct.columns <- to_vec(
-      for (item in colnames(meta.data)){
+      for (item in colnames(vdjdf)){
         if (grepl("CT", item) == TRUE | grepl("cdr3", item) == TRUE){
           item
         }
@@ -105,8 +105,18 @@ for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
     
     meta.data <- meta.data %>% column_to_rownames("barcode") 
     meta.data <- meta.data[row.names(s.obj@meta.data), ]
-    new.cols <- setdiff(colnames(meta.data), colnames(s.obj@meta.data))
-    for (c in c(new.cols, ct.columns)){
+    new.cols <- c("CTgene",
+                  "CTnt",
+                  "CTaa",
+                  "CTstrict",
+                  "V.gene", 
+                  "J.gene", 
+                  "aaSeqCDR3", 
+                  "nSeqCDR3", 
+                  "VJseq.combi", 
+                  "VJ.combi", 
+                  "VJ.len.combi")
+    for (c in new.cols){
       s.obj <- AddMetaData(object = s.obj, col.name = c, metadata = meta.data[[c]])
     }
     
