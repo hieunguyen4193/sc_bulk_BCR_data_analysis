@@ -83,7 +83,9 @@ for (input.dataset in names(path.to.all.s.obj)){
   
   
   meta.data <- s.obj@meta.data %>% 
-    rownames_to_column("input_barcode")
+    rownames_to_column("input_barcode") %>%
+    rowwise() %>%
+    mutate(keep.barcode = input_barcode)
   if (length(intersect(meta.data$input_barcode, clonedf$barcode_full)) == 0){
     print("rename barcode")
     meta.data <- meta.data %>%
@@ -98,7 +100,7 @@ for (input.dataset in names(path.to.all.s.obj)){
       NA
     )) %>%
     mutate(group_mutation = asssign_mutation_to_group(num_mutation)) %>%
-    column_to_rownames("input_barcode")
+    column_to_rownames("keep.barcode")
   
   meta.data <- meta.data[row.names(s.obj@meta.data),]
   s.obj <- AddMetaData(object = s.obj, metadata = meta.data$group_mutation, col.name = "group_mutation")
