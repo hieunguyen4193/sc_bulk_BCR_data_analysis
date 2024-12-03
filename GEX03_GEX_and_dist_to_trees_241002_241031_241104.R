@@ -18,7 +18,7 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 ##### INPUT ARGS
 #####---------------------------------------------------------------------------#####
 
-for (mouseid in c("m1", "m2", "m3")){
+for (mouseid in c("m3", "m7")){
   print(sprintf("working on mouse %s", mouseid))
   path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
   path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
@@ -37,17 +37,14 @@ for (mouseid in c("m1", "m2", "m3")){
   dir.create(path.to.03.output, showWarnings = FALSE, recursive = TRUE)
   
   print(sprintf("Working on dataset %s", input.dataset))
-  s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
-  DefaultAssay(s.obj) <- "RNA"
-  sample.list <- list(
-    m1 = c("M1", "P1"),
-    m2 = c("M2", "P2"),
-    m3 = c("M3", "P3")
-  )
   
-  s.obj <- subset(s.obj, name %in% sample.list[[mouseid]])
-  path.to.distdf <- file.path(outdir, sprintf("tree_analysis/06_output/240826_BSimons_240805_BSimons/%s/scdistdf.csv", mouseid))
+  path.to.distdf <- file.path(outdir, sprintf("tree_analysis/07_output/241031_BSimons_240411_BSimons_241002_BSimons/%s/scdistdf.csv", mouseid))
   
+  if (mouseid == "m7"){
+    s.obj <- readRDS(path.to.all.s.obj[["241002_BSimons"]])
+  } else if (mouseid == "m3"){
+    s.obj <- readRDS(path.to.all.s.obj[["241104_BSimons"]])
+  }
   distdf <- read.csv(Sys.glob(path.to.distdf)) %>%
     subset(select = -c(X))
   
@@ -76,6 +73,7 @@ for (mouseid in c("m1", "m2", "m3")){
     ggplot(aes(x = seurat_clusters, y = minDistTree, fill = seurat_clusters)) + 
     geom_boxplot() + 
     geom_jitter(size = 0.5)
+  
   
   ggsave(plot = feature.dist.plot, filename = sprintf("UMAP_distance_to_trees.csv"), path = path.to.03.output, dev = "svg", width = 14, height = 10)
   ggsave(plot = violin.dist.plot, filename = sprintf("ViolinPlot_distance_to_trees.csv"), path = path.to.03.output, dev = "svg", width = 14, height = 10)
