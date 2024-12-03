@@ -45,7 +45,7 @@ sample.list <- list(
 s.obj <- subset(s.obj, name %in% sample.list[[mouseid]])
 path.to.distdf <- file.path(outdir, sprintf("tree_analysis/06_output/240826_BSimons_240805_BSimons/%s/scdistdf.csv", mouseid))
 
-distdf <- read_tsv(Sys.glob(path.to.distdf)) %>%
+distdf <- read.csv(Sys.glob(path.to.distdf)) %>%
   subset(select = -c(X))
 
 distdf.min <- distdf %>%
