@@ -1,7 +1,7 @@
 gc()
 rm(list = ls())
 if ("svglite" %in% installed.packages() == FALSE){
-  install.pacakges("svglite")
+  install.packages("svglite")
 }
 #####----------------------------------------------------------------------#####
 ##### packages

@@ -2,15 +2,15 @@ gc()
 rm(list = ls())
 # install.packages("dplyr")
 # install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.6-1.tar.gz", type = "source", repos = NULL)
-new.pkgs <- c("APackOfTheClones", "svglite", "car", "ggpubr", "ggthemes", "dplyr")
-for (pkg in new.pkgs){
-if (pkg %in% installed.packages() == FALSE){
-  install.packages(pkg)
-}
-}
-library(ggpubr)
-library(ggthemes)
-library(APackOfTheClones)
+# new.pkgs <- c("APackOfTheClones", "svglite", "car", "ggpubr", "ggthemes", "dplyr")
+# for (pkg in new.pkgs){
+# if (pkg %in% installed.packages() == FALSE){
+#   install.packages(pkg)
+# }
+# }
+# library(ggpubr)
+# library(ggthemes)
+# library(APackOfTheClones)
 
 #####----------------------------------------------------------------------#####
 ##### packages

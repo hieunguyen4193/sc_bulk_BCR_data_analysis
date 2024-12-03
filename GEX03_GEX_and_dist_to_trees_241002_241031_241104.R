@@ -42,7 +42,7 @@ for (mouseid in c("m3", "m7")){
   
   print(sprintf("Working on dataset %s", input.dataset))
   
-  path.to.distdf <- file.path(outdir, sprintf("tree_analysis/07_output/241031_BSimons_240411_BSimons_241002_BSimons/%s/scdistdf.csv", mouseid))
+  path.to.distdf <- file.path(outdir, sprintf("tree_analysis/07_output/241031_BSimons_241104_BSimons_241002_BSimons/%s/scdistdf.csv", mouseid))
   
   if (mouseid == "m7"){
     s.obj <- readRDS(path.to.all.s.obj[["241002_BSimons"]])
