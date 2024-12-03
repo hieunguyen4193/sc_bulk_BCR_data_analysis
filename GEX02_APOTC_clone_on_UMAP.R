@@ -31,6 +31,7 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+clone.name <- "CTstrict"
 
 for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
   print(sprintf("Working on dataset %s", dataset.name))
@@ -40,7 +41,7 @@ for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
   s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
   DefaultAssay(s.obj) <- "RNA"
   
-  path.to.02.output <- file.path(outdir, "GEX_output", "02_output", dataset.name)
+  path.to.02.output <- file.path(outdir, "GEX_output", "02_output", dataset.name, clone.name)
   dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
   if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
     reduction.name <- "RNA_UMAP"
@@ -48,16 +49,16 @@ for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
     reduction.name <- "INTE_UMAP"
   }
   
-  s.obj <- RunAPOTC(seurat_obj = s.obj, reduction_base = reduction.name, clonecall = "CTstrict")
+  s.obj <- RunAPOTC(seurat_obj = s.obj, reduction_base = reduction.name, clonecall = clone.name)
   
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("cell.barcode")
-  clonedf <- data.frame(meta.data$CTstrict %>% table())
+  clonedf <- data.frame(meta.data[[clone.name]] %>% table())
   colnames(clonedf) <- c("clone", "count")
   clonedf <- clonedf %>% arrange(desc(count))
   for (sampleid in unique(s.obj$name)){
     clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
-      nrow(subset(meta.data, meta.data$name == sampleid & meta.data$CTstrict == x))
+      nrow(subset(meta.data, meta.data$name == sampleid & meta.data[[clone.name]] == x))
     }))
   }
   
@@ -81,7 +82,7 @@ for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
     
     apotc.clone.plot <- list()
     for (i in seq(1,4)){
-      tmp.plot <- vizAPOTC(s.obj, clonecall = "CTstrict", 
+      tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
                            verbose = FALSE, 
                            reduction_base = reduction.name, 
                            show_labels = TRUE, 
