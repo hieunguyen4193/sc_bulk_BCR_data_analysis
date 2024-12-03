@@ -31,7 +31,7 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
-clone.name <- "CTstrict"
+clone.name <- "CTaa"
 
 for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
   print(sprintf("Working on dataset %s", dataset.name))
