@@ -15,7 +15,7 @@ library(circlize)
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
 path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
 thres <- 0.85
@@ -28,7 +28,7 @@ define.clone.clusters <- FALSE
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
-sc.projects <-  c("241002_BSimons", "241104_BSimons")
+sc.projects <-  c("241002_BSimons", "241104_BSimons", "2nd_dataset")
 
 for (PROJECT in sc.projects){
   print(sprintf("Working on project %s", PROJECT))
