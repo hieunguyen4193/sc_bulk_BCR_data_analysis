@@ -33,12 +33,19 @@ dir.create(path.to.03.output, showWarnings = FALSE, recursive = TRUE)
 print(sprintf("Working on dataset %s", input.dataset))
 s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
 DefaultAssay(s.obj) <- "RNA"
-  
-path.to.dist.df <- list(
-  `240805_BSimons` = file.path(outdir, "/tree_analysis/06_output/240826_BSimons_240805_BSimons/scdistdf.csv")
+
+mouseid <- "m1"
+
+sample.list <- list(
+  m1 = c("M1", "P1"),
+  m2 = c("M2", "P2"),
+  m3 = c("M3", "P3")
 )
 
-distdf <- read.csv(path.to.dist.df[[input.dataset]]) %>%
+s.obj <- subset(s.obj, name %in% sample.list[[mouseid]])
+path.to.distdf <- file.path(outdir, sprintf("tree_analysis/06_output/240826_BSimons_240805_BSimons/%s/scdistdf.csv", mouseid))
+
+distdf <- read_tsv(Sys.glob(path.to.distdf)) %>%
   subset(select = -c(X))
 
 distdf.min <- distdf %>%
@@ -58,5 +65,10 @@ s.obj <- AddMetaData(object = s.obj,
                      col.name = "dist_to_tree", 
                      metadata = meta.data$dist)
 
-FeaturePlot(object = s.obj, reduction = reduction.name, label = TRUE, features = "dist_to_tree", pt.size = 2, order = TRUE) +
-  scale_color_gradient(low = "gray", high = "red")
+FeaturePlot(object = s.obj, 
+            reduction = reduction.name, 
+            label = TRUE, 
+            features = "dist_to_tree", 
+            pt.size = 2, 
+            order = TRUE) +
+  scale_color_gradient(low = "gray28", high = "red")
