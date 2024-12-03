@@ -60,6 +60,14 @@ for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
     
     ct.columns <- c(ct.columns, "IGH", "IGLC")
     meta.data <- meta.data[setdiff(colnames(meta.data), ct.columns)]
+    if (length(intersect(meta.data$barcode, vdjdf$barcode)) == 0){
+      vdjdf$barcode <- unlist(lapply(
+        vdjdf$barcode, function(x){
+          sampleid <- subset(vdjdf, vdjdf$barcode == x)$sample
+          str_replace(x, sprintf("%s_%s", sampleid, sampleid), sampleid)
+        }
+      ))
+    }
     meta.data <- merge(meta.data, vdjdf, by.x = "barcode", by.y = "barcode", all.x = TRUE) %>%
       rowwise() %>%
       mutate(V.gene = ifelse(is.na(IGH) == FALSE, str_split(IGH, "[.]")[[1]][[1]], NA)) %>%
