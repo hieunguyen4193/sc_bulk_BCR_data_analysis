@@ -20,10 +20,13 @@ source(file.path(path.to.main.src, "VDJ_path_to_output.R"))
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
-input.dataset <- "241002_BSimons"
-vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
 
 for (input.dataset in names(path.to.all.s.obj)){
+  path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
+  dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
+  dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
+  
+  vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
   print(sprintf("Working on dataset %s", input.dataset))
   s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   DefaultAssay(s.obj) <- "RNA"
@@ -73,9 +76,6 @@ for (input.dataset in names(path.to.all.s.obj)){
   colnames(count.C.gene.clusters) <- c(c("Gene"), to_vec(for (i in seq(1, length(unique(s.obj$seurat_clusters)))) sprintf( 
     "cluster_%s", i)) )
   write.csv(count.C.gene.clusters, file.path(path.to.01.output, "svg", "module_scores", "count_C_gene_in_each_cluster.csv"))
-  path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
-  dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
-  dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
   
   tmpdf <- readxl::read_excel(file.path(path.to.project.src, "module_score_Bcells.xlsx"))
   module.gene.list <- list() 
