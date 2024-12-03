@@ -106,7 +106,7 @@ for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
     meta.data <- meta.data %>% column_to_rownames("barcode") 
     meta.data <- meta.data[row.names(s.obj@meta.data), ]
     new.cols <- setdiff(colnames(meta.data), colnames(s.obj@meta.data))
-    for (c in new.cols){
+    for (c in c(new.cols, ct.columns)){
       s.obj <- AddMetaData(object = s.obj, col.name = c, metadata = meta.data[[c]])
     }
     
