@@ -30,12 +30,12 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "VDJ_path_to_output.R"))
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
 # dataset.name <- "241002_BSimons"
 for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
   path.to.00.output <- file.path(outdir, "GEX_output", "00_output", dataset.name)
   dir.create(path.to.00.output, showWarnings = FALSE, recursive = TRUE)
-  outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
   savename <- str_replace(basename(path.to.all.s.obj[[dataset.name]]), ".rds", "")
   if (file.exists(file.path(path.to.00.output, sprintf("%s.addedCloneInfo.rds", savename))) == FALSE){
     s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
