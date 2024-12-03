@@ -123,7 +123,8 @@ for (dataset.name in unique(names(path.to.all.VDJ.output)) ){
                   "nSeqCDR3", 
                   "VJseq.combi", 
                   "VJ.combi", 
-                  "VJ.len.combi")
+                  "VJ.len.combi",
+                  sprintf("VJcombi_CDR3_%s", thres))
     for (c in new.cols){
       s.obj <- AddMetaData(object = s.obj, col.name = c, metadata = meta.data[[c]])
     }
