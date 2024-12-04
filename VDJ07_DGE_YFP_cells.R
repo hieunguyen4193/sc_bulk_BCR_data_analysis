@@ -5,7 +5,7 @@ rm(list = ls())
 ##### packages
 #####----------------------------------------------------------------------#####
 path.to.main.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-source(file.path(path.to.main.src, "VDJ_helper_functions.R"))
+# source(file.path(path.to.main.src, "VDJ_helper_functions.R"))
 scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))

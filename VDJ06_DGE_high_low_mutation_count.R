@@ -147,6 +147,7 @@ for (input.dataset in names(path.to.all.s.obj)){
     saveRDS(dge.mutation, file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds"))
     
   } else {
+    dge.mutation.raw <- readRDS(file.path(path.to.06.output, "DGE_high_low_mutation_rate.raw.rds"))
     dge.mutation <- readRDS(file.path(path.to.06.output, "DGE_high_low_mutation_rate.rds"))
   }
   
@@ -174,7 +175,8 @@ for (input.dataset in names(path.to.all.s.obj)){
       xlim(c(-max(input.df$abs.avg_log2FC), max(input.df$abs.avg_log2FC)))
     
     ggsave(plot = volcano.plot, 
-           filename = sprintf("VolcanoPlot_%s.csv", g), 
+           filename = sprintf("VolcanoPlot_%s.svg", g), 
+           device = "svg",
            path = path.to.06.output, 
            dpi = 300, 
            width = 14, 
