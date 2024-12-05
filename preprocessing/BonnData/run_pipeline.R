@@ -50,7 +50,7 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/p
 source(file.path(path.to.project.src, "config.R"))
 analysis.round <- "1st"
 # _____stage lst for single sample_____
-stage_lst <- c(GF_7w_14w = "GF_7w_14w")
+stage_lst <- c(BonnData = "BonnData")
 
 MINCELLS  = 5
 MINGENES  = 50
