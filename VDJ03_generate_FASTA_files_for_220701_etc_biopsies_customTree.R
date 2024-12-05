@@ -17,8 +17,8 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
 
-path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+path.to.storage <- "/media/hieunguyen/HNHD01/storage/all_BSimons_datasets"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 thres.dis <- 0.15
 PROJECT <- "220701_etc_biopsies"
@@ -80,7 +80,7 @@ clone.output <- run_preprocessing_all_bulk_VDJ_data(
 clonesets <- clone.output$clonesets
 
 for (mouse.id in names(yfp.mids)){
-  for (input.case in c("all", "neg", "pos", "biopsy")){
+  for (input.case in c("all_samples_including_biopsy","all", "neg", "pos", "biopsy")){
     if (input.case == "biopsy"){
       save.folder.name <- input.case
     } else {

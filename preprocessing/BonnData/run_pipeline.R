@@ -108,7 +108,7 @@ for (sample in names(stage_lst)){
   s.obj <- run_pipeline_GEX(path2src=path2src,
                             path2input=file.path(path2input, sample),
                             path.to.logfile.dir=file.path(path.to.output, sprintf("%s_%s_round", sample, analysis.round), "logs"),
-                            stage_lst=stage_lst[[sample]],
+                            stage_lst=stage_lst,
                             path.to.10X.doublet.estimation=path.to.10X.doublet.estimation,
                             MINCELLS=MINCELLS,
                             MINGENES=MINGENES,
