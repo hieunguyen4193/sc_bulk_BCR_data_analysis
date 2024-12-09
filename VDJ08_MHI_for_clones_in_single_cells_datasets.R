@@ -60,23 +60,19 @@ for (input.PROJECT in c("240805_BSimons_240826_BSimons",
           print(sprintf("working on %s", input.mid1))
           mhidf[[input.mid1]] <- unlist(
             lapply(mhidf$MID, function(input.mid2){
-              X <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid1)]] != 0,] %>% nrow()
-              Y <- tmpdf[tmpdf[[sprintf("%s_Freq", input.mid2)]] != 0,] %>% nrow()
+              X <- tmpdf[[sprintf("%s_Count", input.mid1)]] %>% sum()
+              Y <- tmpdf[[sprintf("%s_Count", input.mid2)]] %>% sum()
               
               x <- unlist(lapply(
                 tmpdf$CloneID %>% unique(),
                 function(x){
-                  return(subset(tmpdf, 
-                                tmpdf[[sprintf("%s_Count", input.mid1)]]!= 0 & 
-                                  tmpdf$CloneID == x) %>% nrow())
+                  return(subset(tmpdf, tmpdf$CloneID == x)[[sprintf("%s_Count", input.mid1)]])
                 }
               ))
               y <- unlist(lapply(
                 tmpdf$CloneID %>% unique(),
                 function(x){
-                  return(subset(tmpdf, 
-                                tmpdf[[sprintf("%s_Count", input.mid2)]]!= 0 &
-                                  tmpdf$CloneID == x) %>% nrow())
+                  return(subset(tmpdf, tmpdf$CloneID == x)[[sprintf("%s_Count", input.mid2)]])
                 }
               ))
               

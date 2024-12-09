@@ -36,11 +36,7 @@ for (input.dataset in names(path.to.all.s.obj)){
     reduction.name <- "INTE_UMAP"
   }
   
-  if (module.score.version == "old.version"){
-    path.to.01.output <- file.path(outdir, "GEX_output", "01_output", input.dataset)
-  } else {
-    path.to.01.output <- file.path(outdir, "GEX_output", sprintf("01_output_%s", module.score.version), input.dataset)
-  }
+  path.to.01.output <- file.path(outdir, "GEX_output", sprintf("01_output_%s", module.score.version), input.dataset)
 
   dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
   dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
