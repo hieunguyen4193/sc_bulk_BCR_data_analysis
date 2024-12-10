@@ -243,7 +243,9 @@ exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
 meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 
-for (mouse.id in c("m1", "m2", "m3")){
+# for (mouse.id in c("m1", "m2", "m3")){
+mouse.id <- "m3"
+
   selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
   input.files <- all.input.files[selected.mids]
 
@@ -252,6 +254,7 @@ for (mouse.id in c("m1", "m2", "m3")){
       sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
     }
   )
+  names(fileAliases) <- names(input.files)
   saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
                          circos.group.type,
@@ -270,35 +273,7 @@ for (mouse.id in c("m1", "m2", "m3")){
       filter.clone.cutoff = filter.clone.cutoff
     )
   }
-}
+# }
 
 ##### generate circos plot for mice only, no hashtag information
-for (mouse.id in c("m1", "m2", "m3")){
-  selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
-  input.files <- all.input.files[selected.mids]
-
-  fileAliases <- to_vec(
-    for (item in names(input.files)){
-      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
-    }
-  )
-  saveFileName <- sprintf("%s_circos.svg", mouse.id)
-  outputdir <- file.path(path.to.05.output,
-                         circos.group.type,
-                         "circos_plot")
-  filter.clone <- FALSE
-  filter.clone.cutoff <- NA
-  source(file.path(path.to.main.src, "circos_helper.R"))
-
-  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
-    generate_circos(
-      input = input.files,
-      fileAliases = fileAliases,
-      saveFileName = saveFileName,
-      outputdir = outputdir,
-      filter.clone = filter.clone,
-      filter.clone.cutoff = filter.clone.cutoff
-    )
-  }
-}
-
+cccccccc

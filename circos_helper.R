@@ -55,8 +55,15 @@ generate_circos <- function(
   count.clone.in.samples <- table(cloneCountdf$SampleID)
   exclude.samples <- count.clone.in.samples[count.clone.in.samples <= 1] %>% names()
   cloneCountdf <- subset(cloneCountdf, cloneCountdf$SampleID %in% exclude.samples == FALSE)
-  cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = setdiff(names(input.files), exclude.samples))
+  keep.samples <- setdiff(names(input.files), exclude.samples)
+  cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = keep.samples)
   
+  new.fileAliases <- to_vec(
+    for (item in keep.samples){
+      fileAliases[[item]]
+    }
+  )
+  fileAliases <- new.fileAliases
   plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
     subset(select = c(id, cloneCount, Freq, accum.Freq))
   colnames(plotdf) <- c("id", 

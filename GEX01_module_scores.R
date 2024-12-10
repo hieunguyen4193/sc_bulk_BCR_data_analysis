@@ -26,7 +26,7 @@ all.module.genedf <- list(
   old.version = file.path(path.to.project.src, "module_score_Bcells.xlsx"),
   ver05122024 = file.path(path.to.project.src, "module_score_Bcells.05122024.xlsx")
 )
-module.score.version <- "ver05122024"
+module.score.version <- "old.version"
 module.genedf <- readxl::read_excel(all.module.genedf[[module.score.version]])
 
 for (input.dataset in names(path.to.all.s.obj)){

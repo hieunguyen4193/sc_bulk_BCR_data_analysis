@@ -92,11 +92,14 @@ for (input.PROJECT in c("240805_BSimons_240826_BSimons",
       if ("X" %in% colnames(mhidf)){
         mhidf <- subset(mhidf, select = -c(X))
       }
-      mhi.plot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") %>%
+      mhi.plot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") %>% 
+        rowwise() %>%
+        mutate(MHI.round = round(MHI, 3)) %>%
         ggplot(aes(x = MID, y = SampleID, fill = MHI)) + 
         geom_tile(color = "white") + 
         theme(axis.text.x = element_text(angle = 90)) + 
-        scale_fill_gradient(high = "red", low = "gray")
+        scale_fill_gradient(high = "red", low = "gray") + 
+        geom_text(aes(label = MHI.round), color = "white", size = 4) 
       ggsave(plot = mhi.plot, filename = sprintf("%s.MHI.svg", filename),
              path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
     }
