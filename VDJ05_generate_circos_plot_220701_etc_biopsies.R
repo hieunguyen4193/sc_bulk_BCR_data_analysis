@@ -142,6 +142,7 @@ for (mouse.id in plot.mice){
       subset(mid.metadata, mid.metadata$X == item)$population
     }
   )
+  names(fileAliases) <- names(input.files)
   saveFileName <- sprintf("%s_%s_circos.svg", mouse.id, paste(selected.mids, collapse = "_"))
   outputdir <- file.path(path.to.05.output,
                          "circos_plot")

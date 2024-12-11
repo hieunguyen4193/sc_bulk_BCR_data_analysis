@@ -77,9 +77,9 @@ PROJECT <- params$PROJECT
 sample.id <- params$sample.id
 outdir <- params$outdir
 
-# outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis"
-# PROJECT <- "241002_BSimons"
-# sample.id <- "PP3"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "BonnData"
+sample.id <- "BonnData"
 
 path.to.main.input <- file.path(outdir, PROJECT)
 
@@ -223,29 +223,6 @@ DimPlot(s.obj, reduction = "CELLCYCLED_PCA", group.by = "Phase", pt.size = 1)
 ```
 
 # Dimension reduction with UMAP
-
-
-```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-yfp.exprs <- GetAssayData(object = s.obj, assay = "RNA", slot = "data")["YFP", ]
-yfp.cells <- names(yfp.exprs[yfp.exprs != 0])
-nonyfp.cells <- names(yfp.exprs[yfp.exprs == 0])
-```
-
-
-```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-print(sprintf("number of YFP cells: %s", length(yfp.cells)))
-```
-
-## UMAP: all clusters in the sample, highlighted YFP cells
-```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-DimPlot(object = s.obj, reduction = "RNA_UMAP", cells.highlight = yfp.cells, label = TRUE, label.box = TRUE, label.size = 10, repel = TRUE) + 
-  ggtitle(sprintf("UMAP Sample %s: All clusters", sample.id)) +
-  theme(axis.text = element_text(size=20, face = "bold"),
-        axis.title = element_text(size=20, face = "bold"), 
-        title = element_text(size = 20, face = "bold"), 
-        legend.position = "none")
-```
-
 ## UMAP: all clusters in the sample
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
 DimPlot(object = s.obj, reduction = "RNA_UMAP", label = TRUE, label.box = TRUE, label.size = 10, repel = TRUE) + 

@@ -260,6 +260,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
           sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
         }
       )
+      names(fileAliases) <- names(input.files)
       saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
       outputdir <- file.path(path.to.05.output,
                              circos.group.type,
@@ -357,6 +358,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
         sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
       }
     )
+    names(fileAliases) <- names(input.files)
     if (meta.data.name == "with_hashtags"){
       saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
     } else {

@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- "VJnt"
+circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -258,6 +258,7 @@ for (mouse.id in c("m3", "m7")){
       sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
     }
   )
+  names(fileAliases) <- names(input.files)
   saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
                          circos.group.type,
@@ -288,6 +289,7 @@ for (mouse.id in c("m3", "m7")){
       sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
     }
   )
+  names(fileAliases) <- names(input.files)
   saveFileName <- sprintf("%s_circos.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
                          circos.group.type,

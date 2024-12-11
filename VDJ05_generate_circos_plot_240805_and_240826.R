@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-# circos.group.type <- "VJnt"
-circos.group.type <- "VJaa"
+circos.group.type <- "VJnt"
+# circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
@@ -276,4 +276,33 @@ mouse.id <- "m3"
 # }
 
 ##### generate circos plot for mice only, no hashtag information
-cccccccc
+for (mouse.id in c("m1", "m2", "m3")){
+  selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+  input.files <- all.input.files[selected.mids]
+
+  fileAliases <- to_vec(
+    for (item in names(input.files)){
+      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+    }
+  )
+  names(fileAliases) <- names(input.files)
+  saveFileName <- sprintf("%s_circos.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output,
+                         circos.group.type,
+                         "circos_plot")
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+
+  if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+    generate_circos(
+      input = input.files,
+      fileAliases = fileAliases,
+      saveFileName = saveFileName,
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = filter.clone.cutoff
+    )
+  }
+}
+

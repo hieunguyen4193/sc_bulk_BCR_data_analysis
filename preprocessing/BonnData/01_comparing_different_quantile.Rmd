@@ -1,5 +1,5 @@
 ---
-title: "`r params$PROJECT` Quality Control Hashtag-Antibody 1, 2, 3. Different quantiles comparison (Sample: `r params$sample.id`)"
+title: "`r params$PROJECT` Quality Control Hashtag-Antibody 1, 2, 3. Different quantiles comparison (Sample: `r params$"BonnData"`)"
 author:
   - "trnguyen@ukaachen.de"
 date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
@@ -42,13 +42,13 @@ scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipel
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
 
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/BonnData"
 source(file.path(path.to.project.src, "hashtag_notes.R"))
 
 # PROJECT <- params$PROJECT
 # outdir <- params$outdir
 
-outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 PROJECT <- "BonnData"
 ```
 
@@ -69,7 +69,7 @@ before.filter.s.obj <- readRDS(path.to.before.filter.sobj)
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
 DefaultAssay(before.filter.s.obj) <- "ADT"
 
-all.hts <- num.hashtags[[sample.id]]
+all.hts <- num.hashtags[["BonnData"]]
 counts.adt <- GetAssayData(before.filter.s.obj, slot = "counts", assay = "ADT")
 s.obj.HTO <- CreateSeuratObject(counts = counts.adt[all.hts, ] + 1, assay = "HTO") #### add pseudo count + 1 to avoide error "Cells with zero counts exist as a cluster"
 s.obj.HTO <- NormalizeData(s.obj.HTO, normalization.method = "CLR")
@@ -95,7 +95,7 @@ s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quant
 ```
 
 ```{r echo=FALSE}
-write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", "BonnData", chosen.quantile)))
 ```
 
 ### Summary table: Number of cells in each classified hashtag group
@@ -126,7 +126,7 @@ s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quant
 ```
 
 ```{r echo=FALSE}
-write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", "BonnData", chosen.quantile)))
 ```
 
 ### Summary table: Number of cells in each classified hashtag group
@@ -160,7 +160,7 @@ s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quant
 ```
 
 ```{r echo=FALSE}
-write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", "BonnData", chosen.quantile)))
 ```
 
 ### Summary table: Number of cells in each classified hashtag group
@@ -194,7 +194,7 @@ s.obj.HTO <- HTODemux(s.obj.HTO, assay = "HTO", positive.quantile = chosen.quant
 ```
 
 ```{r echo=FALSE}
-write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", sample.id, chosen.quantile)))
+write.csv(s.obj.HTO@meta.data %>% rownames_to_column("barcode"), file.path(path.to.01.output, sprintf("metadata_HTO_%s_quantile_%s.csv", "BonnData", chosen.quantile)))
 ```
 
 ### Summary table: Number of cells in each classified hashtag group
