@@ -19,10 +19,11 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
-# input.PROJECT <- "240805_BSimons_240826_BSimons"
-for (input.PROJECT in c("240805_BSimons_240826_BSimons", 
+# input.PROJECT <- "241002_BSimons_241104_BSimons_241031_BSimons"
+for (input.PROJECT in c("240805_BSimons_240826_BSimons",
                         "241002_BSimons_241104_BSimons_241031_BSimons")){
   print(sprintf("Working on project %s", input.PROJECT))
+  # circos.group.type <- "VJcombi_CDR3_0.85"
   for (circos.group.type in c("VJaa", "VJnt", "VJcombi_CDR3_0.85")){
     print(sprintf("Working on circos group type: %s", circos.group.type))
     outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"

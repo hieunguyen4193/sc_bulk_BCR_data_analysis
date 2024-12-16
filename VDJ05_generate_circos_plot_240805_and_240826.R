@@ -243,8 +243,7 @@ exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
 meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 
-# for (mouse.id in c("m1", "m2", "m3")){
-mouse.id <- "m3"
+for (mouse.id in c("m1", "m2", "m3")){
 
   selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
   input.files <- all.input.files[selected.mids]
@@ -303,6 +302,6 @@ for (mouse.id in c("m1", "m2", "m3")){
       filter.clone = filter.clone,
       filter.clone.cutoff = filter.clone.cutoff
     )
+    }
   }
 }
-
