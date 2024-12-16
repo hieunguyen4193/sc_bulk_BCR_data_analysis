@@ -42,8 +42,10 @@ if (file.exists(file.path(path.to.00.output, sprintf("%s.addedCloneInfo.rds", sa
   DefaultAssay(s.obj) <- "RNA"
   
   vdj.output <- readRDS(path.to.all.VDJ.output[[dataset.name]])
-  vdj.output <- vdj.output[unique(s.obj$name)]
-  
+  if (dataset.name != "BonnData"){
+    vdj.output <- vdj.output[unique(s.obj$name)]   
+  }
+
   vdjdf <- data.frame()
   for (sample.id in names(vdj.output)){
     vdjdf <- rbind(vdjdf, vdj.output[[sample.id]])

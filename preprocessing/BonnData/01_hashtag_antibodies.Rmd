@@ -44,6 +44,7 @@ $(document).ready(function() {
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.width=20, fig.height=12}
 # gc()
 # rm(list = ls())
+# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.5-4.1.tar.gz", type = "source", repos = NULL)
 scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
 source(file.path(scrna_pipeline_src, "import_libraries.R"))
 source(file.path(scrna_pipeline_src, "helper_functions.R"))
@@ -51,15 +52,15 @@ source(file.path(scrna_pipeline_src, "helper_functions.R"))
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
 source(file.path(path.to.project.src, "hashtag_notes.R"))
 
-PROJECT <- params$PROJECT
-sample.id <- params$sample.id
-outdir <- params$outdir
-chosen.quantile <- params$chosen.quantile
+# PROJECT <- params$PROJECT
+# sample.id <- params$sample.id
+# outdir <- params$outdir
+# chosen.quantile <- params$chosen.quantile
 
-# outdir <- "/home/hieunguyen/CRC1382/outdir"
-# PROJECT <- "241002_BSimons"
-# sample.id <- "M1"
-# chosen.quantile <- 0.99
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "BonnData"
+sample.id <- "BonnData"
+chosen.quantile <- 0.85
 
 path.to.main.input <- file.path(outdir, PROJECT, "1st_round")
 
