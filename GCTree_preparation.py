@@ -445,10 +445,10 @@ class GCtree(CollapsedTree):
         return pd.concat([agg_values(ods, 'od'), agg_values(ods2, 'od2', ['min', 'avg']),
                           agg_values(dlsn, 'dlsn')], axis=0)
         
-    def summarize_tree_features(self) -> pd.Series:
+    def summarize_tree_features(self, sample_name, tree_name) -> pd.Series:
         """ GCtree features as defined in Table 3.1 in the thesis for a given GCtree.
         Additionally, sample MID and name of the tree. """
-        d = [self.sample_name, self.tree_name]
+        d = [sample_name, tree_name]
         index = ["Sample", "Tree"]
         info_features = pd.Series(d, index=index)
     
@@ -588,3 +588,84 @@ def lab_forest_features(f: LabForest, MID: str) -> pd.Series:
     outputdf = pd.concat([misc_features, 
                           pd.concat([node_counts, tree_abunds, ods, ods2, topo_depths, depths, trunks], axis = 0).round(decimals=4)])
     return pd.DataFrame(outputdf)
+
+
+#####---------------------------------------------------------------------------------------#####
+##### LIST OF FEATURES
+#####---------------------------------------------------------------------------------------#####
+tree_features = ['n_nodes',
+                 'n_leaves',
+                 'p_leaves',
+                 'n_internals',
+                 'p_internals',
+                 'n_ptn',
+                 'p_ptn',
+                 'n_obs',
+                 'p_obs',
+                 'n_inf',
+                 'p_inf',
+                 'n_cells',
+                 'min_abund',
+                 'max_abund',
+                 'avg_abund',
+                 'min_depth',
+                 'max_depth',
+                 'avg_depth',
+                 'min_topodepth',
+                 'max_topodepth',
+                 'avg_topodepth',
+                 'trunk',
+                 'topotrunk',
+                 'min_dlfirst_split_node',
+                 'max_dlfirst_split_node',
+                 'avg_dlfirst_split_node',
+                 'min_od',
+                 'max_od',
+                 'avg_od',
+                 'min_od2',
+                 'avg_od2',
+                 'min_dlsn',
+                 'max_dlsn',
+                 'avg_dlsn']
+
+forest_features = [  'n_trees_plus_missing',
+                     'n_trees',
+                     'p_singletons',
+                     'p_leaves',
+                     'p_observed',
+                     'avg_node_abund',
+                     'sum_n_nodes',
+                     'avg_n_nodes',
+                     'std_n_nodes',
+                     'max_n_nodes',
+                     'gini_n_nodes',
+                     'sum_tree_abund',
+                     'avg_tree_abund',
+                     'std_tree_abund',
+                     'max_tree_abund',
+                     'gini_tree_abund',
+                     'sum_od',
+                     'avg_od',
+                     'std_od',
+                     'max_od',
+                     'gini_od',
+                     'sum_od2',
+                     'avg_od2',
+                     'std_od2',
+                     'max_od2',
+                     'gini_od2',
+                     'sum_topodepth',
+                     'avg_topodepth',
+                     'std_topodepth',
+                     'max_topodepth',
+                     'gini_topodepth',
+                     'sum_depth',
+                     'avg_depth',
+                     'std_depth',
+                     'max_depth',
+                     'gini_depth',
+                     'sum_trunk',
+                     'avg_trunk',
+                     'std_trunk',
+                     'max_trunk',
+                     'gini_trunk']
