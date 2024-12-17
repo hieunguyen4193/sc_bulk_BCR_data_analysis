@@ -33,50 +33,82 @@ mouse.id <- "m31"
 
 sub.nodedf <- subset(nodedf, nodedf$mouseid == mouse.id)
 
-sub.nodedf %>% ggplot(aes(x = population, y = dist_to_root)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)")
+my_comparisons <- list(
+  c("3w_d0", "3w_d90"),
+  c("3w_d0", "8w_d0"),
+  c("3w_d0", "8w_d90"),
+  c("3w_d0", "9w_d90")
+)
+symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), 
+                    symbols = c("****", "***", "**", "*", "ns"))
 
-sub.nodedf %>% ggplot(aes(x = population, y = dist_to_deepest)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to deepest node")
-
-nodedf %>% subset(population == "biopsy") %>% 
-  ggplot(aes(x = age, y = dist_to_deepest)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to deepest node")
-
-nodedf %>% subset(population == "biopsy") %>% 
-  ggplot(aes(x = day, y = dist_to_root)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)")
-
-nodedf %>% subset(population == "biopsy") %>% 
-  ggplot(aes(x = age, y = dist_to_root)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)")
-
-nodedf %>% subset(population == "biopsy") %>% 
-  ggplot(aes(x = age_day, y = dist_to_root)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)")
-
-nodedf %>% subset(population == "biopsy") %>% 
+p1 <- nodedf %>% subset(population == "biopsy") %>% 
   ggplot(aes(x = age_day, y = dist_to_deepest)) + 
   geom_boxplot() + 
   theme_pubr() + 
   theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)")
+  ylab("Distance to deepest node") +
+  stat_compare_means(comparisons = my_comparisons)
+
+p2 <- nodedf %>% subset(population == "biopsy") %>% 
+  ggplot(aes(x = age_day, y = dist_to_root)) + 
+  geom_boxplot() + 
+  theme_pubr() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Distance to root node (GL)") +
+  stat_compare_means(comparisons = my_comparisons, method = "t.test", 
+                     symnum.args = symnum.args)
+
+
+p1 <- nodedf %>%  
+  ggplot(aes(x = age_day, y = dist_to_deepest)) + 
+  geom_boxplot() + 
+  theme_pubr() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Distance to deepest node") +
+  stat_compare_means(comparisons = my_comparisons)
+
+p2 <- nodedf %>% 
+  ggplot(aes(x = age_day, y = dist_to_root)) + 
+  geom_boxplot() + 
+  theme_pubr() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Distance to root node (GL)") +
+  stat_compare_means(comparisons = my_comparisons, method = "t.test", 
+                     symnum.args = symnum.args)
+
+
+nodedf %>% subset(cloneID == "m11_IGHV1-78-01_IGHJ3-01_24_3.aln") %>% ggplot(aes(x = dist_to_root, y = dist_to_deepest)) + geom_point()
+p1 + p2
+
+
+p1 <- nodedf  %>% subset(mixed_node == "no") %>%  
+  ggplot(aes(x = population, y = dist_to_deepest)) + 
+  geom_boxplot() + 
+  theme_pubr() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Distance to deepest node") +
+  stat_compare_means(comparisons = my_comparisons)
+
+p2 <- nodedf %>% subset(mixed_node == "no") %>%
+  ggplot(aes(x = population, y = dist_to_root)) + 
+  geom_boxplot() + 
+  theme_pubr() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ylab("Distance to root node (GL)") +
+  stat_compare_means(comparisons = my_comparisons, method = "t.test", 
+                     symnum.args = symnum.args)
+p1 + p2
+
+summarydf <- table(nodedf$cloneID) %>% data.frame()
+colnames(summarydf) <- c("cloneID", "count")
+summarydf <- summarydf %>% rowwise() %>%
+  mutate(mouseid= str_split(cloneID, "_")[[1]][[1]])%>%
+  mutate(age = unique(subset(mid.metadata, mid.metadata$mouse == mouseid)$age)[[1]]) %>%
+  mutate(day = unique(subset(mid.metadata, mid.metadata$mouse == mouseid)$day)[[1]]) %>%
+  mutate(age_day = sprintf("%s_%s", age, day))
+
+
+
+table(subset(summarydf, summarydf$count >= 50)$age_day)
 
