@@ -108,7 +108,5 @@ summarydf <- summarydf %>% rowwise() %>%
   mutate(day = unique(subset(mid.metadata, mid.metadata$mouse == mouseid)$day)[[1]]) %>%
   mutate(age_day = sprintf("%s_%s", age, day))
 
-
-
 table(subset(summarydf, summarydf$count >= 50)$age_day)
 
