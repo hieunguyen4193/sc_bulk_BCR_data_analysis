@@ -19,7 +19,7 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 
-# input.PROJECT <- "241002_BSimons_241104_BSimons_241031_BSimons"
+# input.PROJECT <- "240805_BSimons_240826_BSimons"
 for (input.PROJECT in c("240805_BSimons_240826_BSimons",
                         "241002_BSimons_241104_BSimons_241031_BSimons")){
   print(sprintf("Working on project %s", input.PROJECT))
@@ -79,7 +79,7 @@ for (input.PROJECT in c("240805_BSimons_240826_BSimons",
               
               nom <- 2 * sum(x * y)
               det <- (sum(x^2)/X^2) + (sum(y^2)/Y^2)
-              mhi <- nom/(X*Y * det)
+              mhi <- nom/(as.double(X)*as.double(Y) * det)
               return(mhi)
             })
           )
