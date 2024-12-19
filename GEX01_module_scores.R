@@ -30,7 +30,7 @@ module.score.version <- "old.version"
 module.genedf <- readxl::read_excel(all.module.genedf[[module.score.version]])
 
 for (input.dataset in names(path.to.all.s.obj)){
-  if (input.dataset %in% c("241002_BSimons", "241104_BSimons")){
+  if (input.dataset %in% c("241002_BSimons", "241104_BSimons", "BonnData")){
     reduction.name <- "RNA_UMAP"
   } else {
     reduction.name <- "INTE_UMAP"
@@ -45,7 +45,12 @@ for (input.dataset in names(path.to.all.s.obj)){
   print(sprintf("Working on dataset %s", input.dataset))
   s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   DefaultAssay(s.obj) <- "RNA"
-  vdj.output <- vdj.output[unique(s.obj$name)]
+  if (input.dataset == "BonnData"){
+    vdj.output <- vdj.output$BonnData
+  } else {
+    vdj.output <- vdj.output[unique(s.obj$name)]    
+  }
+
   vdjdf <- data.frame()
   for (sample.id in names(vdj.output)){
     vdjdf <- rbind(vdjdf, vdj.output[[sample.id]])
