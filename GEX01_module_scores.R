@@ -26,7 +26,7 @@ all.module.genedf <- list(
   old.version = file.path(path.to.project.src, "module_score_Bcells.xlsx"),
   ver05122024 = file.path(path.to.project.src, "module_score_Bcells.05122024.xlsx")
 )
-module.score.version <- "old.version"
+module.score.version <- "ver05122024"
 module.genedf <- readxl::read_excel(all.module.genedf[[module.score.version]])
 
 for (input.dataset in names(path.to.all.s.obj)){
@@ -37,6 +37,7 @@ for (input.dataset in names(path.to.all.s.obj)){
     } else {
       reduction.name <- "INTE_UMAP"
     }
+
     dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
     dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
     
@@ -45,7 +46,6 @@ for (input.dataset in names(path.to.all.s.obj)){
     DefaultAssay(s.obj) <- "RNA"
     if (input.dataset == "BonnData"){
       vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
-      vdj.output <- vdj.output$BonnData
     } else if (input.dataset %in% names(all.integration.cases)){
       vdj.output <- c()
       for (tmp.dataset in all.integration.cases[[input.dataset]]){
@@ -59,6 +59,7 @@ for (input.dataset in names(path.to.all.s.obj)){
       }
     } else {
       vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
+      vdj.output <- vdj.output[unique(s.obj$name)]
     }
     
     vdjdf <- data.frame()

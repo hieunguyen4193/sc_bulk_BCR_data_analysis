@@ -19,7 +19,7 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.rmd <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/GEX05_data_analysis_for_integrated_datasets.Rmd"
 path.to.save.html <- file.path(outdir, "GEX_output", "05_output", "HTML_outputs")
 dir.create(path.to.save.html, showWarnings = FALSE, recursive = TRUE)
-for (integration.case in all.integration.cases){
+for (integration.case in names(all.integration.cases)){
   save.html.name <- str_replace(basename(path.to.rmd), ".Rmd", sprintf(".%s.html", integration.case))
   if (file.exists(file.path(path.to.save.html, save.html.name)) == FALSE){
     print(sprintf("Generate html file for the case %s", integration.case))
@@ -30,5 +30,4 @@ for (integration.case in all.integration.cases){
   } else {
     print(sprintf("HTML output for %s exists", integration.case))
   }
-
 }
