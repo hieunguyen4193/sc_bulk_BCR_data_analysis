@@ -39,7 +39,10 @@ for (cell.group in c("group1", "group2", "group3")){
       bulk.projects <- c("240826_BSimons")
       list.of.PROJECT <- c(sc.projects, bulk.projects)
       
-      path.to.05.output <- file.path(outdir, "VDJ_output", sprintf("05_output_filterHT_%s_selected_cells_%s", filter.ht.type, cell.group), paste(list.of.PROJECT, collapse = "_"))
+      path.to.05.output <- file.path(outdir, 
+                                     "VDJ_output", 
+                                     sprintf("05_output_filterHT_%s_selected_cells_%s", filter.ht.type, cell.group), 
+                                     paste(list.of.PROJECT, collapse = "_"))
       dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
       dir.create(file.path(path.to.05.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
       
