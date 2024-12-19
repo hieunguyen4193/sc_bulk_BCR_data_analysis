@@ -13,6 +13,8 @@ output:
     toc_depth: 3
     number_sections: true
     theme: lumen
+params:
+  integration.case: NA
 ---
 
 
@@ -46,8 +48,8 @@ script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
 # trnguyen@ukaachen.de
 #
 #####----------------------------------------------------------------------#####
-gc()
-rm(list = ls())
+# gc()
+# rm(list = ls())
 
 # install.packages("dplyr")
 # install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.6-1.tar.gz", type = "source", repos = NULL)
@@ -93,7 +95,9 @@ num.dim.integration <- 25
 cluster.resolution <- 0.5
 my_random_seed <- 42
 
-integration.case <- "Dataset1_2"
+# integration.case <- "Dataset1_2"
+integration.case <- params$integration.case
+
 path.to.04.output <- file.path(outdir, "GEX_output", "04_output", integration.case)
 path.to.05.output <- file.path(outdir, "GEX_output", "05_output", integration.case)
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
