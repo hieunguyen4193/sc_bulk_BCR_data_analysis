@@ -25,7 +25,7 @@ savefile <- TRUE
 verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
-
+cut.off.ht <- 40
 for (circos.group.type in c("VJnt", "VJaa")){
   for (filter.ht.type in c("remove_last_ht", sprintf("cutoff_%s", cut.off.ht))){
     #####----------------------------------------------------------------------#####

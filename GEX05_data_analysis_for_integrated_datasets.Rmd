@@ -95,7 +95,8 @@ my_random_seed <- 42
 
 integration.case <- "Dataset1_2"
 path.to.04.output <- file.path(outdir, "GEX_output", "04_output", integration.case)
-
+path.to.05.output <- file.path(outdir, "GEX_output", "05_output", integration.case)
+dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 s.obj <- readRDS(file.path(path.to.04.output, "s8_output", sprintf("%s.output.s8.rds", integration.case)))
 ```
 
