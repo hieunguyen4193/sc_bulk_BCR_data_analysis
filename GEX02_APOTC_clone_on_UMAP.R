@@ -32,6 +32,14 @@ source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
+
+sc.projects.with.ht <- c("240805_BSimons", "241002_BSimons", "240411_BSimons")
+name_or_sampleHT <- "name"
+
+if (name_or_sampleHT == "sample_ht"){
+  path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
+}
+
 for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
   for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
     print(sprintf("Working on dataset %s", dataset.name))
@@ -39,6 +47,16 @@ for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
     
     print(sprintf("Working on dataset %s", dataset.name))
     s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
+    if (dataset.name %in% sc.projects.with.ht){
+      meta.data <- s.obj@meta.data %>% 
+        rownames_to_column("barcode") %>%
+        rowwise() %>%
+        mutate(sample_ht = sprintf("%s_%s", name, HTO_classification)) %>%
+        column_to_rownames("barcode")
+      meta.data <- meta.data[row.names(s.obj@meta.data), ]
+      s.obj <- AddMetaData(object = s.obj, metadata = meta.data$sample_ht, col.name = "sample_ht")      
+    }
+    
     DefaultAssay(s.obj) <- "RNA"
     
     path.to.02.output <- file.path(outdir, "GEX_output", "02_output", dataset.name, clone.name)
@@ -56,14 +74,14 @@ for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
     clonedf <- data.frame(meta.data[[clone.name]] %>% table())
     colnames(clonedf) <- c("clone", "count")
     clonedf <- clonedf %>% arrange(desc(count))
-    for (sampleid in unique(s.obj$name)){
+    for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
       clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
-        nrow(subset(meta.data, meta.data$name == sampleid & meta.data[[clone.name]] == x))
+        nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
       }))
     }
     
     plot.top <- 20
-    for (plot.sampleid in unique(s.obj$name)){
+    for (plot.sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
       if (file.exists(file.path(path.to.02.output, 
                                 dataset.name, 
                                 "topClones_in_each_sample", 
