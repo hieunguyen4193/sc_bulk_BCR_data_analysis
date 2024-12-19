@@ -399,5 +399,3 @@ for (filter.ht.type in c("remove_last_ht", sprintf("cutoff_%s", cut.off.ht))){
     }
   }
 }
-
-

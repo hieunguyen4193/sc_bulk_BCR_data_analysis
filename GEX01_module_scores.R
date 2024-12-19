@@ -41,13 +41,25 @@ for (input.dataset in names(path.to.all.s.obj)){
   dir.create(path.to.01.output, showWarnings = FALSE, recursive = TRUE)
   dir.create(file.path(path.to.01.output, "svg", "module_scores"), showWarnings = FALSE, recursive = TRUE)
   
-  vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
   print(sprintf("Working on dataset %s", input.dataset))
   s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   DefaultAssay(s.obj) <- "RNA"
   if (input.dataset == "BonnData"){
+    vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
     vdj.output <- vdj.output$BonnData
+  } else if (input.dataset %in% names(all.integration.cases)){
+    vdj.output <- c()
+    for (tmp.dataset in all.integration.cases[[input.dataset]]){
+      tmp.vdj.output <- readRDS(path.to.all.VDJ.output[[tmp.dataset]])
+      if (tmp.dataset == "1st_dataset"){
+        tmp.vdj.output <- tmp.vdj.output[dataset1_sample_list]
+      } else if (tmp.dataset == "2nd_dataset"){
+        tmp.vdj.output <- tmp.vdj.output[dataset2_sample_list]
+      }
+      vdj.output <- c(vdj.output, tmp.vdj.output)
+    }
   } else {
+    vdj.output <- readRDS(path.to.all.VDJ.output[[input.dataset]])
     vdj.output <- vdj.output[unique(s.obj$name)]    
   }
 
