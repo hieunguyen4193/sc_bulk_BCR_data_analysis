@@ -78,6 +78,7 @@ colnames(plotdf) <- c("mouseid", "seqid", "cloneID", "population", "abundance",
 ##### All nodes
 #####----------------------------------------------------------------------#####
 for (input.feat in c("rootness", "topo_rootness", "leafness", "topo_leafness")){
+  dir.create(file.path(path.to.save.figures, "all_nodes"), showWarnings = FALSE, recursive = TRUE)
   p <- plotdf %>% ggplot(aes_string(x = "age_day", y = input.feat)) + 
     geom_boxplot() + 
     theme_pubr() + 
@@ -86,5 +87,25 @@ for (input.feat in c("rootness", "topo_rootness", "leafness", "topo_leafness")){
           axis.title = element_text(size = 25)) +
     stat_compare_means(method = "t.test", comparisons = my_comparisons, symnum.args = symnum.args)
   ggsave(plot = p, filename = sprintf("boxplot_%s_all_nodes.svg", input.feat), 
-         path = path.to.save.figures, dpi = 300, width = 14, height = 10)
+         path = file.path(path.to.save.figures, "all_nodes"), dpi = 300, width = 14, height = 10)
+}
+
+#####----------------------------------------------------------------------#####
+##### filter node
+#####----------------------------------------------------------------------#####
+for (node.type in unique(plotdf$population)){
+  dir.create(file.path(path.to.save.figures, node.type), showWarnings = FALSE, recursive = TRUE)
+  for (input.feat in c("rootness", "topo_rootness", "leafness", "topo_leafness")){
+    p <- plotdf %>% 
+      subset(population == node.type) %>% 
+      ggplot(aes_string(x = "age_day", y = input.feat)) + 
+      geom_boxplot() + 
+      theme_pubr() + 
+      theme(axis.text.x = element_text(angle = 90, size = 25),
+            axis.text.y = element_text(size = 25),
+            axis.title = element_text(size = 25)) +
+      stat_compare_means(method = "t.test", comparisons = my_comparisons, symnum.args = symnum.args)
+    ggsave(plot = p, filename = sprintf("boxplot_%s_%s.svg", input.feat, node.type), 
+           path = file.path(path.to.save.figures, node.type), dpi = 300, width = 14, height = 10)
+  }
 }
