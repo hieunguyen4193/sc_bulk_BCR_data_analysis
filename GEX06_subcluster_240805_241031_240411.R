@@ -48,11 +48,12 @@ for (PROJECT in c("240805_BSimons", "241002_BSimons", "241104_BSimons")){
     print(sprintf("WORKING ON PROJECT %s, group %s", PROJECT, g))
     subset.s.obj <- subset(s.obj, seurat_clusters %in% sub.clusters[[PROJECT]][[g]])
     subset.metadata <- subset.s.obj@meta.data %>% rownames_to_column("barcode")
+    print(head(subset.metadata$barcode))
     write.csv(subset.metadata, file.path(outdir, 
                                          "GEX_output", 
                                          "06_output", 
                                          PROJECT, 
-                                         sprintf("cell_group_%s.csv", cell.group)))    
+                                         sprintf("cell_group_%s.csv", g)))    
   }
 }
 

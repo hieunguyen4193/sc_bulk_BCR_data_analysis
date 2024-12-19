@@ -25,21 +25,23 @@ savefile <- TRUE
 verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
-
 cut.off.ht <- 40
-
 for (cell.group in c("group1", "group2", "group3")){
   for (circos.group.type in c("VJnt", "VJaa")){
     for (filter.ht.type in c("remove_last_ht", sprintf("cutoff_%s", cut.off.ht))){
       #####----------------------------------------------------------------------#####
       ##### READ METADATA
       #####----------------------------------------------------------------------#####
-      bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
-      sc.projects <- c("240805_BSimons")
-      bulk.projects <- c("240826_BSimons")
+      bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241031_BSimons/241031_sample_sheet.xlsx") %>%
+        rowwise() %>%
+        mutate(MID = sprintf("MID%s", MID))
+      sc.projects <- c("241002_BSimons", "241104_BSimons")
+      bulk.projects <- c("241031_BSimons")
       list.of.PROJECT <- c(sc.projects, bulk.projects)
       
-      path.to.05.output <- file.path(outdir, "VDJ_output", sprintf("05_output_filterHT_%s_selected_cells_%s", filter.ht.type, cell.group), paste(list.of.PROJECT, collapse = "_"))
+      path.to.05.output <- file.path(outdir, "VDJ_output", 
+                                     sprintf("05_output_filterHT_%s_selected_cells_%s", filter.ht.type, cell.group), 
+                                     paste(list.of.PROJECT, collapse = "_"))
       dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
       dir.create(file.path(path.to.05.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
       
@@ -50,7 +52,6 @@ for (cell.group in c("group1", "group2", "group3")){
       sc.meta.data <- list()
       keep.ht <- list()
       keep.barcodes <- list()
-      
       for (PROJECT in sc.projects){
         keep.ht[[PROJECT]] <- list()
         keep.ht[[PROJECT]][["remove_last_ht"]] <- c()
@@ -68,14 +69,14 @@ for (cell.group in c("group1", "group2", "group3")){
                                                           sprintf("%s_%s", sampleid, item)
                                                         }
                                                       ))
+          keep.barcodes[[PROJECT]][[cell.group]] <- read.csv(file.path(outdir, 
+                                                                       "GEX_output", 
+                                                                       "06_output", 
+                                                                       PROJECT, 
+                                                                       sprintf("cell_group_%s.csv", cell.group)))$barcode
         }
         sc.meta.data[[PROJECT]] <- tmp.metadata
         keep.ht[[PROJECT]][[sprintf("cutoff_%s", cut.off.ht)]] <- count.ht[count.ht >= cut.off.ht] %>% names()
-        keep.barcodes[[PROJECT]][[cell.group]] <- read.csv(file.path(outdir, 
-                                                                     "GEX_output", 
-                                                                     "06_output", 
-                                                                     PROJECT, 
-                                                                     sprintf("cell_group_%s.csv", cell.group)))$barcode
       }
       
       #####----------------------------------------------------------------------#####
@@ -114,8 +115,8 @@ for (cell.group in c("group1", "group2", "group3")){
             rowwise() %>%
             mutate(V.gene = ifelse(grepl("[*]", V.gene) == TRUE, str_split(V.gene, "[*]")[[1]][[1]], V.gene )) %>%
             mutate(J.gene = ifelse(grepl("[*]", J.gene) == TRUE, str_split(J.gene, "[*]")[[1]][[1]], J.gene ))
+          
           full.clonedf <- subset(full.clonedf, full.clonedf$aaSeqCDR3 != "region_not_covered")
-          print(sprintf("Size of full.clonedf: %s", nrow(full.clonedf)))
           if (PROJECT %in% sc.projects){
             full.clonedf <- full.clonedf %>% rowwise() %>%
               mutate(barcode.full = sprintf("%s_%s", id, barcode)) %>%
@@ -129,7 +130,6 @@ for (cell.group in c("group1", "group2", "group3")){
               mutate(id = sprintf("%s_%s", id, HT)) %>%
               subset(id %in% keep.ht[[PROJECT]][[filter.ht.type]]) %>%
               subset(barcode.full %in% keep.barcodes[[PROJECT]][[cell.group]])
-            print(sprintf("Size of full.clonedf: %s", nrow(full.clonedf)))
           }
           
           dir.create(file.path(path.to.05.output, circos.group.type), showWarnings = FALSE, recursive = TRUE)
@@ -232,7 +232,7 @@ for (cell.group in c("group1", "group2", "group3")){
           mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
           mutate(mouse = ifelse(
             PROJECT %in% sc.projects,
-            sprintf("m%s", str_split(SampleID, "")[[1]][[2]]),
+            sprintf("m%s", str_split(SampleID, "")[[1]][[3]]),
             subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse
           )) %>%
           mutate(organ = ifelse(
@@ -252,24 +252,26 @@ for (cell.group in c("group1", "group2", "group3")){
       #####----------------------------------------------------------------------#####
       all.input.files <- Sys.glob(file.path(path.to.05.output,
                                             circos.group.type,
-                                            "*.simplified.csv"))
+                                            "*"))
       
       input.metadata <- data.frame(
         path = all.input.files,
         SampleID = to_vec(for (item in all.input.files){
           str_replace(basename(item), ".simplified.csv", "") 
+        }),
+        PROJECT = to_vec(for (item in all.input.files){
+          str_split(item, "/")[[1]][[8]]
         }))
       
       all.input.files <- input.metadata$path
       names(all.input.files) <- input.metadata$SampleID
       
       ##### generate circos plot for all hashtags
-      exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
+      exclude.samples <- c("PP3", "PP7")
       meta.data.splitted <- subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE)
       meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
       
-      for (mouse.id in c("m1", "m2", "m3")){
-        
+      for (mouse.id in c("m3", "m7")){
         selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
         input.files <- all.input.files[selected.mids]
         
@@ -297,43 +299,39 @@ for (cell.group in c("group1", "group2", "group3")){
             filter.clone.cutoff = filter.clone.cutoff
           )
         }
-        # }
+      }
+      
+      ##### generate circos plot for mice only, no hashtag information
+      for (mouse.id in c("m3", "m7")){
+        selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+        input.files <- all.input.files[selected.mids]
         
-        ##### generate circos plot for mice only, no hashtag information
-        for (mouse.id in c("m1", "m2", "m3")){
-          selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
-          input.files <- all.input.files[selected.mids]
-          
-          fileAliases <- to_vec(
-            for (item in names(input.files)){
-              sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
-            }
-          )
-          names(fileAliases) <- names(input.files)
-          saveFileName <- sprintf("%s_circos.svg", mouse.id)
-          outputdir <- file.path(path.to.05.output,
-                                 circos.group.type,
-                                 "circos_plot")
-          filter.clone <- FALSE
-          filter.clone.cutoff <- NA
-          source(file.path(path.to.main.src, "circos_helper.R"))
-          
-          if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
-            generate_circos(
-              input = input.files,
-              fileAliases = fileAliases,
-              saveFileName = saveFileName,
-              outputdir = outputdir,
-              filter.clone = filter.clone,
-              filter.clone.cutoff = filter.clone.cutoff
-            )
+        fileAliases <- to_vec(
+          for (item in names(input.files)){
+            sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
           }
+        )
+        names(fileAliases) <- names(input.files)
+        saveFileName <- sprintf("%s_circos.svg", mouse.id)
+        outputdir <- file.path(path.to.05.output,
+                               circos.group.type,
+                               "circos_plot")
+        filter.clone <- FALSE
+        filter.clone.cutoff <- NA
+        source(file.path(path.to.main.src, "circos_helper.R"))
+        
+        if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
+          generate_circos(
+            input = input.files,
+            fileAliases = fileAliases,
+            saveFileName = saveFileName,
+            outputdir = outputdir,
+            filter.clone = filter.clone,
+            filter.clone.cutoff = filter.clone.cutoff
+          )
         }
       }
     }
   }
-  
 }
-
-
 
