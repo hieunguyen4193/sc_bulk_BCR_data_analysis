@@ -77,29 +77,6 @@ p2 <- nodedf %>%
   stat_compare_means(comparisons = my_comparisons, method = "t.test", 
                      symnum.args = symnum.args)
 
-
-nodedf %>% subset(cloneID == "m11_IGHV1-78-01_IGHJ3-01_24_3.aln") %>% ggplot(aes(x = dist_to_root, y = dist_to_deepest)) + geom_point()
-p1 + p2
-
-
-p1 <- nodedf  %>% subset(mixed_node == "no") %>%  
-  ggplot(aes(x = population, y = dist_to_deepest)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to deepest node") +
-  stat_compare_means(comparisons = my_comparisons)
-
-p2 <- nodedf %>% subset(mixed_node == "no") %>%
-  ggplot(aes(x = population, y = dist_to_root)) + 
-  geom_boxplot() + 
-  theme_pubr() + 
-  theme(axis.text.x = element_text(angle = 90)) +
-  ylab("Distance to root node (GL)") +
-  stat_compare_means(comparisons = my_comparisons, method = "t.test", 
-                     symnum.args = symnum.args)
-p1 + p2
-
 summarydf <- table(nodedf$cloneID) %>% data.frame()
 colnames(summarydf) <- c("cloneID", "count")
 summarydf <- summarydf %>% rowwise() %>%

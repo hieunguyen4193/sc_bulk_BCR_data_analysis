@@ -28,36 +28,6 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
-gc()
-rm(list = ls())
-# install.packages("dplyr")
-# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.6-1.tar.gz", type = "source", repos = NULL)
-new.pkgs <- c("APackOfTheClones", "svglite", "car", "ggpubr", "ggthemes", "dplyr")
-for (pkg in new.pkgs){
-  if (pkg %in% installed.packages() == FALSE){
-    install.packages(pkg)
-  }
-}
-
-#####----------------------------------------------------------------------#####
-##### packages
-#####----------------------------------------------------------------------#####
-path.to.main.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-source(file.path(path.to.main.src, "VDJ_helper_functions.R"))
-
-scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
-source(file.path(scrna_pipeline_src, "import_libraries.R"))
-source(file.path(scrna_pipeline_src, "helper_functions.R"))
-source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
-
-#####---------------------------------------------------------------------------#####
-##### INPUT ARGS
-#####---------------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
-
-outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
 all.integration.cases <- list(
   Dataset1_2 = c("1st_dataset", "2nd_dataset"),
@@ -100,7 +70,7 @@ for (integration.case in names(all.integration.cases)){
   
   s.obj.merged.1st <- s8.integration.and.clustering(s.obj = s.obj.merged, 
                                                     path.to.output = path.to.04.output, 
-                                                    save.RDS.s8 = FALSE,
+                                                    save.RDS.s8 = TRUE,
                                                     PROJECT = integration.case, 
                                                     num.dim.integration = num.dim.integration,
                                                     num.PCA = num.PCA,
