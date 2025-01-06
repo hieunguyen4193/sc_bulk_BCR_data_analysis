@@ -27,6 +27,15 @@ for (PROJECT in c("240805_BSimons", "241002_BSimons", "241104_BSimons")){
   path.to.06.output <- file.path(outdir, "GEX_output", "06_output", PROJECT)
   dir.create(path.to.06.output, showWarnings = FALSE, recursive = TRUE)
   s.obj <- readRDS(path.to.all.s.obj[[PROJECT]])
+  if (PROJECT == "240805_BSimons"){
+    reduction.name <- "INTE_UMAP"
+  } else {
+    reduction.name <- "RNA_UMAP"
+  }
+  
+  p <- DimPlot(object = s.obj, reduction = reduction.name, label = TRUE, label.box = TRUE)
+  ggsave(plot = p, filename = sprintf("UMAP_clusters_%s.svg", PROJECT),
+         path = path.to.06.output, dpi = 300, width = 14, height = 10)
   sub.clusters <- list(
     `240805_BSimons` = list(
       group1 = c(2, 5, 9),

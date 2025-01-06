@@ -11,6 +11,7 @@ for (pkg in new.pkgs){
 library(ggpubr)
 library(ggthemes)
 library(APackOfTheClones)
+library("gridExtra")
 
 #####----------------------------------------------------------------------#####
 ##### packages
@@ -33,8 +34,8 @@ source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
-sc.projects.with.ht <- c("240805_BSimons", "241002_BSimons", "240411_BSimons")
-name_or_sampleHT <- "name"
+sc.projects.with.ht <- c("240805_BSimons", "241002_BSimons", "241104_BSimons")
+name_or_sampleHT <- "sample_ht"
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
@@ -42,6 +43,7 @@ if (name_or_sampleHT == "sample_ht"){
 
 for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
   for (dataset.name in names(path.to.all.s.obj) %>% unique() ){
+  # for (dataset.name in c("BonnData")){
     print(sprintf("Working on dataset %s", dataset.name))
     save.dev <- "png"
     
@@ -59,7 +61,7 @@ for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
     
     DefaultAssay(s.obj) <- "RNA"
     
-    path.to.02.output <- file.path(outdir, "GEX_output", "02_output", dataset.name, clone.name)
+    path.to.02.output <- file.path(outdir, "GEX_output", sprintf("02_output_%s", name_or_sampleHT), dataset.name, clone.name)
     dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
     if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
       reduction.name <- "RNA_UMAP"
@@ -105,27 +107,43 @@ for (clone.name in c("CTaa", "CTstrict", "VJcombi_CDR3_0.85")){
         
         apotc.clone.plot <- list()
         for (i in seq(1,4)){
-          tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
-                               verbose = FALSE, 
-                               reduction_base = reduction.name, 
-                               show_labels = TRUE, 
-                               legend_position = "top_right", 
-                               legend_sizes = 2) %>% 
-            showCloneHighlight(clonotype =  as.character(split.top5.clones[[i]]), 
-                               fill_legend = TRUE,
-                               color_each = split.colors[[i]], 
-                               default_color = "#808080") 
-          apotc.clone.plot[[i]] <- tmp.plot
-        }
-        library("gridExtra")
-        merge.plot <- arrangeGrob(ggarrange(apotc.clone.plot[[1]], apotc.clone.plot[[2]],
-                                            apotc.clone.plot[[3]], apotc.clone.plot[[4]], 
-                                            ncol = 2, nrow = 2 ))
-        
-        ggsave(plot = merge.plot, filename = sprintf("%s_top%sClones.%s", plot.sampleid, plot.top, save.dev),
-               path = file.path(path.to.02.output, dataset.name, "topClones_in_each_sample", plot.sampleid),
-               device = save.dev, width = 20, height = 14
-        )
+          if (length(split.top5.clones[[i]]) != 0){
+            tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
+                                 verbose = FALSE, 
+                                 reduction_base = reduction.name, 
+                                 show_labels = TRUE, 
+                                 legend_position = "top_right", 
+                                 legend_sizes = 2) %>% 
+              showCloneHighlight(clonotype =  as.character(split.top5.clones[[i]]), 
+                                 fill_legend = TRUE,
+                                 color_each = split.colors[[i]][1:length(split.top5.clones[[i]])], 
+                                 default_color = "#808080") 
+            apotc.clone.plot[[i]] <- tmp.plot
+          }
+          if (length(apotc.clone.plot) == 4){
+            merge.plot <- arrangeGrob(ggarrange(apotc.clone.plot[[1]], apotc.clone.plot[[2]],
+                                                apotc.clone.plot[[3]], apotc.clone.plot[[4]], 
+                                                ncol = 2, nrow = 2 ))            
+          } else if (length(apotc.clone.plot) == 3){
+            merge.plot <- arrangeGrob(ggarrange(apotc.clone.plot[[1]], apotc.clone.plot[[2]],
+                                                apotc.clone.plot[[3]], 
+                                                ncol = 2, nrow = 2 ))
+          } else if (length(apotc.clone.plot) == 2){
+            merge.plot <- arrangeGrob(ggarrange(apotc.clone.plot[[1]], apotc.clone.plot[[2]], 
+                                                ncol = 2, nrow = 1 ))
+          } else{
+            merge.plot <- apotc.clone.plot[[1]]
+          }
+
+          
+          ggsave(plot = merge.plot, filename = sprintf("%s_top%sClones.%s", plot.sampleid, plot.top, save.dev),
+                 path = file.path(path.to.02.output, dataset.name, "topClones_in_each_sample", plot.sampleid),
+                 device = save.dev, width = 20, height = 14)
+          }
+      } else {
+        print(sprintf("File %s exists", 
+                      file.path(path.to.02.output, dataset.name, "topClones_in_each_sample", plot.sampleid, 
+                                sprintf("%s_top%sClones.%s", plot.sampleid, plot.top, save.dev))))
       }
     }
   }
