@@ -41,10 +41,26 @@ name_or_sampleHT <- "name"
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
 }
-
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
 save.dev <- "png"
+
+##### sample.list for each mouse:
+if (grepl("240805_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    m1 = c("M1", "P1"),
+    m2 = c("M2", "P2"),
+    m3 = c("M3", "P3")
+  )
+} else if (grepl("241002_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    m3 = c("PP3")
+  )
+} else if (grpel("241104_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    m7 = c("PP7")
+  )
+}
 
 print(sprintf("Working on dataset %s", dataset.name))
 
@@ -86,5 +102,3 @@ for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
     nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
   }))
 }
-
-
