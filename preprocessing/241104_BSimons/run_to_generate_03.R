@@ -42,6 +42,5 @@ for (chosen.quantile in all.quantiles){
     } else {
       print(sprintf("Html output file for sample %s, quantile %s existed", sample.id, chosen.quantile))
     }
-
   }
 }

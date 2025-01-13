@@ -76,12 +76,12 @@ if (dataset.name %in% sc.projects.with.ht){
 
 DefaultAssay(s.obj) <- "RNA"
 
-path.to.02.output <- file.path(outdir, 
+path.to.07.output <- file.path(outdir, 
                                "GEX_output", 
-                               sprintf("02_output_20250113_%s", name_or_sampleHT), 
+                               sprintf("07_output"), 
                                dataset.name, 
                                clone.name)
-dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
+dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
   reduction.name <- "RNA_UMAP"
 } else {
@@ -89,47 +89,3 @@ if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
 }
 
 Idents(s.obj) <- "seurat_clusters"
-s.obj <- RunAPOTC(seurat_obj = s.obj, reduction_base = reduction.name, clonecall = clone.name)
-
-meta.data <- s.obj@meta.data %>% 
-  rownames_to_column("cell.barcode")
-clonedf <- data.frame(meta.data[[clone.name]] %>% table())
-colnames(clonedf) <- c("clone", "count")
-clonedf <- clonedf %>% arrange(desc(count))
-
-for (sample.list.name in names(sample.list)){
-  for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
-    print(sprintf("Generating clonedf, working on sample: %s", sampleid))
-    clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
-      nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
-    }))
-  }
-  
-  colors <- tableau_color_pal(palette = "Tableau 20")(20)
-  plot.clonedf <- data.frame()
-  for (sample.id in sample.list[[sample.list.name]]){
-    tmpdf <- clonedf[, c("clone", sample.id)]
-    colnames(tmpdf) <- c("clone", "SampleID")
-    tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% head(5)
-    tmp.plot.clonedf <- data.frame(clone = tmpdf$clone)
-    tmp.plot.clonedf$SampleID <- sample.id
-    plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
-  }
-  plot.clonedf$color <- head(colors, nrow(plot.clonedf))
-  
-  tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
-                       verbose = FALSE, 
-                       reduction_base = reduction.name, 
-                       show_labels = TRUE, 
-                       repulsion_strength = 5,
-                       legend_position = "top_right", 
-                       legend_sizes = 2) %>% 
-    showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
-                       fill_legend = TRUE,
-                       color_each = plot.clonedf$color, 
-                       default_color = "lightgray") 
-  for (save.type in c("svg", "tiff")){
-    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.type), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
-  }
-}
-
