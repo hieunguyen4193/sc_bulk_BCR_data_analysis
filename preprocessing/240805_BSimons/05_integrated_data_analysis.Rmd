@@ -87,17 +87,16 @@ all.integration.case <- list(
 ##### input arguments
 #####----------------------------------------------------------------------#####
 
-# outdir <- "/home/hieunguyen/CRC1382/outdir"
-# PROJECT <- "240805_BSimons"
-# output.version <- "20240820"
-# config.version <- "default"
-# chosen.quantile <- 0.99
-# integration.case <- "all_samples"
 
 outdir <- params$outdir
 PROJECT <- params$PROJECT
 chosen.quantile <- params$chosen.quantile
 integration.case <- params$integration.case
+
+# outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+# PROJECT <- "240805_BSimons"
+# chosen.quantile <- 0.85
+# integration.case <- "all_samples"
 
 path.to.main.input <- file.path(outdir, PROJECT)
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
@@ -223,7 +222,6 @@ integrated.cluster.markers %>% create_dt()
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
-
 for (cluster.id in sort(unique(integrated.cluster.markers$cluster))){
   tmp.integrated.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
   tmp.integrated.cluster.markers <- tmp.integrated.cluster.markers %>% mutate_if(is.numeric, round, 6) 
@@ -246,9 +244,12 @@ for (cluster.id in sort(unique(integrated.cluster.markers$cluster))){
                 ))))
   cat("\n \n")
 }
-
 ```
 
-
+# Check the gene Aicda
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DefaultAssay(s.obj) <- "RNA"
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = c("Aicda"))
+```
 
 

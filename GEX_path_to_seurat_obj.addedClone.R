@@ -10,6 +10,9 @@ path.to.all.s.obj <- list(
   Dataset1_2 = file.path(outdir, "GEX_output/04_output", "Dataset1_2", sprintf("s8_output/%s.output.s8.rds", "Dataset1_2")),
   Dataset1_2_Bonn = file.path(outdir, "GEX_output/04_output", "Dataset1_2_Bonn", sprintf("s8_output/%s.output.s8.rds", "Dataset1_2_Bonn")),
   Dataset1_Bonn = file.path(outdir, "GEX_output/04_output", "Dataset1_Bonn", sprintf("s8_output/%s.output.s8.rds", "Dataset1_Bonn")),
-  Dataset2_Bonn = file.path(outdir, "GEX_output/04_output", "Dataset2_Bonn", sprintf("s8_output/%s.output.s8.rds", "Dataset2_Bonn"))
+  Dataset2_Bonn = file.path(outdir, "GEX_output/04_output", "Dataset2_Bonn", sprintf("s8_output/%s.output.s8.rds", "Dataset2_Bonn")),
+  `240805_BSimons_filterHT` = file.path(path.to.00.output, "240805_BSimons_filterHT/240805_BSimons.output.s8.addedCloneInfo.rds"),
+  `240805_BSimons_filterHT_cluster` = file.path(path.to.00.output, "240805_BSimons_filterHT_cluster/240805_BSimons.output.s8.addedCloneInfo.rds"),
+  `240805_BSimons_filterHT_cluster_renamed` = file.path(path.to.00.output, "240805_BSimons_filterHT_cluster_renamed/240805_BSimons.renamedClusters.output.s8.addedCloneInfo.rds")
 )
 

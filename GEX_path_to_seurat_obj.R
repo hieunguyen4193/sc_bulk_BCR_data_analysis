@@ -6,6 +6,9 @@ path.to.all.s.obj <- list(
   `240805_BSimons` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/04_output/quantile_0.85/all_samples/s8_output/240805_BSimons.output.s8.rds"),
   `241104_BSimons` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/241104_BSimons/data_analysis/03_output/quantile_0.85/PP7/GEX_sample_PP7_seurat_object.rds"),
   `241002_BSimons` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/241002_BSimons/data_analysis/03_output/quantile_0.85/PP3/GEX_sample_PP3_seurat_object.rds"),
-  BonnData = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/BonnData/data_analysis/03_output/quantile_0.85/BonnData/GEX_sample_BonnData_seurat_object.addedSampleID.rds")
+  BonnData = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/BonnData/data_analysis/03_output/quantile_0.85/BonnData/GEX_sample_BonnData_seurat_object.addedSampleID.rds"),
+  `240805_BSimons_filterHT` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/06_output/quantile_0.85/all_samples/s8_output/240805_BSimons.output.s8.rds"),
+  `240805_BSimons_filterHT_cluster` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/07_output/quantile_0.85/all_samples/s8_output/240805_BSimons.output.s8.rds"),
+  `240805_BSimons_filterHT_cluster_renamed` = file.path(outdir, "sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/07_output/quantile_0.85/all_samples/s8_output/240805_BSimons.renamedClusters.output.s8.rds")
 )
 

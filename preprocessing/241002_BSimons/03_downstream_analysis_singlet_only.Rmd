@@ -82,18 +82,22 @@ sample.id <- params$sample.id
 outdir <- params$outdir
 chosen.quantile <- params$chosen.quantile
 
-# outdir <- "/home/hieunguyen/CRC1382/outdir"
-# PROJECT <- "240805_BSimons"
-# sample.id <- "M3"
-# output.version <- "20240820"
-# config.version <- "default"
-# chosen.quantile <- 0.95
+# PROJECT <- "241002_BSimons"
+# sample.id <- "PP3"
+# outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+# chosen.quantile <- 0.85
 
 path.to.main.input <- file.path(outdir, PROJECT)
 
-s.obj <- readRDS(file.path(path.to.main.input, sprintf("%s_round", analysis.round), sprintf("%s_1st_round", sample.id), "s8a_output", sprintf("%s.output.s8a.rds", PROJECT)))
+s.obj <- readRDS(file.path(path.to.main.input, 
+                           sprintf("%s_round", analysis.round), 
+                           sprintf("%s_1st_round", sample.id), 
+                           "s8a_output", sprintf("%s.output.s8a.rds", PROJECT)))
 
-raw.s.obj <- readRDS(file.path(path.to.main.input,sprintf("%s_round", analysis.round), sprintf("%s_1st_round", sample.id), "s1_output", sprintf("%s.output.s1.rds", PROJECT)))
+raw.s.obj <- readRDS(file.path(path.to.main.input,
+                               sprintf("%s_round", analysis.round), 
+                               sprintf("%s_1st_round", sample.id), "s1_output",
+                               sprintf("%s.output.s1.rds", PROJECT)))
 
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 
@@ -364,6 +368,13 @@ DimPlot(s.obj, reduction = "CELLCYCLED_PCA", group.by = "Phase", pt.size = 1)
 yfp.exprs <- GetAssayData(object = s.obj, assay = "RNA", slot = "data")["YFP", ]
 yfp.cells <- names(yfp.exprs[yfp.exprs != 0])
 nonyfp.cells <- names(yfp.exprs[yfp.exprs == 0])
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode") %>%
+  rowwise() %>%
+  mutate(YFP = ifelse(barcode %in% yfp.cells, "YFP+", "YFP-")) %>%
+  column_to_rownames("barcode")
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+s.obj <- AddMetaData(object = s.obj, metadata = meta.data$YFP, col.name = "YFP")
 ```
 
 
@@ -622,5 +633,82 @@ if (file.exists(file.path(path.to.03.output, sprintf("GEX_sample_%s_seurat_objec
 }
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=20, fig.height=12}
+# Update 13.01.2025
+
+## Check expression of Aicda gene in all cells
+
+### UMAP
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+FeaturePlot(object = s.obj, reduction = "RNA_UMAP", label = TRUE, features = c("Aicda"))
 ```
+
+### Violin plot
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = s.obj, features = c("Aicda"))
+```
+
+### In each hashtags
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = s.obj, features = c("Aicda"), split.by = "HTO_classification")
+```
+
+## Check expression of Aicda gene in YFP+ cells
+
+### UMAP
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+FeaturePlot(object = subset(s.obj, cells = yfp.cells), reduction = "RNA_UMAP", label = TRUE, features = c("Aicda"))
+```
+
+### Violin plot
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = subset(s.obj, cells = yfp.cells), features = c("Aicda"))
+```
+
+### In each hashtags
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = subset(s.obj, cells = yfp.cells), features = c("Aicda"), split.by = "HTO_classification")
+```
+
+
+## Check expression of Aicda gene in YFP- cells
+
+### UMAP
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+FeaturePlot(object = subset(s.obj, cells = nonyfp.cells), reduction = "RNA_UMAP", label = TRUE, features = c("Aicda"))
+```
+
+### Violin plot
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = subset(s.obj, cells = nonyfp.cells), features = c("Aicda"))
+```
+
+### In each hashtags
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+VlnPlot(object = subset(s.obj, cells = nonyfp.cells), features = c("Aicda"), split.by = "HTO_classification")
+```
+
+## Number of YFP +- cells in each hashtags
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+table(s.obj$YFP, s.obj$HTO_classification) %>% data.frame() %>% pivot_wider(names_from = "Var1", values_from = "Freq") %>% create_dt()
+```
+
+## Number of YFP +- cells in each hashtags
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+table(s.obj$YFP, s.obj$seurat_clusters) %>% data.frame() %>% pivot_wider(names_from = "Var1", values_from = "Freq") %>% create_dt()
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+count.mat <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")[c("Aicda"), yfp.cells]
+meta.data <- s.obj@meta.data %>% 
+  rownames_to_column("barcode") %>% 
+  subset(YFP == "YFP+") %>% 
+  subset(select = c(barcode, seurat_clusters)) %>%
+  rowwise() %>% 
+  mutate(Aicda = count.mat[[barcode]])
+
+meta.data %>% create_dt()
+```
+
+
+
