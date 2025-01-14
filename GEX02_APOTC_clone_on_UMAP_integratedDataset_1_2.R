@@ -65,7 +65,8 @@ path.to.02.output <- file.path(outdir,
                                sprintf("02_output_20250113_%s", name_or_colonization), 
                                dataset.name, 
                                clone.name,
-                               sprintf("top%s", topN))
+                               sprintf("top%s", topN),
+                               save.dev)
 dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
 
 if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
@@ -116,13 +117,13 @@ for (sampleid in unique(s.obj@meta.data[[name_or_colonization]])){
   all.top.clones <- c(all.top.clones, top.clones[[sampleid]])
 }
 
-plot.clonedf <- data.frame(clone = all.top.clones)
-if (length(all.top.clones) <= 20){
-  colors <- tableau_color_pal(palette = "Tableau 20")(length(all.top.clones))  
+plot.clonedf <- data.frame(clone = unique(all.top.clones))
+if (length(plot.clonedf$clone) <= 20){
+  colors <- tableau_color_pal(palette = "Tableau 20")(length(plot.clonedf$clone))  
 } else {
-  colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(all.top.clones) - 20))
+  colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(plot.clonedf$clone) - 20))
 }
-
+plot.clonedf$color <- colors
 tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
                      verbose = FALSE, 
                      reduction_base = reduction.name, 
@@ -134,3 +135,7 @@ tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name,
                      fill_legend = TRUE,
                      color_each = plot.clonedf$color, 
                      default_color = "lightgray") 
+
+ggsave(plot = tmp.plot, 
+       filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), 
+       path = path.to.02.output, dpi = 300, width = 14, height = 10)    

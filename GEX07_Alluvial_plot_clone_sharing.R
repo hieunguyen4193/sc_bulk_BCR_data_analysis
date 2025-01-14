@@ -53,8 +53,8 @@ path.to.07.output <- file.path(outdir,
                                sprintf("07_output_%s", name_or_sampleHT), 
                                dataset.name, 
                                clone.name,
-                               save.dev,
-                               sprintf("top%s", num.top)
+                               sprintf("top%s", num.top),
+                               save.dev
                                )
 dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 

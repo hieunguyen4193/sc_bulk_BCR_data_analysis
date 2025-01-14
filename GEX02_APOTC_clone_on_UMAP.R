@@ -81,7 +81,8 @@ path.to.02.output <- file.path(outdir,
                                sprintf("02_output_20250113_%s", name_or_sampleHT), 
                                dataset.name, 
                                clone.name,
-                               sprintf("top%s", topN))
+                               sprintf("top%s", topN),
+                               save.dev)
 dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
 if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
   reduction.name <- "RNA_UMAP"
