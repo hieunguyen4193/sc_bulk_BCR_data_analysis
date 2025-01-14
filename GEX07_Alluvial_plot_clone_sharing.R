@@ -39,10 +39,11 @@ path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("Bonn
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
 
-name_or_sampleHT <- "name" # sample_ht
+name_or_sampleHT <- "sample_ht" # sample_ht
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
-save.dev <- "svg"
+save.dev <- "tiff"
+# save.dev <- "svg"
 num.top <- 5
 
 if (name_or_sampleHT == "sample_ht"){

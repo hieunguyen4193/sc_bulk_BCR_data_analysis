@@ -35,7 +35,6 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
-# name_or_sampleHT <- "sample_ht"
 name_or_sampleHT <- "name"
 
 if (name_or_sampleHT == "sample_ht"){

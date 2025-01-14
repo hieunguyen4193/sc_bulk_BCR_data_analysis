@@ -37,7 +37,6 @@ path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("Bonn
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
 
 name_or_colonization <- "colonization"
-# name_or_colonization <- "name"
 
 if (name_or_colonization == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
@@ -137,5 +136,5 @@ tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name,
                      default_color = "lightgray") 
 
 ggsave(plot = tmp.plot, 
-       filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), 
+       filename = sprintf("APOTC.%s", save.dev), 
        path = path.to.02.output, dpi = 300, width = 14, height = 10)    
