@@ -38,91 +38,107 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
-name_or_sampleHT <- "sample_ht" # sample_ht
-clone.name <- "VJcombi_CDR3_0.85"
-dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
-save.dev <- "png"
-num.top <- 5
+# name_or_sampleHT <- "sample_ht"
+name_or_sampleHT <- "name"
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
 }
-path.to.07.output <- file.path(outdir, 
-                               "GEX_output", 
-                               sprintf("07_output_%s", name_or_sampleHT), 
-                               dataset.name, 
-                               clone.name,
-                               save.dev,
-                               sprintf("top%s", num.top)
-                               )
-dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
+clone.name <- "VJcombi_CDR3_0.85"
+dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
+save.dev <- "png"
 
-##### read seurat object 
+##### sample.list for each mouse:
+if (grepl("240805_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    M_samples = c("M1", "M2", "M3"),
+    P_samples = c("P1", "P2", "P3")
+  )
+  mouse.list <- list(
+    m1 = c("M1", "P1"),
+    m2 = c("M2", "P2"),
+    m3 = c("M3", "P3")
+  )
+} else if (grepl("241002_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    m3 = c("PP3")
+  )
+} else if (grpel("241104_BSimons", dataset.name) == TRUE){
+  sample.list <- list(
+    m7 = c("PP7")
+  )
+}
+print(sprintf("Working on dataset %s", dataset.name))
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
 if (dataset.name %in% sc.projects.with.ht){
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("barcode") %>%
     rowwise() %>%
     mutate(sample_ht = sprintf("%s_%s", name, HTO_classification)) %>%
-    mutate(mouseid = sprintf("m%s", str_replace(name, "M", ""))) %>%
-    mutate(mouseid = sprintf("%s", str_replace(mouseid, "P", ""))) %>%
-    mutate(mouseid = sprintf("%s", str_replace(mouseid, "PP", ""))) %>%
     column_to_rownames("barcode")
   meta.data <- meta.data[row.names(s.obj@meta.data), ]
-  s.obj <- AddMetaData(object = s.obj, metadata = meta.data$sample_ht, col.name = "sample_ht")    
-  s.obj <- AddMetaData(object = s.obj, metadata = meta.data$mouseid, col.name = "mouseid")    
+  s.obj <- AddMetaData(object = s.obj, metadata = meta.data$sample_ht, col.name = "sample_ht")      
 }
 
 DefaultAssay(s.obj) <- "RNA"
+path.to.07.output <- file.path(outdir, 
+                               "GEX_output", 
+                               sprintf("07_output"), 
+                               dataset.name, 
+                               clone.name)
+dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
+if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
+  reduction.name <- "RNA_UMAP"
+} else {
+  reduction.name <- "INTE_UMAP"
+}
 
-#####----------------------------------------------------------------------#####
-##### Generate clonedf
-#####----------------------------------------------------------------------#####
+Idents(s.obj) <- "seurat_clusters"
+
 meta.data <- s.obj@meta.data %>% 
   rownames_to_column("cell.barcode")
 clonedf <- data.frame(meta.data[[clone.name]] %>% table())
 colnames(clonedf) <- c("clone", "count")
 clonedf <- clonedf %>% arrange(desc(count))
 
-selected.top.clones <- list()
-all.selected.top.clones <- c()
 for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
   print(sprintf("Generating clonedf, working on sample: %s", sampleid))
   clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
     nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
   }))
-  selected.top.clones[[sampleid]] <- clonedf[order(clonedf[[sampleid]], decreasing = TRUE),] %>% 
-    head(num.top) %>% 
-    pull(clone) %>%
-    as.character()
-  all.selected.top.clones <- c(all.selected.top.clones, selected.top.clones[[sampleid]])
 }
 
-
-##### prepare the data frame for plotting
+#####----------------------------------------------------------------------#####
+##### Clone sharing between samples
+#####----------------------------------------------------------------------#####
 mouse.id <- "m1"
 
-all.plot.samples <- unique(subset(s.obj@meta.data, s.obj@meta.data$mouseid == mouse.id)[[name_or_sampleHT]]) %>% sort()
-p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
-m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
-
-plotdf <- clonedf[, c("clone", all.plot.samples)] %>% 
-  subset(clone %in% unlist(selected.top.clones[all.plot.samples])) 
-
-for (sampleid in all.plot.samples){
-  plotdf[[sampleid]] <- to_vec(for (item in plotdf[[sampleid]]){
-    item / sum(plotdf[[sampleid]])
-  })  
+selected.clones <- c()
+top.clones <- list()
+for (sample.id in mouse.list[[mouse.id]]){
+  tmpdf <- clonedf[, c("clone", sample.id)]
+  colnames(tmpdf) <- c("clone", "SampleID")
+  tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% head(5)
+  selected.clones <- c(selected.clones, as.character(tmpdf$clone))
+  top.clones[[sample.id]] <- as.character(tmpdf$clone)
 }
 
-row.names(plotdf) <- NULL
-plotdf$check.share <- plotdf %>% column_to_rownames("clone") %>% as.matrix() %>% rowProds()
+plotdf <- clonedf[, c("clone", mouse.list[[mouse.id]])] %>% subset(clone %in% selected.clones)
 
-tmp.plotdf <- plotdf %>% column_to_rownames("clone")
-share.clones <- tmp.plotdf[rowSums(tmp.plotdf != 0) >= 2, ] %>% row.names() %>% as.character()
-plotdf <- subset(plotdf, select = -c(check.share))
+##### scale to percentage
+for (sample.id in mouse.list[[mouse.id]]){
+  plotdf[[sample.id]] <- to_vec(for (item in plotdf[[sample.id]]){
+    item/sum(plotdf[[sample.id]])
+  })
+}
 
-##### plot alluvial plots
+p.sample <- mouse.list[[mouse.id]][grepl("P", mouse.list[[mouse.id]])]
+m.sample <- mouse.list[[mouse.id]][grepl("M", mouse.list[[mouse.id]])]
+
+share.clones <- subset(plotdf, 
+                         plotdf[[colnames(plotdf)[[2]]]] != 0 &
+                         plotdf[[colnames(plotdf)[[3]]]] != 0 )$clone
+
 plotdf.pivot <- plotdf %>% pivot_longer(!clone, names_to = "SampleID", values_to = "Count")
 colnames(plotdf.pivot) <- c("Clone", "SampleID", "Count", "CloneID")
 plotdf.pivot$Clone <- as.character(plotdf.pivot$Clone)
@@ -130,28 +146,21 @@ plotdf.pivot <- plotdf.pivot %>% rowwise() %>%
   mutate(CloneID = ifelse(Clone %in% as.character(share.clones), Clone, NA))
 
 # is_lodes_form(plotdf.pivot, key = SampleID, value = Count, id = clone, silent = TRUE)
-if (name_or_sampleHT == "name"){
-  clone.orders <- plotdf[order(plotdf[[p.sample]]), ]$clone %>% as.character()
-  colors <- colors[clone.orders]
-  plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)  
-}
-
+clone.orders <- plotdf[order(plotdf[[p.sample]]), ]$clone %>% as.character()
 unique.clones <- unique(plotdf.pivot$Clone)
-if (length(unique.clones) <= 20){
-  colors <- tableau_color_pal(palette = "Tableau 20")(length(unique.clones))  
-} else {
-  colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(unique.clones) - 20))
-}
-
+colors <- tableau_color_pal(palette = "Tableau 20")(length(unique.clones))
 names(colors) <- unique.clones
 
+colors <- colors[clone.orders]
+
+plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)
 plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))
 
-allu.plot <- ggplot(plotdf.pivot,
+ggplot(plotdf.pivot,
        aes(x = SampleID, stratum = Clone, alluvium = Clone, y = Count, fill = Clone)) +
   geom_alluvium(aes(fill = CloneID), width=.5) +
   geom_stratum(width=.5) +
-  # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
   theme_pubr() + 
   scale_fill_manual(values = colors, na.value = "lightgray") + 
   theme(legend.position = "bottom")
