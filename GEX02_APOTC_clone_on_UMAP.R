@@ -97,14 +97,14 @@ clonedf <- data.frame(meta.data[[clone.name]] %>% table())
 colnames(clonedf) <- c("clone", "count")
 clonedf <- clonedf %>% arrange(desc(count))
 
+for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
+  print(sprintf("Generating clonedf, working on sample: %s", sampleid))
+  clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
+    nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
+  }))
+}
+
 for (sample.list.name in names(sample.list)){
-  for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
-    print(sprintf("Generating clonedf, working on sample: %s", sampleid))
-    clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
-      nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
-    }))
-  }
-  
   colors <- tableau_color_pal(palette = "Tableau 20")(20)
   plot.clonedf <- data.frame()
   for (sample.id in sample.list[[sample.list.name]]){
