@@ -42,8 +42,9 @@ if (name_or_sampleHT == "sample_ht"){
 }
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
-save.dev <- "png"
 topN <- 5
+save.dev <- "svg"
+# save.dev <- "tiff"
 ##### sample.list for each mouse:
 if (grepl("240805_BSimons", dataset.name) == TRUE){
   sample.list <- list(
@@ -129,8 +130,6 @@ for (sample.list.name in names(sample.list)){
                        fill_legend = TRUE,
                        color_each = plot.clonedf$color, 
                        default_color = "lightgray") 
-  for (save.type in c("svg", "tiff")){
-    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.type), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
-  }
+    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
 }
 
