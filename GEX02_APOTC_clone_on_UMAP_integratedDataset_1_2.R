@@ -35,32 +35,17 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
-# name_or_sampleHT <- "sample_ht"
-name_or_sampleHT <- "name"
 
-if (name_or_sampleHT == "sample_ht"){
+name_or_colonization <- "colonization"
+# name_or_colonization <- "name"
+
+if (name_or_colonization == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
 }
 clone.name <- "VJcombi_CDR3_0.85"
-dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
-save.dev <- "png"
+dataset.name <- "Dataset1_2"
+save.dev <- "svg"
 topN <- 5
-##### sample.list for each mouse:
-if (grepl("240805_BSimons", dataset.name) == TRUE){
-  sample.list <- list(
-    M_samples = c("M1", "M2", "M3"),
-    P_samples = c("P1", "P2", "P3")
-  )
-} else if (grepl("241002_BSimons", dataset.name) == TRUE){
-  sample.list <- list(
-    m3 = c("PP3")
-  )
-} else if (grpel("241104_BSimons", dataset.name) == TRUE){
-  sample.list <- list(
-    m7 = c("PP7")
-  )
-}
-
 print(sprintf("Working on dataset %s", dataset.name))
 
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
@@ -75,22 +60,44 @@ if (dataset.name %in% sc.projects.with.ht){
 }
 
 DefaultAssay(s.obj) <- "RNA"
-
 path.to.02.output <- file.path(outdir, 
                                "GEX_output", 
-                               sprintf("02_output_20250113_%s", name_or_sampleHT), 
+                               sprintf("02_output_20250113_%s", name_or_colonization), 
                                dataset.name, 
                                clone.name,
                                sprintf("top%s", topN))
 dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
+
 if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
   reduction.name <- "RNA_UMAP"
 } else {
   reduction.name <- "INTE_UMAP"
 }
-
 Idents(s.obj) <- "seurat_clusters"
 s.obj <- RunAPOTC(seurat_obj = s.obj, reduction_base = reduction.name, clonecall = clone.name)
+
+colonizations <- list( MM9_Ecoli = c("17_MM9_Ecoli", 
+                                     "20_MM9_Ecoli"),
+                       MM9_Ecoli_SPF = c("21_MM9_Ecoli_SPF"),
+                       MM9 = c("MM9_S2",
+                                   "MM9_S4"),
+                       MM9_SPF = c( "MM9_SPF_S3",
+                                    "MM9_SPF_S9"),
+                       dataset2 = c("Sample_132",
+                                    "Sample_133")
+                       )
+colonizationdf <- data.frame(SampleID = unlist(colonizations)) %>%
+  rownames_to_column("colonization") %>%
+  rowwise() %>%
+  mutate(colonization = paste(str_split(colonization, "")[[1]][1:nchar(colonization)- 1], collapse = ""))
+
+meta.data <- s.obj@meta.data %>% rownames_to_column("barcode") %>%
+  rowwise() %>%
+  mutate(colonization = subset(colonizationdf, colonizationdf$SampleID == name)$colonization) %>%
+  column_to_rownames("barcode")
+
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+s.obj <- AddMetaData(object = s.obj, col.name = "colonization", metadata = meta.data$colonization)
 
 meta.data <- s.obj@meta.data %>% 
   rownames_to_column("cell.barcode")
@@ -98,39 +105,32 @@ clonedf <- data.frame(meta.data[[clone.name]] %>% table())
 colnames(clonedf) <- c("clone", "count")
 clonedf <- clonedf %>% arrange(desc(count))
 
-for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
+top.clones <- list()
+all.top.clones <- c()
+for (sampleid in unique(s.obj@meta.data[[name_or_colonization]])){
   print(sprintf("Generating clonedf, working on sample: %s", sampleid))
   clonedf[[sampleid]] <- unlist(lapply(clonedf$clone, function(x){
-    nrow(subset(meta.data, meta.data[[name_or_sampleHT]] == sampleid & meta.data[[clone.name]] == x))
+    nrow(subset(meta.data, meta.data[[name_or_colonization]] == sampleid & meta.data[[clone.name]] == x))
   }))
+  top.clones[[sampleid]] <- clonedf[order(clonedf[[sampleid]], decreasing = TRUE),] %>% head(topN) %>% pull(clone) %>% as.character()
+  all.top.clones <- c(all.top.clones, top.clones[[sampleid]])
 }
 
-for (sample.list.name in names(sample.list)){
-  colors <- tableau_color_pal(palette = "Tableau 20")(20)
-  plot.clonedf <- data.frame()
-  for (sample.id in sample.list[[sample.list.name]]){
-    tmpdf <- clonedf[, c("clone", sample.id)]
-    colnames(tmpdf) <- c("clone", "SampleID")
-    tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% head(topN)
-    tmp.plot.clonedf <- data.frame(clone = tmpdf$clone)
-    tmp.plot.clonedf$SampleID <- sample.id
-    plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
-  }
-  plot.clonedf$color <- head(colors, nrow(plot.clonedf))
-  
-  tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
-                       verbose = FALSE, 
-                       reduction_base = reduction.name, 
-                       show_labels = TRUE, 
-                       repulsion_strength = 5,
-                       legend_position = "top_right", 
-                       legend_sizes = 2) %>% 
-    showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
-                       fill_legend = TRUE,
-                       color_each = plot.clonedf$color, 
-                       default_color = "lightgray") 
-  for (save.type in c("svg", "tiff")){
-    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.type), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
-  }
+plot.clonedf <- data.frame(clone = all.top.clones)
+if (length(all.top.clones) <= 20){
+  colors <- tableau_color_pal(palette = "Tableau 20")(length(all.top.clones))  
+} else {
+  colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(all.top.clones) - 20))
 }
 
+tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
+                     verbose = FALSE, 
+                     reduction_base = reduction.name, 
+                     show_labels = TRUE, 
+                     repulsion_strength = 5,
+                     legend_position = "top_right", 
+                     legend_sizes = 2) %>% 
+  showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
+                     fill_legend = TRUE,
+                     color_each = plot.clonedf$color, 
+                     default_color = "lightgray") 

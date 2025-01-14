@@ -38,10 +38,11 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
-name_or_sampleHT <- "sample_ht" # sample_ht
+
+name_or_sampleHT <- "name" # sample_ht
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
-save.dev <- "png"
+save.dev <- "svg"
 num.top <- 5
 
 if (name_or_sampleHT == "sample_ht"){
@@ -59,6 +60,7 @@ dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 
 ##### read seurat object 
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
+
 if (dataset.name %in% sc.projects.with.ht){
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("barcode") %>%
@@ -98,60 +100,66 @@ for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
   all.selected.top.clones <- c(all.selected.top.clones, selected.top.clones[[sampleid]])
 }
 
-
+#####----------------------------------------------------------------------#####
 ##### prepare the data frame for plotting
-mouse.id <- "m1"
-
-all.plot.samples <- unique(subset(s.obj@meta.data, s.obj@meta.data$mouseid == mouse.id)[[name_or_sampleHT]]) %>% sort()
-p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
-m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
-
-plotdf <- clonedf[, c("clone", all.plot.samples)] %>% 
-  subset(clone %in% unlist(selected.top.clones[all.plot.samples])) 
-
-for (sampleid in all.plot.samples){
-  plotdf[[sampleid]] <- to_vec(for (item in plotdf[[sampleid]]){
-    item / sum(plotdf[[sampleid]])
-  })  
+#####----------------------------------------------------------------------#####
+for (mouse.id in unique(s.obj$mouseid)){
+  print(sprintf("Working on mouse ID: %s", mouse.id))
+  all.plot.samples <- unique(subset(s.obj@meta.data, s.obj@meta.data$mouseid == mouse.id)[[name_or_sampleHT]]) %>% 
+    sort()
+  
+  p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
+  m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
+  
+  plotdf <- clonedf[, c("clone", all.plot.samples)] %>% 
+    subset(clone %in% unlist(selected.top.clones[all.plot.samples])) 
+  
+  for (sampleid in all.plot.samples){
+    plotdf[[sampleid]] <- to_vec(for (item in plotdf[[sampleid]]){
+      item / sum(plotdf[[sampleid]])
+    })  
+  }
+  
+  row.names(plotdf) <- NULL
+  plotdf$check.share <- plotdf %>% column_to_rownames("clone") %>% as.matrix() %>% rowProds()
+  
+  tmp.plotdf <- plotdf %>% column_to_rownames("clone")
+  share.clones <- tmp.plotdf[rowSums(tmp.plotdf != 0) >= 2, ] %>% row.names() %>% as.character()
+  plotdf <- subset(plotdf, select = -c(check.share))
+  
+  ##### plot alluvial plots
+  plotdf.pivot <- plotdf %>% pivot_longer(!clone, names_to = "SampleID", values_to = "Count")
+  colnames(plotdf.pivot) <- c("Clone", "SampleID", "Count", "CloneID")
+  plotdf.pivot$Clone <- as.character(plotdf.pivot$Clone)
+  plotdf.pivot <- plotdf.pivot %>% rowwise() %>%
+    mutate(CloneID = ifelse(Clone %in% as.character(share.clones), Clone, NA))
+  
+  # is_lodes_form(plotdf.pivot, key = SampleID, value = Count, id = clone, silent = TRUE)
+  unique.clones <- unique(plotdf.pivot$Clone)
+  if (length(unique.clones) <= 20){
+    colors <- tableau_color_pal(palette = "Tableau 20")(length(unique.clones))  
+  } else {
+    colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(unique.clones) - 20))
+  }
+  names(colors) <- unique.clones
+  
+  if (name_or_sampleHT == "name"){
+    clone.orders <- plotdf[order(plotdf[[p.sample]]), ]$clone %>% as.character()
+    colors <- colors[clone.orders]
+    plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)  
+  }
+  
+  plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))
+  
+  allu.plot <- ggplot(plotdf.pivot,
+                      aes(x = SampleID, stratum = Clone, alluvium = Clone, y = Count, fill = Clone)) +
+    geom_alluvium(aes(fill = CloneID), width=.5) +
+    geom_stratum(width=.5) +
+    # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+    theme_pubr() + 
+    scale_fill_manual(values = colors, na.value = "lightgray") + 
+    theme(legend.position = "bottom")
+  ggsave(plot = allu.plot, filename = sprintf("alluvial_plot_%s.%s", mouse.id, save.dev),
+         path = file.path(path.to.07.output), device = save.dev, width = 14, height = 10, dpi = 300)
 }
 
-row.names(plotdf) <- NULL
-plotdf$check.share <- plotdf %>% column_to_rownames("clone") %>% as.matrix() %>% rowProds()
-
-tmp.plotdf <- plotdf %>% column_to_rownames("clone")
-share.clones <- tmp.plotdf[rowSums(tmp.plotdf != 0) >= 2, ] %>% row.names() %>% as.character()
-plotdf <- subset(plotdf, select = -c(check.share))
-
-##### plot alluvial plots
-plotdf.pivot <- plotdf %>% pivot_longer(!clone, names_to = "SampleID", values_to = "Count")
-colnames(plotdf.pivot) <- c("Clone", "SampleID", "Count", "CloneID")
-plotdf.pivot$Clone <- as.character(plotdf.pivot$Clone)
-plotdf.pivot <- plotdf.pivot %>% rowwise() %>%
-  mutate(CloneID = ifelse(Clone %in% as.character(share.clones), Clone, NA))
-
-# is_lodes_form(plotdf.pivot, key = SampleID, value = Count, id = clone, silent = TRUE)
-if (name_or_sampleHT == "name"){
-  clone.orders <- plotdf[order(plotdf[[p.sample]]), ]$clone %>% as.character()
-  colors <- colors[clone.orders]
-  plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)  
-}
-
-unique.clones <- unique(plotdf.pivot$Clone)
-if (length(unique.clones) <= 20){
-  colors <- tableau_color_pal(palette = "Tableau 20")(length(unique.clones))  
-} else {
-  colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(unique.clones) - 20))
-}
-
-names(colors) <- unique.clones
-
-plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))
-
-allu.plot <- ggplot(plotdf.pivot,
-       aes(x = SampleID, stratum = Clone, alluvium = Clone, y = Count, fill = Clone)) +
-  geom_alluvium(aes(fill = CloneID), width=.5) +
-  geom_stratum(width=.5) +
-  # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
-  theme_pubr() + 
-  scale_fill_manual(values = colors, na.value = "lightgray") + 
-  theme(legend.position = "bottom")
