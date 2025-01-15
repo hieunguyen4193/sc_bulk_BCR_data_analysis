@@ -53,12 +53,14 @@ for (input.dataset in names(path.to.all.s.obj)){
     print(sprintf("Working on dataset %s", input.dataset))
     s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
     
+    input.colors <- tableau_color_pal(palette = "Tableau 20")(length(unique(s.obj$seurat_clusters)))
     umap.p <- DimPlot(object = s.obj, 
                       reduction = reduction.name,
                       label = TRUE, 
                       label.box = TRUE, 
                       repel = TRUE, 
-                      group.by = "seurat_clusters")
+                      group.by = "seurat_clusters", 
+                      cols = input.colors)
     ggsave(plot = umap.p, filename = sprintf("UMAP.%s", save.figure.type), 
            path = file.path(path.to.01.output, save.figure.type, "module_scores"), device = save.figure.type, width = 14, height = 10)
     
