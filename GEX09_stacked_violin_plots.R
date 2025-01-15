@@ -152,7 +152,3 @@ for (g in names(gene.list[[dataset.name]])){
   ggsave(plot = p, filename = sprintf("violin_plot_group_%s.svg", g), 
          path = path.to.save.output, device = "svg", width = 4, height = 10, dpi = 300)  
 }
-
-
-
-

@@ -104,13 +104,16 @@ for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
 #####----------------------------------------------------------------------#####
 ##### prepare the data frame for plotting
 #####----------------------------------------------------------------------#####
-for (mouse.id in unique(s.obj$mouseid)){
+mouse.id <- "m1"
+# for (mouse.id in unique(s.obj$mouseid)){
   print(sprintf("Working on mouse ID: %s", mouse.id))
   all.plot.samples <- unique(subset(s.obj@meta.data, s.obj@meta.data$mouseid == mouse.id)[[name_or_sampleHT]]) %>% 
     sort()
   
   p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
   m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
+  
+  all.plot.samples <- p.sample
   
   plotdf <- clonedf[, c("clone", all.plot.samples)] %>% 
     subset(clone %in% unlist(selected.top.clones[all.plot.samples])) 
@@ -150,7 +153,14 @@ for (mouse.id in unique(s.obj$mouseid)){
     plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)  
   }
   
-  plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))
+  if (length(m.sample) != 0 & length(p.sample) != 0){
+    plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))    
+  } else if (length(m.sample) != 0 & length(p.sample) == 0) {
+    plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(m.sample))
+  } else if (length(m.sample) == 0 & length(p.sample) != 0) {
+    plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample))
+  }
+
   
   allu.plot <- ggplot(plotdf.pivot,
                       aes(x = SampleID, stratum = Clone, alluvium = Clone, y = Count, fill = Clone)) +
@@ -160,7 +170,7 @@ for (mouse.id in unique(s.obj$mouseid)){
     theme_pubr() + 
     scale_fill_manual(values = colors, na.value = "lightgray") + 
     theme(legend.position = "bottom")
-  ggsave(plot = allu.plot, filename = sprintf("alluvial_plot_%s.%s", mouse.id, save.dev),
-         path = file.path(path.to.07.output), device = save.dev, width = 14, height = 10, dpi = 300)
-}
+  # ggsave(plot = allu.plot, filename = sprintf("alluvial_plot_%s.%s", mouse.id, save.dev),
+  #        path = file.path(path.to.07.output), device = save.dev, width = 14, height = 10, dpi = 300)
+# }
 
