@@ -103,7 +103,7 @@ for (input.case in c("")){
           m.sample <- sort(m.sample, decreasing = FALSE)
           
           all.plot.samples <- c(p.sample, m.sample, MID.samples)
-          mhidf <- data.frame(MID = all.plot.samples)
+          mhidf <- data.frame(MID = factor(all.plot.samples, levels = all.plot.samples))
           
           #####
           for (input.mid1 in mhidf$MID){
