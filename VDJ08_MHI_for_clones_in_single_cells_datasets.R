@@ -32,6 +32,17 @@ source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
 # to.run.projects <- c("240805_BSimons_240826_BSimons",
 #                      "241002_BSimons_241104_BSimons_241031_BSimons")
 
+bulk.metadata <- list(
+  `240826_BSimons` = readxl::read_excel(file.path(path.to.main.src, 
+                                                  "preprocessing", 
+                                                  "240826_BSimons", 
+                                                  "240829 sample sheet.xlsx")),
+  `240805_BSimons_filterHT_cluster_renamed_240826_BSimons` = readxl::read_excel(file.path(path.to.main.src, 
+                                                                                          "preprocessing", 
+                                                                                          "240826_BSimons", 
+                                                                                          "240829 sample sheet.xlsx"))
+)
+
 to.run.projects <- c("240805_BSimons_filterHT_cluster_renamed_240826_BSimons")
 
 for (input.case in c("")){
@@ -59,6 +70,7 @@ for (input.case in c("")){
       all.files <- Sys.glob(file.path(path.to.input, "*.csv"))
       
       for (input.file in all.files){
+        mouse.id <- str_split(basename(input.file), "_")[[1]][[1]]
         print(sprintf("Working on sample %s", input.file))
         tmpdf <- read.csv(input.file) %>% subset(select = -c(X))
         colnames(tmpdf) <- c("CloneID", colnames(tmpdf)[2:length(colnames(tmpdf))])
@@ -72,6 +84,28 @@ for (input.case in c("")){
             }
           ))
           
+          # update 16.01.2025: change the order of M samples, P samples and 
+          # MID of bulk samples. 
+          mid.metadata <- bulk.metadata[[input.PROJECT]] %>%
+            subset(mouse == mouse.id)
+          
+          MID.samples <- to_vec(
+            for (item in c("SI prox", "SI mid", "SI dist", "colon")){
+              subset(mid.metadata, mid.metadata$sample == sprintf("%s %s", mouse.id, item))$MID
+            }
+          )
+          all.plot.samples <- mhidf$MID %>% unique()
+          p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
+          p.sample <- sort(p.sample, decreasing = TRUE)
+          
+          m.sample <- all.plot.samples[grepl("M", all.plot.samples) == TRUE & 
+                                         grepl("MID", all.plot.samples) == FALSE]
+          m.sample <- sort(m.sample, decreasing = FALSE)
+          
+          all.plot.samples <- c(p.sample, m.sample, MID.samples)
+          mhidf <- data.frame(MID = all.plot.samples)
+          
+          #####
           for (input.mid1 in mhidf$MID){
             print(sprintf("working on %s", input.mid1))
             mhidf[[input.mid1]] <- unlist(
