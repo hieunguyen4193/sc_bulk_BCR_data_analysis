@@ -43,7 +43,7 @@ if (name_or_colonization == "sample_ht"){
 }
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "Dataset1_2"
-save.dev <- "svg"
+save.dev <- "tiff"
 topN <- 5
 print(sprintf("Working on dataset %s", dataset.name))
 
@@ -89,7 +89,9 @@ colonizations <- list( MM9_Ecoli = c("17_MM9_Ecoli",
 colonizationdf <- data.frame(SampleID = unlist(colonizations)) %>%
   rownames_to_column("colonization") %>%
   rowwise() %>%
-  mutate(colonization = paste(str_split(colonization, "")[[1]][1:nchar(colonization)- 1], collapse = ""))
+  mutate(colonization = ifelse(colonization != "MM9_Ecoli_SPF", 
+                               paste(str_split(colonization, "")[[1]][1:nchar(colonization)- 1], collapse = ""), 
+                               "MM9_Ecoli_SPF"))
 
 meta.data <- s.obj@meta.data %>% rownames_to_column("barcode") %>%
   rowwise() %>%
@@ -122,7 +124,9 @@ if (length(plot.clonedf$clone) <= 20){
 } else {
   colors <- c(tableau_color_pal(palette = "Tableau 20")(20), hue_pal()(length(plot.clonedf$clone) - 20))
 }
+
 plot.clonedf$color <- colors
+
 tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
                      verbose = FALSE, 
                      reduction_base = reduction.name, 
@@ -138,3 +142,26 @@ tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name,
 ggsave(plot = tmp.plot, 
        filename = sprintf("APOTC.%s", save.dev), 
        path = path.to.02.output, dpi = 300, width = 14, height = 10)    
+
+for (c in names(colonizations)){
+  p.umap <- DimPlot(object = subset(s.obj, colonization == c), reduction = reduction.name, label = TRUE, label.box = TRUE)
+  tmp.plot <- vizAPOTC(subset(s.obj, colonization == c), clonecall = clone.name, 
+                       verbose = FALSE, 
+                       reduction_base = reduction.name, 
+                       show_labels = TRUE, 
+                       repulsion_strength = 5,
+                       legend_position = "top_right", 
+                       legend_sizes = 2) %>% 
+  showCloneHighlight(clonotype =  as.character(top.clones[[c]]), 
+                       fill_legend = TRUE,
+                       color_each = subset(plot.clonedf, plot.clonedf$clone %in% top.clones[[c]])$color, 
+                       default_color = "lightgray") 
+  
+  ggsave(plot = tmp.plot, 
+         filename = sprintf("APOT_%s.%s", c, save.dev), 
+         path = path.to.02.output, dpi = 300, width = 14, height = 10)    
+  ggsave(plot = p.umap, 
+         filename = sprintf("UMAP_colonization_%s.%s", c, save.dev), 
+         path = path.to.02.output, dpi = 300, width = 14, height = 10)    
+}
+

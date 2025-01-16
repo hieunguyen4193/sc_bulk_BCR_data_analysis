@@ -1,48 +1,26 @@
 gc()
 rm(list = ls())
 
-# install.packages("dplyr")
-# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.6-1.tar.gz", type = "source", repos = NULL)
-new.pkgs <- c("APackOfTheClones", "svglite", "car", "ggpubr", "ggthemes", "dplyr")
+new.pkgs <- c("svglite", "dplyr")
 for (pkg in new.pkgs){
   if (pkg %in% installed.packages() == FALSE){
     install.packages(pkg)
   }
 }
-library(ggpubr)
-library(ggthemes)
-library(APackOfTheClones)
 library(patchwork)
 library(scales)
+library(ggthemes)
+library(Seurat)
 library("gridExtra")
+library(ggplot2)
 
-#####----------------------------------------------------------------------#####
-##### packages
-#####----------------------------------------------------------------------#####
-path.to.main.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-source(file.path(path.to.main.src, "VDJ_helper_functions.R"))
-
-scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
-source(file.path(scrna_pipeline_src, "import_libraries.R"))
-source(file.path(scrna_pipeline_src, "helper_functions.R"))
-source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
-
-#####---------------------------------------------------------------------------#####
-##### INPUT ARGS
-#####---------------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
-path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
-
-outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
-path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
-
+path.to.s.obj <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/07_output/quantile_0.85/all_samples/s8_output/240805_BSimons.renamedClusters.output.s8.rds"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
 save.dev <- "svg"
 
 print(sprintf("Working on dataset %s", dataset.name))
 
-s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
+s.obj <- readRDS(path.to.s.obj)
 DefaultAssay(s.obj) <- "RNA"
 Idents(s.obj) <- "seurat_clusters"
 
@@ -52,12 +30,10 @@ if (dataset.name %in% c("241104_BSimons", "241002_BSimons")){
   reduction.name <- "INTE_UMAP"
 }
 
-path.to.09.output <- file.path(outdir, 
-                               "GEX_output", 
-                               sprintf("09_output"), 
-                               dataset.name, 
-                               save.dev)
-dir.create(path.to.09.output, showWarnings = FALSE, recursive = TRUE)
+path.to.save.output <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1/tmp"
+path.to.save.output <- file.path(path.to.save.output, save.dev)
+
+dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
 
 ##### table color - cluster
 modify_vlnplot_from_seurat<- function(obj, 
@@ -132,7 +108,6 @@ gene.list <- list(
                                                      group2= c("Foxp1", "Cxcr4", "Cxcr5", "Nt5e"))
 )
 
-path.to.save.output <- path.to.09.output
 
 all.clusters <- sort(unique(s.obj$seurat_clusters))
 cluster.order <- all.clusters
@@ -143,12 +118,12 @@ names(plot.clusters) <- cluster.order
 p.umap <- DimPlot(object = s.obj, reduction = reduction.name, label = TRUE, label.box = TRUE, 
                   group.by = "seurat_clusters", cols = plot.clusters)
 
-ggsave(plot = p.umap, filename = sprintf("UMAP.svg"), 
-       path = path.to.save.output, device = "svg", width = 14, height = 10, dpi = 300)  
+ggsave(plot = p.umap, filename = sprintf("UMAP.%s", save.dev), 
+       path = path.to.save.output, device = save.dev, width = 14, height = 10, dpi = 300)  
 
 for (g in names(gene.list[[dataset.name]])){
   p <- generate_vlnplot(obj = s.obj, features = gene.list[[dataset.name]][[g]], pt.size = 0, cluster.order = cluster.order, 
                         colors = plot.clusters)
   ggsave(plot = p, filename = sprintf("violin_plot_group_%s.svg", g), 
-         path = path.to.save.output, device = "svg", width = 4, height = 10, dpi = 300)  
+         path = path.to.save.output, device = save.dev, width = 4, height = 10, dpi = 300)  
 }

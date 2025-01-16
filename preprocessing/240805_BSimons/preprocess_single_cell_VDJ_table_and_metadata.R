@@ -9,15 +9,33 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 
 library("Biostrings")
 
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-PROJECT <- "240805_BSimons"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "240805_BSimons_filterHT_cluster_renamed"
 path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
 thres <- 0.85
+
+path.to.storage <- "/media/hieunguyen/HNHD01/storage/all_BSimons_datasets"
+
+#####----------------------------------------------------------------------#####
+##### read seurat object and get single cell data
+#####----------------------------------------------------------------------#####
+path.to.main.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
+s.obj <- readRDS(path.to.all.s.obj[[PROJECT]])
 
 #####----------------------------------------------------------------------#####
 ##### read file from VDJ output, after pre-processing. 
 #####----------------------------------------------------------------------#####
-path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
+if (PROJECT == "240805_BSimons_filterHT_cluster_renamed"){
+  path.to.main.input <- file.path(path.to.storage, "240805_BSimons", "VDJ")
+  full.metadata <- readxl::read_excel(file.path(outdir, "240805_BSimons", "data_analysis", "metadata.xlsx"))
+  path.to.VDJ.output <- file.path(outdir, "VDJ_output", "240805_BSimons", sprintf("VDJ_output_%s", thres))
+} else {
+  path.to.main.input <- file.path(path.to.storage, PROJECT, "VDJ")  
+  full.metadata <- readxl::read_excel(file.path(outdir, PROJECT, "data_analysis", "metadata.xlsx"))
+  path.to.VDJ.output <- file.path(outdir, "VDJ_output", PROJECT, sprintf("VDJ_output_%s", thres))
+}
+
 all.VDJ.files <- Sys.glob(file.path(path.to.VDJ.output, "annotated_contigs*.csv"))
 names(all.VDJ.files) <- to_vec(
   for (item in all.VDJ.files) str_replace(str_replace(basename(item), "annotated_contigs_clonaltype_", ""), ".csv", "")
@@ -34,8 +52,7 @@ dir.create(path.to.save.output, showWarnings = FALSE, recursive = TRUE)
 #####----------------------------------------------------------------------#####
 ##### read file "filtered_contig_annotations.csv" from the raw CellRanger pipeline
 #####----------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/GSHD_HN01/storage/all_BSimons_datasets"
-path.to.main.input <- file.path(path.to.storage, PROJECT, "VDJ")
+
 all.raw.VDJ.files <- Sys.glob(file.path(path.to.main.input, "*", "filtered_contig_annotations.csv"))
 names(all.raw.VDJ.files) <- to_vec(
   for (item in all.raw.VDJ.files) basename(dirname(item))
@@ -48,16 +65,13 @@ names(all.raw.VDJ.fasta) <- to_vec(
 all.raw.VDJ.fasta <- all.raw.VDJ.fasta[names(all.VDJ.files)]
 
 #####----------------------------------------------------------------------#####
-##### get metadata sheets from the 1st and 2nd datasets
-#####----------------------------------------------------------------------#####
-full.metadata <- readxl::read_excel(file.path(path.to.main.output, "metadata.xlsx"))
-
-#####----------------------------------------------------------------------#####
 ##### merge pre-processed data with the raw VDJ data
 #####----------------------------------------------------------------------#####
+rerun <- TRUE
+
 maindf <- list()
 for (sampleid in names(all.VDJ.files)){
-  if (file.exists(file.path(path.to.save.output, sprintf("%s.xlsx", sampleid))) == FALSE){
+  if (file.exists(file.path(path.to.save.output, sprintf("%s.xlsx", sampleid))) == FALSE | rerun == TRUE){
     rawdf <- read.csv(all.raw.VDJ.files[[sampleid]])
     prepdf <- read.csv(all.VDJ.files[[sampleid]]) 
     prepdf$prep_barcode <- prepdf$barcode
@@ -84,7 +98,15 @@ for (sampleid in names(all.VDJ.files)){
       mutate(suffix = ifelse(check.seqs == "yes", str_split(prefix_and_suffix, "_")[[1]][[2]], "none")) %>%
       subset(select = -c(prefix_and_suffix)) %>%
       mutate(CTstrict = str_replace_all(CTstrict, ":", "__"))
+    
+    # update 16.01.2025: keep cells in VDJ information that match GEX information,
+    # because we have filtered cells from 240805_BSimons. 
+    final.tmpdf <- final.tmpdf %>% rowwise() %>%
+      mutate(check.barcode = sprintf("%s_%s", sampleid, barcode)) %>%
+      subset(check.barcode %in% colnames(s.obj)) %>%
+      subset(select = -c(check.barcode))
     maindf[[sampleid]] <- final.tmpdf
+    
     writexl::write_xlsx(maindf[[sampleid]], file.path(path.to.save.output, sprintf("%s.xlsx", sampleid)))
   } else {
     maindf[[sampleid]] <- readxl::read_excel(file.path(path.to.save.output, sprintf("%s.xlsx", sampleid)))

@@ -16,7 +16,7 @@ library(circlize)
 ##### INPUT ARGS
 #####----------------------------------------------------------------------#####
 path.to.storage <- "/media/hieunguyen/HNHD01/storage/all_BSimons_datasets"
-source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.R"))
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
 thres <- 0.85
@@ -26,14 +26,14 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- "VJnt"
+circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
 bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
-sc.projects <- c("240805_BSimons")
+sc.projects <- c("240805_BSimons_filterHT_cluster_renamed")
 bulk.projects <- c("240826_BSimons")
 list.of.PROJECT <- c(sc.projects, bulk.projects)
 
@@ -203,7 +203,9 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
   saveRDS(all.data, file.path(path.to.05.output, circos.group.type, "all_data.rds"))
   meta.data <- data.frame(MID = names(all.data))
   meta.data <- meta.data  %>% rowwise() %>% 
-    mutate(PROJECT = paste(str_split(MID, "_")[[1]][1:2], collapse = "_") ) %>%
+    mutate(PROJECT = ifelse(grepl("_HT", MID), 
+                            paste(str_split(MID, "_")[[1]][1: (length(str_split(MID, "_")[[1]]) - 2)], collapse = "_"),
+                            paste(str_split(MID, "_")[[1]][1: (length(str_split(MID, "_")[[1]]) - 1)], collapse = "_")) ) %>%
     mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
     mutate(mouse = ifelse(
       PROJECT %in% sc.projects,
