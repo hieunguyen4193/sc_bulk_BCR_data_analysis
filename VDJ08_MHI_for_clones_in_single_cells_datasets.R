@@ -142,7 +142,11 @@ for (input.case in c("")){
         if ("X" %in% colnames(mhidf)){
           mhidf <- subset(mhidf, select = -c(X))
         }
-        mhi.plot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") %>% 
+        mhidf.pivot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") 
+        mhidf.pivot$MID <- factor(mhidf.pivot$MID, levels = all.plot.samples)
+        mhidf.pivot$SampleID <- factor(mhidf.pivot$SampleID, levels = all.plot.samples)
+        print(paste(all.plot.samples, collapse = ", "))
+        mhi.plot <- mhidf.pivot %>% 
           rowwise() %>%
           mutate(MHI.round = round(MHI, 3)) %>%
           ggplot(aes(x = MID, y = SampleID, fill = MHI)) + 
