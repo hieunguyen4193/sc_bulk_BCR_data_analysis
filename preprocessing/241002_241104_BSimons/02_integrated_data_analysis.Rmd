@@ -1,0 +1,224 @@
+---
+title: "Integration and Downstream analysis 241002 and 241104"
+author:
+  - "trnguyen@ukaachen.de"
+date: "Last update on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    keep_md: no
+    df_print: paged
+    toc: true
+    toc_float:
+      toc_collapsed: false
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+
+```{css zoom-lib-src, echo = FALSE}
+script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+```
+
+```{js zoom-jquery, echo = FALSE}
+ $(document).ready(function() {
+    $('body').prepend('<div class=\"zoomDiv\"><img src=\"\" class=\"zoomImg\"></div>');
+    // onClick function for all plots (img's)
+    $('img:not(.zoomImg)').click(function() {
+      $('.zoomImg').attr('src', $(this).attr('src')).css({width: '100%'});
+      $('.zoomDiv').css({opacity: '1', width: 'auto', border: '1px solid white', borderRadius: '5px', position: 'fixed', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)', boxShadow: '0px 0px 50px #888888', zIndex: '50', overflow: 'auto', maxHeight: '100%'});
+    });
+    // onClick function for zoomImg
+    $('img.zoomImg').click(function() {
+      $('.zoomDiv').css({opacity: '0', width: '0%'}); 
+    });
+  });
+```
+
+<style type="text/css">
+    div.datatables { height: auto !important;}
+</style>
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.width=14, fig.height=10}
+#####----------------------------------------------------------------------#####
+#
+# trnguyen@ukaachen.de
+#
+#####----------------------------------------------------------------------#####
+# gc()
+# rm(list = ls())
+
+scrna_pipeline_src <- "/media/hieunguyen/HNSD01/src/src_pipeline/scRNA_GEX_pipeline/processes_src"
+source(file.path(scrna_pipeline_src, "import_libraries.R"))
+source(file.path(scrna_pipeline_src, "helper_functions.R"))
+source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
+
+path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241002_BSimons"
+source(file.path(path.to.project.src, "config.R"))
+#####----------------------------------------------------------------------#####
+# CONFIGURATIONS 
+#####----------------------------------------------------------------------#####
+analysis.round <- "1st"
+chosen.seed <- 42
+num.dim.integration <- 25 
+num.PCA <- 25
+num.dim.cluster <- 25
+num.PC.used.in.Clustering <- 25
+num.PC.used.in.UMAP <- 25
+my_random_seed <- 42
+
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
+PROJECT <- "241002_241104_BSimons"
+path.to.main.input <- file.path(outdir, PROJECT)
+path.to.main.output <- file.path(outdir, PROJECT, "data_analysis")
+path.to.01.output <- file.path(path.to.main.output, "01_output")
+path.to.02.output <- file.path(path.to.main.output, "02_output")
+dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
+
+s.obj <- readRDS(file.path(path.to.01.output, "s8_output", "241002_241104_BSimons.output.s8.rds"))
+```
+
+# UMAP of all samples {.tabset}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (sample.id in unique(s.obj$name)){
+  cat(sprintf("## Sample: %s \n", sample.id))
+  p <- DimPlot(object = subset(s.obj, name == sample.id), reduction = "RNA_UMAP", label = TRUE, label.box = TRUE, label.size = 10, repel = TRUE) + 
+  ggtitle(sprintf("UMAP Sample %s: All clusters", sample.id)) +
+  theme(axis.text = element_text(size=20, face = "bold"),
+        axis.title = element_text(size=20, face = "bold"), 
+        title = element_text(size = 20, face = "bold"))
+  print(p)
+  cat("\n \n")
+}
+
+```
+
+## Integrate all samples and show them on UMAP
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DimPlot(object = s.obj, reduction = "RNA_UMAP", label = TRUE, group.by = "name", label.box = TRUE, label.size = 10, repel = TRUE) +
+  ggtitle("UMAP: all samples before performing data integration") + 
+  theme(axis.text = element_text(size=20, face = "bold"),
+        axis.title = element_text(size=20, face = "bold"), 
+        title = element_text(size = 20, face = "bold"))
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, group.by = "name", label.box = TRUE, label.size = 10, repel = TRUE) +
+  ggtitle("UMAP: all samples after performing data integration") + 
+  theme(axis.text = element_text(size=20, face = "bold"),
+        axis.title = element_text(size=20, face = "bold"), 
+        title = element_text(size = 20, face = "bold"))
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=28, fig.height=20}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = FALSE, split.by = "name", ncol = 3, label.box = TRUE, label.size = 10, repel = TRUE) +
+  ggtitle("UMAP: all samples after performing data integration") + 
+  theme(axis.text = element_text(size=20, face = "bold"),
+        axis.title = element_text(size=20, face = "bold"), 
+        title = element_text(size = 20, face = "bold"))
+```
+
+## Clustering after integration
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=28, fig.height=20}
+DimPlot(object = s.obj, reduction = "INTE_UMAP", label = TRUE, label.box = TRUE, label.size = 10, repel = TRUE) +
+  ggtitle("UMAP: all samples after performing data integration") + 
+  theme(axis.text = element_text(size=20, face = "bold"),
+        axis.title = element_text(size=20, face = "bold"), 
+        title = element_text(size = 20, face = "bold"))
+```
+
+
+# Cluster markers of integrated dataset
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+
+if (file.exists(file.path(path.to.02.output, "integrated_cluster_markers.rds")) == FALSE){
+  integrated.cluster.markers <- FindAllMarkers(object = s.obj, assay = "RNA", test.use = "wilcox")
+  saveRDS(integrated.cluster.markers, file.path(path.to.02.output, "integrated_cluster_markers.rds"))   
+} else {
+  integrated.cluster.markers <- readRDS(file.path(path.to.02.output, "integrated_cluster_markers.rds"))
+}
+
+integrated.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$p_val_adj <= 0.05 & integrated.cluster.markers$avg_log2FC > 0)
+```
+
+## Top-12 cluster marker genes `FeaturePlot` {.tabset}
+Here we just show the top-12 genes (ranked by `avg_log2FC`) for each cluster. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=28, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = head(tmp.cluster.markers, 9)$gene, ncol = 3, label = TRUE, pt.size = 0.5, label.size = 5, label.color = "red")  
+  print(p)
+  cat("\n \n")
+}
+```
+
+
+## Top-12 dot plot {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=28, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- DotPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+## Top-12 Violin plot {.tabset}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=28, fig.height=20}
+for (cluster.id in sort(unique(s.obj@meta.data$seurat_clusters))){
+  DefaultAssay(s.obj) <- "RNA"
+  cat(sprintf("### Cluster %s \n", cluster.id))
+  tmp.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  p <- VlnPlot(object = s.obj, features = head(tmp.cluster.markers, 9)$gene)  
+  print(p)
+  cat("\n \n")
+}
+```
+
+## Tables of all cluster marker genes {.tabset}
+```{r echo=FALSE, include=FALSE}
+integrated.cluster.markers %>% create_dt()
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+for (cluster.id in sort(unique(integrated.cluster.markers$cluster))){
+  tmp.integrated.cluster.markers <- subset(integrated.cluster.markers, integrated.cluster.markers$cluster == cluster.id) %>% arrange(desc(avg_log2FC))
+  tmp.integrated.cluster.markers <- tmp.integrated.cluster.markers %>% mutate_if(is.numeric, round, 6) 
+  
+  cat(paste("\n\n### Cluster: ", cluster.id, "##\n"))
+  print( htmltools::tagList(datatable(tmp.integrated.cluster.markers, extensions = 'Buttons',
+                filter = "top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                               lengthMenu = list(c(10,25,50,-1),
+                                                 c(10,25,50,"All")),
+                               columnDefs = list(list(
+                                 targets = "_all",
+                                 render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 100 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 100) + '...</span>' : data;",
+                                   "}")
+                               ))
+                ))))
+  cat("\n \n")
+}
+```
+
+# Check the gene Aicda
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=14, fig.height=10}
+DefaultAssay(s.obj) <- "RNA"
+FeaturePlot(object = s.obj, reduction = "INTE_UMAP", features = c("Aicda"))
+```
+
+
