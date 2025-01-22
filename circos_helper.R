@@ -8,7 +8,7 @@ generate_circos <- function(
     linkColor1 = "#FF000080",
     linkColor2 = "lightgray",
     group.to.highlight1 = NULL,
-    group.to.highligh2 = NULL
+    group.to.highlight2 = NULL
 ){
   if (filter.clone == TRUE){
     path.to.save.svg <- file.path(outputdir, 
@@ -164,14 +164,26 @@ generate_circos <- function(
       maxLinkSize <- max(tmp.plotdf$sample1_Freq + tmp.plotdf$sample2_Freq)
       
       for (index in seq(1, nrow(tmp.plotdf))){
-        circos.link(sample1, 
-                    c(tmp.plotdf$sample1_accumFreq[index] - tmp.plotdf$sample1_Freq[index], 
-                      tmp.plotdf$sample1_accumFreq[index]),
-                    sample2, 
-                    c(tmp.plotdf$sample2_accumFreq[index] - tmp.plotdf$sample2_Freq[index], 
-                      tmp.plotdf$sample2_accumFreq[index]), 
-                    col = linkRampAB(tmp.plotdf$sample1_Freq[index] + tmp.plotdf$sample2_Freq[index], maxLinkSize),
-                    border = NA)
+        if (sample1 %in% group.to.highlight1 & sample2 %in% group.to.highlight2){
+          circos.link(sample1, 
+                      c(tmp.plotdf$sample1_accumFreq[index] - tmp.plotdf$sample1_Freq[index], 
+                        tmp.plotdf$sample1_accumFreq[index]),
+                      sample2, 
+                      c(tmp.plotdf$sample2_accumFreq[index] - tmp.plotdf$sample2_Freq[index], 
+                        tmp.plotdf$sample2_accumFreq[index]), 
+                      col = linkRampAB(tmp.plotdf$sample1_Freq[index] + tmp.plotdf$sample2_Freq[index], maxLinkSize),
+                      border = NA)
+        } else {
+          circos.link(sample1, 
+                      c(tmp.plotdf$sample1_accumFreq[index] - tmp.plotdf$sample1_Freq[index], 
+                        tmp.plotdf$sample1_accumFreq[index]),
+                      sample2, 
+                      c(tmp.plotdf$sample2_accumFreq[index] - tmp.plotdf$sample2_Freq[index], 
+                        tmp.plotdf$sample2_accumFreq[index]), 
+                      col = linkRampAB2(tmp.plotdf$sample1_Freq[index] + tmp.plotdf$sample2_Freq[index], maxLinkSize),
+                      border = NA)
+        }
+
       }  
     }
   }

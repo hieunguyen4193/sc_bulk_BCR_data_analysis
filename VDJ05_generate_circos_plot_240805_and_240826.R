@@ -282,7 +282,8 @@ for (mouse.id in c("m1", "m2", "m3")){
 for (mouse.id in c("m1", "m2", "m3")){
   selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
   input.files <- all.input.files[selected.mids]
-
+  group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
+  group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
   fileAliases <- to_vec(
     for (item in names(input.files)){
       sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
@@ -304,7 +305,11 @@ for (mouse.id in c("m1", "m2", "m3")){
       saveFileName = saveFileName,
       outputdir = outputdir,
       filter.clone = filter.clone,
-      filter.clone.cutoff = filter.clone.cutoff
+      filter.clone.cutoff = filter.clone.cutoff,
+      group.to.highlight1 = group.to.highlight1,
+      group.to.highlight2 = group.to.highlight2,
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray"
     )
     }
   }
