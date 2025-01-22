@@ -349,7 +349,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   names(all.input.files) <- input.metadata$SampleID
   
   for (mouse.id in c("m1", "m2", "m3")){
-    selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+    selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
     
     p.sample <- selected.mids[grepl("P", selected.mids)]
     p.sample <- sort(p.sample, decreasing = TRUE)
@@ -369,11 +369,11 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
     
     input.files <- all.input.files[ordered.selected.mids]
-    group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
-    group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
+    group.to.highlight1 <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
+    group.to.highlight2 <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
     fileAliases <- to_vec(
       for (item in names(input.files)){
-        # sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+        # sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
         convert.sampleID[[item]]
       }
     )
