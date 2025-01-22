@@ -48,7 +48,7 @@ dataset.name <- "241002_241104_BSimons"
 # save.dev <- "tiff"
 save.dev <- "svg"
 num.top <- 5
-get.YFP.clone.only <- FALSE
+get.YFP.clone.only <- TRUE
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]

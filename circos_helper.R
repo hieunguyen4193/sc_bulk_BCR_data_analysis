@@ -149,9 +149,14 @@ generate_circos <- function(
   )
   
   all.combi <- combn(levels(cloneCountdf$SampleID), 2)
-  for (j in seq(1, ncol(all.combi))){
-    sample1 <- all.combi[, j][[1]]
-    sample2 <- all.combi[, j][[2]]
+  all.combidf <- data.frame(all.combi %>% t)
+  colnames(all.combidf) <- c("Sample1", "Sample2")
+  all.combidf <- all.combidf %>% rowwise() %>%
+    mutate(check = ifelse(Sample1 %in% group.to.highlight1 & Sample2 %in% group.to.highlight2, "yes", "no")) %>%
+    arrange(check)
+  for (j in seq(1, nrow(all.combidf))){
+    sample1 <- all.combidf[j, ][["Sample1"]]
+    sample2 <- all.combidf[j, ][["Sample2"]]
     print(sprintf("Generating links between %s and %s", sample1, sample2))
     tmp.plotdf <- plotdf[, c( 
       sprintf("%s_Freq", sample1), sprintf("%s_accumFreq", sample1),
