@@ -65,7 +65,8 @@ generate_circos <- function(
     cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = keep.samples)
   } else {
     print(sprintf("Samples are ordered based on input order %s", paste(ordered.samples, collapse = ", ")))
-    cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = ordered.samples)    
+    cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = ordered.samples)
+    cloneCountdf <- cloneCountdf[order(cloneCountdf$SampleID), ]
   }
 
   

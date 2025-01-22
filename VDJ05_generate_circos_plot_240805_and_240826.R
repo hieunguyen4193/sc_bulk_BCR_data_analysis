@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- "VJnt"
+circos.group.type <- "VJaa"
 
 source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
 #####----------------------------------------------------------------------#####
@@ -326,7 +326,7 @@ for (mouse.id in c("m1", "m2", "m3")){
   )
   ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
   
-  input.files <- all.input.files[selected.mids]
+  input.files <- all.input.files[ordered.selected.mids]
   group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
   group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
   fileAliases <- to_vec(

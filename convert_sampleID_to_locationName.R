@@ -18,7 +18,7 @@ convert.sampleID <- list(
   "P2_HT1" =	"PP #1",
   "P2_HT2" =	"PP #2",
   "P2_HT5" =	"PP #4",
-  "m2_HT3" =	"mLN #3",
+  "M2_HT3" =	"mLN #3",
   "M2_HT2" = 	"mLN #2",
   "M2_HT1" =	"mLN #1",
   "MID9" =	"SI dist",
