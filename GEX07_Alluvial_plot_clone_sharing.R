@@ -89,10 +89,6 @@ if (dataset.name %in% sc.projects.with.ht){
   s.obj <- AddMetaData(object = s.obj, metadata = meta.data$mouseid, col.name = "mouseid")    
 }
 
-count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
-yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
-non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
-
 DefaultAssay(s.obj) <- "RNA"
 
 #####----------------------------------------------------------------------#####
@@ -104,24 +100,28 @@ clonedf <- data.frame(meta.data[[clone.name]] %>% table())
 colnames(clonedf) <- c("clone", "count")
 clonedf <- clonedf %>% arrange(desc(count))
 
-clonedf <- clonedf %>% rowwise() %>%
-  mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
-  mutate(YFP.clone = 
-           length(intersect(
-             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
-           ))
-  ) %>%
-  mutate(non.YFP.clone = 
-           length(intersect(
-             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
-           ))
-  )
-
 if (get.YFP.clone.only == TRUE){
+  count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
+  yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
+  non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
+  
   print("Generating data for YFP clones only, clones that have at least 1 cell YFP+")
   clonedf <- subset(clonedf, clonedf$YFP.clone != 0)
   path.to.07.output <- file.path(path.to.07.output, "YFP_clones_only")
   dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
+  
+  clonedf <- clonedf %>% rowwise() %>%
+    mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
+    mutate(YFP.clone = 
+             length(intersect(
+               row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
+             ))
+    ) %>%
+    mutate(non.YFP.clone = 
+             length(intersect(
+               row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
+             ))
+    )
 }
 
 selected.top.clones <- list()
