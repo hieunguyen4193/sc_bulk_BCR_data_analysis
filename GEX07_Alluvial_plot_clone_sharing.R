@@ -217,3 +217,20 @@ for (mouse.id in unique(s.obj$mouseid)){
   }
 }
 
+##### consider YFP clones
+count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
+yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
+non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
+
+clonedf <- clonedf %>% rowwise() %>%
+  mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
+  mutate(YFP.clone = 
+           length(intersect(
+             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
+           ))
+  ) %>%
+  mutate(non.YFP.clone = 
+           length(intersect(
+             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
+           ))
+  )

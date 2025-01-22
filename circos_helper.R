@@ -4,7 +4,11 @@ generate_circos <- function(
     saveFileName,
     outputdir,
     filter.clone = FALSE,
-    filter.clone.cutoff = NULL
+    filter.clone.cutoff = NULL,
+    linkColor1 = "#FF000080",
+    linkColor2 = "lightgray",
+    group.to.highlight1 = NULL,
+    group.to.highligh2 = NULL
 ){
   if (filter.clone == TRUE){
     path.to.save.svg <- file.path(outputdir, 
@@ -93,9 +97,17 @@ generate_circos <- function(
   }
   
   ##### Define LINK colors
-  linkColors <- c("#FF000080", "#FF000080")
+  linkColors <- c(linkColor1, linkColor1)
   linkRampAB <- function(x, maxLinkSize) {
     ramp <- colorRamp(c(linkColors[1], linkColors[2]), alpha = TRUE)
+    color <- ramp(x / maxLinkSize)
+    rgb(color, alpha = color[4], maxColorValue = 255)
+  }
+  
+  ##### Define BACKGROUND LINK colors
+  linkColors2 <- c(linkColor2, linkColor2)
+  linkRampAB2 <- function(x, maxLinkSize) {
+    ramp <- colorRamp(c(linkColors2[1], linkColors2[2]), alpha = TRUE)
     color <- ramp(x / maxLinkSize)
     rgb(color, alpha = color[4], maxColorValue = 255)
   }

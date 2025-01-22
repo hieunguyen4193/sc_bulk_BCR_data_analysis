@@ -227,6 +227,8 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
 #####----------------------------------------------------------------------#####
 ##### MAIN FUNCTIONS GENERATE CIRCOS PLOT
 #####----------------------------------------------------------------------#####
+# if the data has already been processed, just run from this part of the script
+
 all.input.files <- Sys.glob(file.path(path.to.05.output,
                                       circos.group.type,
                                       "*.simplified.csv"))
