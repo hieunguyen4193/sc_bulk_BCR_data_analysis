@@ -26,9 +26,10 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-# circos.group.type <- "VJnt"
-circos.group.type <- "VJaa"
+circos.group.type <- "VJnt"
+# circos.group.type <- "VJaa"
 
+source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
@@ -256,7 +257,8 @@ for (mouse.id in c("m1", "m2", "m3")){
   
   fileAliases <- to_vec(
     for (item in names(input.files)){
-      sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+      # sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+      convert.sampleID[[item]]
     }
   )
   names(fileAliases) <- names(input.files)
@@ -292,7 +294,8 @@ for (mouse.id in c("m1", "m2", "m3")){
   group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
   fileAliases <- to_vec(
     for (item in names(input.files)){
-      sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+      # sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+      convert.sampleID[[item]]
     }
   )
   names(fileAliases) <- names(input.files)

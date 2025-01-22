@@ -28,6 +28,8 @@ define.clone.clusters <- FALSE
 
 circos.group.type <- "VJaa"
 
+source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
+
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
@@ -354,7 +356,8 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     
     fileAliases <- to_vec(
       for (item in names(input.files)){
-        sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
+        # sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
+        convert.sampleID[[item]]
       }
     )
     names(fileAliases) <- names(input.files)

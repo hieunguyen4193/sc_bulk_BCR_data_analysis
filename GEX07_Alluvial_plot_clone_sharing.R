@@ -48,7 +48,7 @@ dataset.name <- "241002_241104_BSimons"
 # save.dev <- "tiff"
 save.dev <- "svg"
 num.top <- 5
-get.YFP.clone.only <- TRUE
+  get.YFP.clone.only <- FALSE
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
@@ -106,7 +106,6 @@ if (get.YFP.clone.only == TRUE){
   non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
   
   print("Generating data for YFP clones only, clones that have at least 1 cell YFP+")
-  clonedf <- subset(clonedf, clonedf$YFP.clone != 0)
   path.to.07.output <- file.path(path.to.07.output, "YFP_clones_only")
   dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
   
@@ -122,6 +121,7 @@ if (get.YFP.clone.only == TRUE){
                row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
              ))
     )
+  clonedf <- subset(clonedf, clonedf$YFP.clone != 0)
 }
 
 selected.top.clones <- list()
