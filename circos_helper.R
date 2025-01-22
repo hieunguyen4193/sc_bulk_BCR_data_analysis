@@ -8,7 +8,8 @@ generate_circos <- function(
     linkColor1 = "#FF000080",
     linkColor2 = "lightgray",
     group.to.highlight1 = NULL,
-    group.to.highlight2 = NULL
+    group.to.highlight2 = NULL,
+    ordered.samples = NULL
 ){
   if (filter.clone == TRUE){
     path.to.save.svg <- file.path(outputdir, 
@@ -60,7 +61,13 @@ generate_circos <- function(
   exclude.samples <- count.clone.in.samples[count.clone.in.samples <= 1] %>% names()
   cloneCountdf <- subset(cloneCountdf, cloneCountdf$SampleID %in% exclude.samples == FALSE)
   keep.samples <- setdiff(names(input.files), exclude.samples)
-  cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = keep.samples)
+  if (is.null(ordered.samples) == TRUE){
+    cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = keep.samples)
+  } else {
+    print(sprintf("Samples are ordered based on input order %s", paste(ordered.samples, collapse = ", ")))
+    cloneCountdf$SampleID <- factor(cloneCountdf$SampleID, levels = ordered.samples)    
+  }
+
   
   new.fileAliases <- to_vec(
     for (item in keep.samples){

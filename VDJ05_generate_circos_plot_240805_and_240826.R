@@ -251,6 +251,24 @@ meta.data.non.splitted <- subset(meta.data, grepl("_", meta.data$SampleID) == FA
 for (mouse.id in c("m1", "m2", "m3")){
 
   selected.mids <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id)$SampleID
+  
+  p.sample <- selected.mids[grepl("P", selected.mids)]
+  p.sample <- sort(p.sample, decreasing = TRUE)
+  
+  m.sample <- selected.mids[grepl("M", selected.mids) == TRUE & grepl("MID", selected.mids) == FALSE]
+  m.sample <- sort(m.sample, decreasing = FALSE)
+  
+  MID.samples <- selected.mids[grepl("MID", selected.mids) == TRUE]
+  MID.sample.order <- c("SI prox", "SI mid", "SI dist", "colon")
+  
+  orderdf <- subset(convert.sampleIDdf, convert.sampleIDdf$SampleID %in% MID.samples)
+  ordered.MID.samples <- to_vec(
+    for (item in MID.sample.order){
+      subset(orderdf, orderdf$alias == item)$SampleID
+    }
+  )
+  ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
+  
   input.files <- all.input.files[selected.mids]
   group.to.highlight1 <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
   group.to.highlight2 <- subset(meta.data.splitted, meta.data.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
@@ -281,7 +299,8 @@ for (mouse.id in c("m1", "m2", "m3")){
       group.to.highlight1 = group.to.highlight1,
       group.to.highlight2 = group.to.highlight2,
       linkColor1 = "#FF000080",
-      linkColor2 = "lightgray"
+      linkColor2 = "lightgray",
+      ordered.samples = ordered.selected.mids
     )
   }
 # }
@@ -289,6 +308,24 @@ for (mouse.id in c("m1", "m2", "m3")){
 ##### generate circos plot for mice only, no hashtag information
 for (mouse.id in c("m1", "m2", "m3")){
   selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
+  
+  p.sample <- selected.mids[grepl("P", selected.mids)]
+  p.sample <- sort(p.sample, decreasing = TRUE)
+  
+  m.sample <- selected.mids[grepl("M", selected.mids) == TRUE & grepl("MID", selected.mids) == FALSE]
+  m.sample <- sort(m.sample, decreasing = FALSE)
+  
+  MID.samples <- selected.mids[grepl("MID", selected.mids) == TRUE]
+  MID.sample.order <- c("SI prox", "SI mid", "SI dist", "colon")
+  
+  orderdf <- subset(convert.sampleIDdf, convert.sampleIDdf$SampleID %in% MID.samples)
+  ordered.MID.samples <- to_vec(
+    for (item in MID.sample.order){
+      print(subset(orderdf, orderdf$alias == item)$SampleID)
+    }
+  )
+  ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
+  
   input.files <- all.input.files[selected.mids]
   group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
   group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
@@ -318,7 +355,8 @@ for (mouse.id in c("m1", "m2", "m3")){
       group.to.highlight1 = group.to.highlight1,
       group.to.highlight2 = group.to.highlight2,
       linkColor1 = "#FF000080",
-      linkColor2 = "lightgray"
+      linkColor2 = "lightgray",
+      ordered.samples = ordered.selected.mids
     )
     }
   }

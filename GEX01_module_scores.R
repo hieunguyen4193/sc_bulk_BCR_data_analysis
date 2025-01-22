@@ -41,10 +41,11 @@ module.genedf <- readxl::read_excel(all.module.genedf[[module.score.version]])
 
 # save.figure.type <- "tiff"
 save.figure.type <- "svg"
+rerun <- TRUE
 
 for (input.dataset in names(path.to.all.s.obj)){
   path.to.01.output <- file.path(outdir, "GEX_output", sprintf("01_output_%s", module.score.version), input.dataset)
-  if (file.exists(file.path(path.to.01.output, sprintf("finished_%s_%s", input.dataset, save.figure.type))) == FALSE){
+  if (file.exists(file.path(path.to.01.output, sprintf("finished_%s_%s", input.dataset, save.figure.type))) == FALSE | rerun == TRUE){
     if (input.dataset %in% c("241002_BSimons", "241104_BSimons", "BonnData")){
       reduction.name <- "RNA_UMAP"
     } else {
@@ -56,6 +57,9 @@ for (input.dataset in names(path.to.all.s.obj)){
     
     print(sprintf("Working on dataset %s", input.dataset))
     s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
+    
+    DefaultAssay(s.obj) <- "RNA"
+    Idents(s.obj) <- "seurat_clusters"
     
     input.colors <- tableau_color_pal(palette = "Tableau 20")(length(unique(s.obj$seurat_clusters)))
     umap.p <- DimPlot(object = s.obj, 
@@ -152,9 +156,6 @@ for (input.dataset in names(path.to.all.s.obj)){
         sprintf("%s_1", item)
       }
     )
-    DefaultAssay(s.obj) <- "RNA"
-    Idents(s.obj) <- "seurat_clusters"
-    
     feature.plot <- FeaturePlot(object = s.obj, reduction = reduction.name, label = TRUE, ncol = 3, features = fake.module.gene.list, pt.size = 1) &
       scale_color_gradient(low = "lightgray", high = "#FF0000", na.value = "lightgray")
     

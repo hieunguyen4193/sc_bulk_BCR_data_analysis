@@ -354,6 +354,23 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     group.to.highlight1 <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
     group.to.highlight2 <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
     
+    p.sample <- selected.mids[grepl("P", selected.mids)]
+    p.sample <- sort(p.sample, decreasing = TRUE)
+    
+    m.sample <- selected.mids[grepl("M", selected.mids) == TRUE & grepl("MID", selected.mids) == FALSE]
+    m.sample <- sort(m.sample, decreasing = FALSE)
+    
+    MID.samples <- selected.mids[grepl("MID", selected.mids) == TRUE]
+    MID.sample.order <- c("SI prox", "SI mid", "SI dist", "colon")
+    
+    orderdf <- subset(convert.sampleIDdf, convert.sampleIDdf$SampleID %in% MID.samples)
+    ordered.MID.samples <- to_vec(
+      for (item in MID.sample.order){
+        print(subset(orderdf, orderdf$alias == item)$SampleID)
+      }
+    )
+    ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
+    
     fileAliases <- to_vec(
       for (item in names(input.files)){
         # sprintf("%s (%s)", item, subset(tmp.metadata, tmp.metadata$SampleID == item)$organ)
@@ -384,7 +401,8 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
         group.to.highlight1 = group.to.highlight1,
         group.to.highlight2 = group.to.highlight2,
         linkColor1 = "#FF000080",
-        linkColor2 = "lightgray"
+        linkColor2 = "lightgray",
+        ordered.samples = ordered.selected.mids
       )
     }
   }

@@ -6,7 +6,7 @@ convert.sampleID <- list(
   "P1_HT2" =	"PP #2",
   "P1_HT5" =	"PP #4", 
   "P1_HT1" =	"PP #1",
-  "P1_HT5" =	"PP #3",
+  "P1_HT3" =	"PP #3",
   "M1_HT3" =	"mLN #3",
   "M1_HT2" =	"mLN #2",
   "M1_HT1" =	"mLN #1",
@@ -21,10 +21,10 @@ convert.sampleID <- list(
   "m2_HT3" =	"mLN #3",
   "M2_HT2" = 	"mLN #2",
   "M2_HT1" =	"mLN #1",
-  "MID9" =	"mid",
-  "MID10" = 	"prox",
-  "MID10" =	"colon",
-  "MID13" =	"dist",
+  "MID9" =	"SI dist",
+  "MID10" = 	"SI mid",
+  "MID11" =	"SI prox",
+  "MID13" =	"colon",
   "P3_HT3" =	"PP #2",
   "P3_HT4" =	"PP #3",
   "P3_HT2" =	"PP #1",
@@ -32,11 +32,15 @@ convert.sampleID <- list(
   "M3_HT3" =	"mLN #3",
   "M3_HT2" =	"mLN #2",
   "M3_HT1" =	"mLN #1",
-  "M1" = "M1",
-  "M2" = "M2",
-  "M3" = "M3",
-  "P1" = "P1",
-  "P2" = "P2",
-  "P3" = "P3"
-  
+  "M1" = "mLN #1-2-3",
+  "M2" = "mLN #1-2-3",
+  "M3" = "mLN #1-2-3",
+  "P1" = "PP #1-2-3",
+  "P2" = "PP #1-2-3",
+  "P3" = "PP #1-2-3"
 )
+
+convert.sampleIDdf <- data.frame(convert.sampleID) %>% t() %>% data.frame() %>% rownames_to_column("SampleID")
+colnames(convert.sampleIDdf) <- c("SampleID", "alias")
+# writexl::write_xlsx(convert.sampleIDdf, "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.preprocessed.xlsx")
+
