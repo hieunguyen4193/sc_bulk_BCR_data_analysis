@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-# circos.group.type <- "VJnt"
-circos.group.type <- "VJaa"
+circos.group.type <- "VJnt"
+# circos.group.type <- "VJaa"
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA

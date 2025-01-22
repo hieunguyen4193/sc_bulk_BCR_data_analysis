@@ -141,6 +141,7 @@ for (input.case in c("")){
         library(viridis)
         if ("X" %in% colnames(mhidf)){
           mhidf <- subset(mhidf, select = -c(X))
+          all.plot.samples <- mhidf$MID
         }
         mhidf.pivot <- mhidf %>% pivot_longer(!MID, names_to = "SampleID", values_to = "MHI") 
         mhidf.pivot$MID <- factor(mhidf.pivot$MID, levels = all.plot.samples)
@@ -152,8 +153,8 @@ for (input.case in c("")){
           ggplot(aes(x = MID, y = SampleID, fill = MHI)) + 
           geom_tile(color = "white") + 
           theme(axis.text.x = element_text(angle = 90)) + 
-          scale_fill_gradient(high = "red", low = "gray") + 
-          geom_text(aes(label = MHI.round), color = "white", size = 4) 
+          scale_fill_gradient(high = "red", low = "#f7fafd") + 
+          geom_text(aes(label = MHI.round), color = "black", size = 4) 
         ggsave(plot = mhi.plot, filename = sprintf("%s.MHI.svg", filename),
                path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
       }
