@@ -26,16 +26,17 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
+# circos.group.type <- "VJnt"
 circos.group.type <- "VJaa"
-
-source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
 
 #####----------------------------------------------------------------------#####
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
-bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
-sc.projects <- c("240805_BSimons_filterHT_cluster_renamed")
-bulk.projects <- c("240826_BSimons")
+bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241031_BSimons/241031_sample_sheet.xlsx") %>%
+  rowwise() %>% 
+  mutate(MID = sprintf("MID%s", MID))
+sc.projects <- c("241002_241104_BSimons")
+bulk.projects <- c("241031_BSimons")
 list.of.PROJECT <- c(sc.projects, bulk.projects)
 
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.PROJECT, collapse = "_"))
@@ -208,12 +209,12 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
     mutate(SampleID = str_replace(MID, sprintf("%s_", PROJECT), "")) %>%
     mutate(mouse = ifelse(
       PROJECT %in% sc.projects,
-      sprintf("m%s", str_split(SampleID, "")[[1]][[2]]),
+      sprintf("m%s", str_split(SampleID, "")[[1]][[3]]),
       subset(bulk.metadata, bulk.metadata$MID == SampleID)$mouse
     )) %>%
     mutate(organ = ifelse(
       PROJECT %in% sc.projects,
-      str_split(SampleID, "")[[1]][[1]],
+      paste0(str_split(SampleID, "")[[1]][1:2], collapse = ""),
       subset(bulk.metadata, bulk.metadata$MID == SampleID)$organ
     ))
   writexl::write_xlsx(meta.data, file.path(path.to.05.output, "all_data_metadata.xlsx"))
@@ -240,12 +241,13 @@ all.input.files <- input.metadata$path
 names(all.input.files) <- input.metadata$SampleID
 
 ##### generate circos plot for all hashtags
-exclude.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
+exclude.samples <- c("PP3", "PP7")
 
 meta.data.splitted.or.not <- list(
   with_hashtags = subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE),
   without_hashtags = subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 )
+
 
 for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
@@ -253,7 +255,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   
   if (file.exists(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), meta.data.name, "all.data.VJ.combi.rds")) == FALSE){
     all.data.VJ.combi <- list()
-    for (mouse.id in c("m1", "m2", "m3")){
+    for (mouse.id in c("m3", "m7")){
       selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
       input.files <- all.input.files[selected.mids]
       
@@ -324,10 +326,6 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   }
 }
 
-#####----------------------------------------------------------------------#####
-##### GENERATE CIRCOS PLOT FOR THRES 0.85
-#####----------------------------------------------------------------------#####
-
 for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
   all.input.files <- Sys.glob(file.path(path.to.05.output, 
@@ -348,35 +346,35 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   all.input.files <- input.metadata$path
   names(all.input.files) <- input.metadata$SampleID
   
-  for (mouse.id in c("m1", "m2", "m3")){
+  for (mouse.id in c("m3", "m7")){
     selected.mids <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id)$SampleID
     
-    p.sample <- selected.mids[grepl("P", selected.mids)]
-    p.sample <- sort(p.sample, decreasing = TRUE)
-    
-    m.sample <- selected.mids[grepl("M", selected.mids) == TRUE & grepl("MID", selected.mids) == FALSE]
-    m.sample <- sort(m.sample, decreasing = FALSE)
+    if (meta.data.name == "with_hashtags"){
+      if (mouse.id == "m3"){
+        p.sample <- c("PP3_HT1", "PP3_HT2", "PP3_HT3")
+      } else if (mouse.id == "m7"){
+        p.sample <- c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+      }
+    } else if (meta.data.name == "without_hashtags"){
+      p.sample <- selected.mids[grepl("P", selected.mids)]
+      p.sample <- sort(p.sample, decreasing = TRUE)
+    }
     
     MID.samples <- selected.mids[grepl("MID", selected.mids) == TRUE]
-    MID.sample.order <- c("SI prox", "SI mid", "SI dist", "colon")
     
-    orderdf <- subset(convert.sampleIDdf, convert.sampleIDdf$SampleID %in% MID.samples)
-    ordered.MID.samples <- to_vec(
-      for (item in MID.sample.order){
-        print(subset(orderdf, orderdf$alias == item)$SampleID)
-      }
-    )
-    ordered.selected.mids <- c(p.sample, m.sample, ordered.MID.samples)
-    
+    ordered.selected.mids <- c(p.sample, MID.samples)
     input.files <- all.input.files[ordered.selected.mids]
-    group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P"))$SampleID
-    group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("M", "P") == FALSE)$SampleID
+    
+    group.to.highlight1 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("PP"))$SampleID
+    group.to.highlight2 <- subset(meta.data.non.splitted, meta.data.non.splitted$mouse == mouse.id & organ %in% c("PP") == FALSE)$SampleID
+    
     fileAliases <- to_vec(
       for (item in names(input.files)){
-        # sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
-        convert.sampleID[[item]]
+        sprintf("%s (%s)", item, subset(meta.data.non.splitted, meta.data.non.splitted$SampleID == item)$organ)
+        # convert.sampleID[[item]]
       }
     )
+    
     names(fileAliases) <- names(input.files)
     if (meta.data.name == "with_hashtags"){
       saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
@@ -407,6 +405,3 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     }
   }
 }
-
-
-  

@@ -21,10 +21,7 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 thres <- 0.85
 rerun <- TRUE
 output <- list()
-for (PROJECT in c("1st_2nd_BSimons_Datasets",
-                  "240805_BSimons",
-                  "241002_BSimons",
-                  "241104_BSimons")){
+for (PROJECT in c("241002_241104_BSimons")){
   print("#####----------------------------------#####")
   print(sprintf("Working on project %s", PROJECT))
   print("#####----------------------------------#####")
