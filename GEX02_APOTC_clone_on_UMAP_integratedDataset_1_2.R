@@ -48,6 +48,7 @@ topN <- 5
 print(sprintf("Working on dataset %s", dataset.name))
 
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
+
 if (dataset.name %in% sc.projects.with.ht){
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("barcode") %>%
