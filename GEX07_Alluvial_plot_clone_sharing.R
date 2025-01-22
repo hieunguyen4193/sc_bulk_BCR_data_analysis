@@ -48,6 +48,7 @@ dataset.name <- "241002_241104_BSimons"
 # save.dev <- "tiff"
 save.dev <- "svg"
 num.top <- 5
+get.YFP.clone.only <- FALSE
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
@@ -88,6 +89,10 @@ if (dataset.name %in% sc.projects.with.ht){
   s.obj <- AddMetaData(object = s.obj, metadata = meta.data$mouseid, col.name = "mouseid")    
 }
 
+count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
+yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
+non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
+
 DefaultAssay(s.obj) <- "RNA"
 
 #####----------------------------------------------------------------------#####
@@ -98,6 +103,26 @@ meta.data <- s.obj@meta.data %>%
 clonedf <- data.frame(meta.data[[clone.name]] %>% table())
 colnames(clonedf) <- c("clone", "count")
 clonedf <- clonedf %>% arrange(desc(count))
+
+clonedf <- clonedf %>% rowwise() %>%
+  mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
+  mutate(YFP.clone = 
+           length(intersect(
+             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
+           ))
+  ) %>%
+  mutate(non.YFP.clone = 
+           length(intersect(
+             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
+           ))
+  )
+
+if (get.YFP.clone.only == TRUE){
+  print("Generating data for YFP clones only, clones that have at least 1 cell YFP+")
+  clonedf <- subset(clonedf, clonedf$YFP.clone != 0)
+  path.to.07.output <- file.path(path.to.07.output, "YFP_clones_only")
+  dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
+}
 
 selected.top.clones <- list()
 all.selected.top.clones <- c()
@@ -216,21 +241,3 @@ for (mouse.id in unique(s.obj$mouseid)){
            path = file.path(path.to.07.output, to.plot.samples), device = save.dev, width = 14, height = 10, dpi = 300)
   }
 }
-
-##### consider YFP clones
-count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
-yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
-non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
-
-clonedf <- clonedf %>% rowwise() %>%
-  mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
-  mutate(YFP.clone = 
-           length(intersect(
-             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
-           ))
-  ) %>%
-  mutate(non.YFP.clone = 
-           length(intersect(
-             row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
-           ))
-  )
