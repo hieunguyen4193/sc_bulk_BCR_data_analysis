@@ -40,8 +40,11 @@ name_or_sampleHT <- "name"
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
 }
+
 clone.name <- "VJcombi_CDR3_0.85"
+
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
+
 topN <- 5
 save.dev <- "svg"
 # save.dev <- "tiff"
@@ -51,12 +54,17 @@ if (grepl("240805_BSimons", dataset.name) == TRUE){
     M_samples = c("M1", "M2", "M3"),
     P_samples = c("P1", "P2", "P3")
   )
-} else if (grepl("241002_BSimons", dataset.name) == TRUE){
+} else if (dataset.name == "241002_BSimons"){
   sample.list <- list(
     m3 = c("PP3")
   )
-} else if (grpel("241104_BSimons", dataset.name) == TRUE){
+} else if (dataset.name == "241104_BSimons"){
   sample.list <- list(
+    m7 = c("PP7")
+  )
+} else if (dataset.name == "241002_241104_BSimons"){
+  sample.list <- list(
+    m3 = c("PP3"),
     m7 = c("PP7")
   )
 }

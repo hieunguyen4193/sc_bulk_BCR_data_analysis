@@ -17,7 +17,8 @@ path.to.all.VDJ.output <- list(
   BonnData = file.path(path.to.VDJ.output, "BonnData", "VDJ_output_0.85", "BonnData_combined_contigs.rds"),
   `240805_BSimons_filterHT` = file.path(path.to.VDJ.output, "240805_BSimons", "VDJ_output_0.85", "240805_BSimons_combined_contigs.rds"),
   `240805_BSimons_filterHT_cluster` = file.path(path.to.VDJ.output, "240805_BSimons", "VDJ_output_0.85", "240805_BSimons_combined_contigs.rds"),
-  `240805_BSimons_filterHT_cluster_renamed` = file.path(path.to.VDJ.output, "240805_BSimons", "VDJ_output_0.85", "240805_BSimons_combined_contigs.rds")
+  `240805_BSimons_filterHT_cluster_renamed` = file.path(path.to.VDJ.output, "240805_BSimons", "VDJ_output_0.85", "240805_BSimons_combined_contigs.rds"),
+  `241002_241104_BSimons` = file.path(path.to.VDJ.output, "241002_241104_BSimons", "VDJ_output_0.85", "241002_241104_BSimons_combined_contigs.rds")
 )
 
 dataset1_sample_list <- c("17_MM9_Ecoli",
@@ -30,4 +31,17 @@ dataset1_sample_list <- c("17_MM9_Ecoli",
 
 dataset2_sample_list <- c( "Sample_132",
                            "Sample_133")
+
+##### process VDJ merge output for integrated dataset.
+##### 241002_241104_BSimons
+if (file.exists(path.to.all.VDJ.output[["241002_241104_BSimons"]]) == FALSE){
+  dir.create(dirname(path.to.all.VDJ.output[["241002_241104_BSimons"]]), 
+             showWarnings = FALSE, recursive = TRUE)
+  vdj.output1 <- readRDS(path.to.all.VDJ.output[["241002_BSimons"]])
+  vdj.output2 <- readRDS(path.to.all.VDJ.output[["241104_BSimons"]])
+  
+  vdj.output <- c(vdj.output1, vdj.output2)
+  saveRDS(vdj.output, path.to.all.VDJ.output[["241002_241104_BSimons"]])  
+}
+
 

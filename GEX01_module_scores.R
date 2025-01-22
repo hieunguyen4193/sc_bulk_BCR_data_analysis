@@ -14,6 +14,10 @@ library(viridis)
 if ("svglite" %in% installed.packages() == FALSE){
   install.packages("svglite")
 }
+if ("ggthemes" %in% installed.packages() == FALSE){
+  install.packages("ggthemes")
+}
+library(ggthemes)
 #####---------------------------------------------------------------------------#####
 ##### INPUT ARGS
 #####---------------------------------------------------------------------------#####

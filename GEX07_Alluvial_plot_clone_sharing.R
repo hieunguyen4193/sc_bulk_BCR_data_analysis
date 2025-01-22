@@ -38,12 +38,13 @@ source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
-sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
+sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed",
+                         "241002_241104_BSimons")
 
 # name_or_sampleHT <- "name"
 name_or_sampleHT <- "sample_ht"
 clone.name <- "VJcombi_CDR3_0.85"
-dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
+dataset.name <- "241002_241104_BSimons"
 # save.dev <- "tiff"
 save.dev <- "svg"
 num.top <- 5
@@ -65,14 +66,23 @@ dir.create(path.to.07.output, showWarnings = FALSE, recursive = TRUE)
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
 
 if (dataset.name %in% sc.projects.with.ht){
-  meta.data <- s.obj@meta.data %>% 
-    rownames_to_column("barcode") %>%
-    rowwise() %>%
-    mutate(sample_ht = sprintf("%s_%s", name, HTO_classification)) %>%
-    mutate(mouseid = sprintf("m%s", str_replace(name, "M", ""))) %>%
-    mutate(mouseid = sprintf("%s", str_replace(mouseid, "P", ""))) %>%
-    mutate(mouseid = sprintf("%s", str_replace(mouseid, "PP", ""))) %>%
-    column_to_rownames("barcode")
+  if (grepl("240805_BSimons", dataset.name) == TRUE){
+    meta.data <- s.obj@meta.data %>% 
+      rownames_to_column("barcode") %>%
+      rowwise() %>%
+      mutate(sample_ht = sprintf("%s_%s", name, HTO_classification)) %>%
+      mutate(mouseid = sprintf("m%s", str_replace(name, "M", ""))) %>%
+      mutate(mouseid = sprintf("%s", str_replace(mouseid, "P", ""))) %>%
+      mutate(mouseid = sprintf("%s", str_replace(mouseid, "PP", ""))) %>%
+      column_to_rownames("barcode")
+  } else if (dataset.name == "241002_241104_BSimons"){
+    meta.data <- s.obj@meta.data %>% 
+      rownames_to_column("barcode") %>%
+      rowwise() %>%
+      mutate(sample_ht = sprintf("%s_%s", name, HTO_classification)) %>%
+      mutate(mouseid = sprintf("%s", str_replace(name, "PP", "m"))) %>%
+      column_to_rownames("barcode")
+  }
   meta.data <- meta.data[row.names(s.obj@meta.data), ]
   s.obj <- AddMetaData(object = s.obj, metadata = meta.data$sample_ht, col.name = "sample_ht")    
   s.obj <- AddMetaData(object = s.obj, metadata = meta.data$mouseid, col.name = "mouseid")    
@@ -111,22 +121,34 @@ for (mouse.id in unique(s.obj$mouseid)){
   all.plot.samples <- unique(subset(s.obj@meta.data, s.obj@meta.data$mouseid == mouse.id)[[name_or_sampleHT]]) %>% 
     sort()
   
-  p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
-  p.sample <- sort(p.sample, decreasing = TRUE)
-  
-  m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
-  m.sample <- sort(m.sample, decreasing = FALSE)
-  
-  if (name_or_sampleHT == "sample_ht"){
-    all.to.plot.samples <- list(
-      M_samples = m.sample, 
-      P_samples = p.sample,
-      M_P_samples = c(p.sample, m.sample)
-    )    
-  } else {
-    all.to.plot.samples <- list(
-      M_P_samples = c(p.sample, m.sample)
-    )
+  if (grepl("240805_BSimons", dataset.name) == TRUE){
+    p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
+    p.sample <- sort(p.sample, decreasing = TRUE)
+    
+    m.sample <- all.plot.samples[grepl("M", all.plot.samples)]
+    m.sample <- sort(m.sample, decreasing = FALSE)
+    
+    if (name_or_sampleHT == "sample_ht"){
+      all.to.plot.samples <- list(
+        M_samples = m.sample, 
+        P_samples = p.sample,
+        M_P_samples = c(p.sample, m.sample)
+      )    
+    } else {
+      all.to.plot.samples <- list(
+        M_P_samples = c(p.sample, m.sample)
+      )
+    }
+  } else if (dataset.name == "241002_241104_BSimons"){
+    if (mouse.id == "m3"){
+      all.to.plot.samples <- list(
+        P_samples = c("PP3_HT1", "PP3_HT2", "PP3_HT3")
+      )      
+    } else if (mouse.id == "m7"){
+      all.to.plot.samples <- list(
+        P_samples = c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+      )
+    }
   }
 
   for (to.plot.samples in  names(all.to.plot.samples)){
@@ -168,12 +190,16 @@ for (mouse.id in unique(s.obj$mouseid)){
       plotdf.pivot$Clone <- factor(plotdf.pivot$Clone, levels = clone.orders)  
     }
     
-    if (length(m.sample) != 0 & length(p.sample) != 0){
-      plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))    
-    } else if (length(m.sample) != 0 & length(p.sample) == 0) {
-      plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(m.sample))
-    } else if (length(m.sample) == 0 & length(p.sample) != 0) {
-      plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample))
+    if (grepl("240805_BSimons", dataset.name) == TRUE){
+      if (length(m.sample) != 0 & length(p.sample) != 0){
+        plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample, m.sample))    
+      } else if (length(m.sample) != 0 & length(p.sample) == 0) {
+        plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(m.sample))
+      } else if (length(m.sample) == 0 & length(p.sample) != 0) {
+        plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(p.sample))
+      }      
+    } else if (dataset.name == "241002_241104_BSimons"){
+        plotdf.pivot$SampleID <- factor(plotdf.pivot$SampleID, levels = c(all.to.plot.samples$P_samples))
     }
     
     allu.plot <- ggplot(plotdf.pivot,
