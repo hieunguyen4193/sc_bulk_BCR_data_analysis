@@ -36,14 +36,15 @@ path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("Bonn
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed")
 
-name_or_colonization <- "colonization"
+# name_or_colonization <- "colonization"
+name_or_colonization <- "name"
 
 if (name_or_colonization == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
 }
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "Dataset1_2"
-save.dev <- "tiff"
+save.dev <- "svg"
 topN <- 5
 print(sprintf("Working on dataset %s", dataset.name))
 
@@ -62,7 +63,7 @@ if (dataset.name %in% sc.projects.with.ht){
 DefaultAssay(s.obj) <- "RNA"
 path.to.02.output <- file.path(outdir, 
                                "GEX_output", 
-                               sprintf("02_output_20250113_%s", name_or_colonization), 
+                               sprintf("02_output_Dataset1_2_%s", name_or_colonization), 
                                dataset.name, 
                                clone.name,
                                sprintf("top%s", topN),

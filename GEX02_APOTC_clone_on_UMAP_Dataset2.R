@@ -35,11 +35,11 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 clone.name <- "VJcombi_CDR3_0.85"
 dataset.name <- "2nd_dataset"
-save.dev <- "tiff"
+save.dev <- "svg"
 topN <- 5
 path.to.02.output <- file.path(outdir, 
                                "GEX_output", 
-                               sprintf("02_output_20250113"), 
+                               sprintf("02_output_Dataset2"), 
                                dataset.name, 
                                clone.name,
                                sprintf("top%s", topN),

@@ -40,11 +40,21 @@ bulk.metadata <- list(
   `240805_BSimons_filterHT_cluster_renamed_240826_BSimons` = readxl::read_excel(file.path(path.to.main.src, 
                                                                                           "preprocessing", 
                                                                                           "240826_BSimons", 
-                                                                                          "240829 sample sheet.xlsx"))
+                                                                                          "240829 sample sheet.xlsx")),
+  `241002_241104_BSimons_241031_BSimons` = readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/241031_BSimons/241031_sample_sheet.xlsx")
 )
 
-to.run.projects <- c("240805_BSimons_filterHT_cluster_renamed_240826_BSimons")
+tmp.metadata <- bulk.metadata[["241002_241104_BSimons_241031_BSimons"]]
+colnames(tmp.metadata) <- c("MID", "mouse", "organ", "YFP", "sample")
+tmp.metadata <- tmp.metadata %>% rowwise() %>%
+  mutate(MID = sprintf("MID%s", MID))
+bulk.metadata[["241002_241104_BSimons_241031_BSimons"]] <- tmp.metadata
 
+# to.run.projects <- c("240805_BSimons_filterHT_cluster_renamed_240826_BSimons",
+#                      "240805_BSimons_240826_BSimons",
+#                      "241002_BSimons_241104_BSimons_241031_BSimons")
+
+to.run.projects <- c("241002_241104_BSimons_241031_BSimons")
 for (input.case in c("")){
   for (input.PROJECT in to.run.projects){
     print(sprintf("Working on project %s", input.PROJECT))
@@ -88,21 +98,40 @@ for (input.case in c("")){
           # MID of bulk samples. 
           mid.metadata <- bulk.metadata[[input.PROJECT]] %>%
             subset(mouse == mouse.id)
-          
-          MID.samples <- to_vec(
-            for (item in c("SI prox", "SI mid", "SI dist", "colon")){
-              subset(mid.metadata, mid.metadata$sample == sprintf("%s %s", mouse.id, item))$MID
+          if (input.PROJECT == "240805_BSimons_filterHT_cluster_renamed_240826_BSimons"){
+            MID.samples <- to_vec(
+              for (item in c("SI prox", "SI mid", "SI dist", "colon")){
+                subset(mid.metadata, mid.metadata$sample == sprintf("%s %s", mouse.id, item))$MID
+              }
+            )
+            all.plot.samples <- mhidf$MID %>% unique()
+            p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
+            p.sample <- sort(p.sample, decreasing = TRUE)
+            
+            m.sample <- all.plot.samples[grepl("M", all.plot.samples) == TRUE & 
+                                           grepl("MID", all.plot.samples) == FALSE]
+            m.sample <- sort(m.sample, decreasing = FALSE)
+            
+            all.plot.samples <- c(p.sample, m.sample, MID.samples)
+          } else {
+            MID.samples <- mid.metadata$MID
+            all.plot.samples <- mhidf$MID %>% unique()
+            if (mouse.id == "m3"){
+              if (grepl("hashtags", basename(input.file)) == TRUE){
+                p.sample <- c("PP3_HT1", "PP3_HT2", "PP3_HT3")
+              } else{
+                p.sample <- c("PP3")
+              }
+            } else if (mouse.id == "m7"){
+              if (grepl("hashtags", basename(input.file)) == TRUE){
+                p.sample <- c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+              } else{
+                p.sample <- c("PP7")
+              }
             }
-          )
-          all.plot.samples <- mhidf$MID %>% unique()
-          p.sample <- all.plot.samples[grepl("P", all.plot.samples)]
-          p.sample <- sort(p.sample, decreasing = TRUE)
+            all.plot.samples <- c(p.sample, MID.samples)
+          }
           
-          m.sample <- all.plot.samples[grepl("M", all.plot.samples) == TRUE & 
-                                         grepl("MID", all.plot.samples) == FALSE]
-          m.sample <- sort(m.sample, decreasing = FALSE)
-          
-          all.plot.samples <- c(p.sample, m.sample, MID.samples)
           mhidf <- data.frame(MID = factor(all.plot.samples, levels = all.plot.samples))
           
           #####

@@ -35,7 +35,7 @@ outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.all.s.obj <- path.to.all.s.obj[setdiff(names(path.to.all.s.obj), c("BonnData"))]
 
 sc.projects.with.ht <- c("240805_BSimons_filterHT_cluster_renamed", "241002_241104_BSimons")
-name_or_sampleHT <- "name"
+name_or_sampleHT <- "sample_ht"
 
 if (name_or_sampleHT == "sample_ht"){
   path.to.all.s.obj <- path.to.all.s.obj[sc.projects.with.ht]
@@ -43,18 +43,13 @@ if (name_or_sampleHT == "sample_ht"){
 
 clone.name <- "VJcombi_CDR3_0.85"
 
-dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
+dataset.name <- "241002_241104_BSimons"
 
 topN <- 5
 save.dev <- "svg"
 # save.dev <- "tiff"
+get.YFP.clone.only <- TRUE
 ##### sample.list for each mouse:
-if (grepl("240805_BSimons", dataset.name) == TRUE){
-  sample.list <- list(
-    M_samples = c("M1", "M2", "M3"),
-    P_samples = c("P1", "P2", "P3")
-  )
-}
 
 print(sprintf("Working on dataset %s", dataset.name))
 
@@ -73,7 +68,7 @@ DefaultAssay(s.obj) <- "RNA"
 
 path.to.02.output <- file.path(outdir, 
                                "GEX_output", 
-                               sprintf("02_output_240805_filtered"), 
+                               sprintf("02_output_241002_241104_BSimons"), 
                                dataset.name, 
                                clone.name,
                                sprintf("top%s", topN),
@@ -101,6 +96,34 @@ for (sampleid in unique(s.obj@meta.data[[name_or_sampleHT]])){
   }))
 }
 
+if (get.YFP.clone.only == TRUE){
+  count.yfp.exprs <- GetAssayData(object = s.obj, slot = "counts", assay = "RNA")["YFP", ]
+  yfp.cells <- count.yfp.exprs[count.yfp.exprs != 0] %>% names()
+  non.yfp.cells <- count.yfp.exprs[count.yfp.exprs == 0] %>% names()
+  
+  print("Generating data for YFP clones only, clones that have at least 1 cell YFP+")
+  path.to.02.output <- file.path(path.to.02.output, "YFP_clones_only")
+  dir.create(path.to.02.output, showWarnings = FALSE, recursive = TRUE)
+  
+  clonedf <- clonedf %>% rowwise() %>%
+    mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
+    mutate(YFP.clone = 
+             length(intersect(
+               row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), yfp.cells
+             ))
+    ) %>%
+    mutate(non.YFP.clone = 
+             length(intersect(
+               row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)), non.yfp.cells
+             ))
+    )
+  clonedf <- subset(clonedf, clonedf$YFP.clone != 0)
+}
+
+sample.list <- list(
+  PP3 = c("PP3_HT1", "PP3_HT2", "PP3_HT3"),
+  PP7 = c("PP7_HT1", "PP7_HT2", "PP7_HT3")
+)
 for (sample.list.name in names(sample.list)){
   colors <- tableau_color_pal(palette = "Tableau 20")(20)
   plot.clonedf <- data.frame()
@@ -125,6 +148,6 @@ for (sample.list.name in names(sample.list)){
                        fill_legend = TRUE,
                        color_each = plot.clonedf$color, 
                        default_color = "lightgray") 
-    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
+  ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
 }
 
