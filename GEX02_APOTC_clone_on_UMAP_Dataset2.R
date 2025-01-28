@@ -73,6 +73,8 @@ clonedf <- clonedf %>% arrange(desc(count)) %>%
 ##### PLOTTING TOP CLONES IN EACH MOUSE
 #####----------------------------------------------------------------------#####
 topN <- 5
+
+# Top 5 clones in each mouse, show them on the same APOTC.
 top.clones <- list()
 all.top.clones <- c()
 for (sample.id in unique(s.obj$name)){
@@ -151,6 +153,7 @@ for (sample.set in list(c("Sample_132"),
   }
   plot.clonedf$color <- colors
   
+  # YFP clones only, top 10 in each mouse
   tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
                        verbose = FALSE, 
                        reduction_base = reduction.name, 
@@ -169,6 +172,8 @@ for (sample.set in list(c("Sample_132"),
 }
 
 ##### plot APOTC with color by sample Sample_132 or Sample_133
+# 20 clones, top 10 YFP clones from each mouse, in same APOTC, color by mouse
+topN <- 10
 sample.set <- c("Sample_132", "Sample_133")
 colors <- tableau_color_pal(palette = "Tableau 10")(2)
 names(colors) <- unique(s.obj$name)

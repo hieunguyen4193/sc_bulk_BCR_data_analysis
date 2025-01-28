@@ -128,7 +128,7 @@ sample.list <- list(
 
 for (sample.list.name in names(sample.list)){
   if (file.exists(file.path(path.to.02.output, sprintf("APOTC_%s.%s", sample.list.name, save.dev))) == FALSE){
-    colors <- tableau_color_pal(palette = "Tableau 20")(20)
+    plot.colors <- tableau_color_pal(palette = "Tableau 20")(20)
     plot.clonedf <- data.frame()
     for (sample.id in sample.list[[sample.list.name]]){
       tmpdf <- clonedf[, c("clone", sample.id)]
@@ -138,7 +138,7 @@ for (sample.list.name in names(sample.list)){
       tmp.plot.clonedf$SampleID <- sample.id
       plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
     }
-    plot.clonedf$color <- head(colors, nrow(plot.clonedf))
+    plot.clonedf$color <- head(plot.colors, nrow(plot.clonedf))
     
     tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
                          verbose = FALSE, 
@@ -158,3 +158,39 @@ for (sample.list.name in names(sample.list)){
   }
 }
 
+if (get.YFP.clone.only == TRUE){
+  print("Generate APOTC for YFP clones only for 2 mice, color by mice basis ...")
+  plot.clonedf <- data.frame()
+  for (sample.list.name in names(sample.list)){
+    for (sample.id in sample.list[[sample.list.name]]){
+      tmpdf <- clonedf[, c("clone", sample.id)]
+      colnames(tmpdf) <- c("clone", "SampleID")
+      tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% subset(SampleID != 0)
+      tmp.plot.clonedf <- data.frame(clone = tmpdf$clone)
+      tmp.plot.clonedf$SampleID <- sample.id
+      plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
+    }    
+  }
+  plot.colors <- tableau_color_pal(palette = "Tableau 10")(2)
+  plot.clonedf$color <- to_vec(
+    for (item in plot.clonedf$SampleID){
+      if (grepl("PP3", item) == TRUE){
+        plot.colors[[1]]
+      } else {
+        plot.colors[[2]]
+      }
+    }
+  )
+  tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
+                       verbose = FALSE, 
+                       reduction_base = reduction.name, 
+                       show_labels = TRUE, 
+                       repulsion_strength = 5,
+                       legend_position = "top_right", 
+                       legend_sizes = 2) %>% 
+    showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
+                       fill_legend = TRUE,
+                       color_each = plot.clonedf$color, 
+                       default_color = "lightgray") +
+    ggtitle(sprintf("PP3: %s, PP7: %s", plot.colors[[1]], plot.colors[[2]]))
+}

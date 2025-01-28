@@ -15,9 +15,9 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 #####---------------------------------------------------------------------------#####
 ##### INPUT ARGS
 #####---------------------------------------------------------------------------#####
-path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
+path.to.storage <- "/media/hieunguyen/HNHD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
+outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 path.to.04.output <- file.path(outdir, "VDJ_output", "04_output")
 dir.create(path.to.04.output, showWarnings = FALSE, recursive = TRUE)
 
@@ -35,7 +35,9 @@ dataset.origin <- list(
   `240826_BSimons` = "bulk",
   `241002_BSimons` = "sc",
   `241031_BSimons` = "bulk",
-  `241104_BSimons` = "sc"
+  `241104_BSimons` = "sc",
+  `240805_BSimons_filterHT_cluster_renamed` = "sc",
+  `241002_241104_BSimons` = "sc"
 )
 
 names(all.clone.files) <- to_vec(
@@ -69,6 +71,7 @@ selected.cols <- c(
 rerun <- TRUE
 
 if (file.exists(file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv")) == FALSE | rerun == TRUE){
+  print("RE RUN: Generate the data frame full_clonedf_with_mutation_rate.csv again")
   clonedf <- data.frame()
   for (dataset.name in names(all.clone.files)){
     input.file <- all.clone.files[[dataset.name]]
