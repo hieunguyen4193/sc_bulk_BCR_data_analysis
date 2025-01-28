@@ -86,7 +86,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
                                                   thres.dis = thres.dis,
                                                   savefile = savefile,
                                                   rerun = rerun,
-                                                  define.clone.clusters =  define.clone.clusters)
+                                                  define.clone.clusters = define.clone.clusters)
     }
     
     full.clonedf <- clone.obj$clonesets
@@ -228,7 +228,7 @@ if (file.exists(file.path(path.to.05.output, circos.group.type, "all_data.rds"))
 #####----------------------------------------------------------------------#####
 all.input.files <- Sys.glob(file.path(path.to.05.output,
                                       circos.group.type,
-                                      "*"))
+                                      "*.simplified.csv"))
 
 input.metadata <- data.frame(
   path = all.input.files,
@@ -246,6 +246,10 @@ meta.data.splitted.or.not <- list(
   with_hashtags = subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE),
   without_hashtags = subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 )
+
+
+##### generate clone tables with 85% similarity criteria for both sequences 
+##### from bulk data and from single cell data
 
 for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
@@ -328,7 +332,8 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
 ##### GENERATE CIRCOS PLOT FOR THRES 0.85
 #####----------------------------------------------------------------------#####
 
-for (meta.data.name in names(meta.data.splitted.or.not)){
+meta.data.name <- "without_hashtags"
+# for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
   all.input.files <- Sys.glob(file.path(path.to.05.output, 
                                         sprintf("VJcombi_CDR3_%s", thres), 
@@ -348,7 +353,8 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
   all.input.files <- input.metadata$path
   names(all.input.files) <- input.metadata$SampleID
   
-  for (mouse.id in c("m1", "m2", "m3")){
+  mouse.id <- "m1"
+  # for (mouse.id in c("m1", "m2", "m3")){
     selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
     
     p.sample <- selected.mids[grepl("P", selected.mids)]
@@ -405,8 +411,8 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
         ordered.samples = ordered.selected.mids
       )
     }
-  }
-}
+#   }
+# }
 
 
   

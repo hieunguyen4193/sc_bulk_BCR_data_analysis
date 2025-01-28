@@ -76,23 +76,38 @@ generate_circos <- function(
     }
   )
   fileAliases <- new.fileAliases
-  plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
-    subset(select = c(id, cloneCount, Freq, accum.Freq))
-  colnames(plotdf) <- c("id", 
-                        sprintf("%s_Count", levels(cloneCountdf$SampleID)[[1]]),
-                        sprintf("%s_Freq", levels(cloneCountdf$SampleID)[[1]]), 
-                        sprintf("%s_accumFreq", levels(cloneCountdf$SampleID)[[1]]))
+  # plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
+  #   subset(select = c(id, cloneCount, Freq, accum.Freq))
+  # colnames(plotdf) <- c("id", 
+  #                       sprintf("%s_Count", levels(cloneCountdf$SampleID)[[1]]),
+  #                       sprintf("%s_Freq", levels(cloneCountdf$SampleID)[[1]]), 
+  #                       sprintf("%s_accumFreq", levels(cloneCountdf$SampleID)[[1]]))
+  # 
+  # for (sample.id in levels(cloneCountdf$SampleID)[2: length(levels(cloneCountdf$SampleID))]){
+  #   tmpdf <- subset(cloneCountdf, cloneCountdf$SampleID == sample.id) %>%
+  #     subset(select = c(id, cloneCount, Freq, accum.Freq))
+  #   colnames(tmpdf) <- c("id", 
+  #                        sprintf("%s_Count", sample.id),
+  #                        sprintf("%s_Freq", sample.id), 
+  #                        sprintf("%s_accumFreq", sample.id))
+  #   plotdf <- merge(plotdf, tmpdf, by.x = "id", by.y = "id", all.x = TRUE, all.y = TRUE)
+  # }
+  # plotdf[is.na(plotdf)] <- 0
   
-  for (sample.id in levels(cloneCountdf$SampleID)[2: length(levels(cloneCountdf$SampleID))]){
-    tmpdf <- subset(cloneCountdf, cloneCountdf$SampleID == sample.id) %>%
+  # Fix/update 28.01.2025
+  all.plotdf <- list()
+  all.unique.clones <- c()
+  for (sample.id in levels(cloneCountdf$SampleID)){
+    tmp.plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
       subset(select = c(id, cloneCount, Freq, accum.Freq))
-    colnames(tmpdf) <- c("id", 
-                         sprintf("%s_Count", sample.id),
-                         sprintf("%s_Freq", sample.id), 
-                         sprintf("%s_accumFreq", sample.id))
-    plotdf <- merge(plotdf, tmpdf, by.x = "id", by.y = "id", all.x = TRUE, all.y = TRUE)
+    colnames(plotdf) <- c("id", 
+                          sprintf("%s_Count", sample.id),
+                          sprintf("%s_Freq", sample.id),
+                          sprintf("%s_accumFreq", sample.id))
+    all.plotdf[[sample.id]] <- tmp.plotdf
+    all.unique.clones <- c(all.unique.clones, unique(plotdf$id)) %>% unique()
   }
-  plotdf[is.na(plotdf)] <- 0
+  plotdf <- data.frame(id = all.unique.clones)
   
   write.csv(plotdf, str_replace(path.to.save.svg, ".svg", ".csv"))
   ##### Define COUNT colors

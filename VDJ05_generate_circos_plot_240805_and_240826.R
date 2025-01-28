@@ -34,6 +34,10 @@ source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
 ##### READ METADATA
 #####----------------------------------------------------------------------#####
 bulk.metadata <- readxl::read_excel("/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis/preprocessing/240826_BSimons/240829 sample sheet.xlsx")
+
+# for dataset 240805_BSimons, we use the filtered and renamed cluster version.
+# 240805_BSimons_filterHT_cluster_renamed
+
 sc.projects <- c("240805_BSimons_filterHT_cluster_renamed")
 bulk.projects <- c("240826_BSimons")
 list.of.PROJECT <- c(sc.projects, bulk.projects)
