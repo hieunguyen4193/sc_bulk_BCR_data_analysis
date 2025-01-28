@@ -70,7 +70,7 @@ clonedf <- clonedf %>% arrange(desc(count)) %>%
   mutate(Sample_133 = nrow(subset(s.obj@meta.data, s.obj@meta.data$name == "Sample_133" & VJcombi_CDR3_0.85 == clone)))
   
 #####----------------------------------------------------------------------#####
-##### PLOTTING TOP CLONES
+##### PLOTTING TOP CLONES IN EACH MOUSE
 #####----------------------------------------------------------------------#####
 topN <- 5
 top.clones <- list()
@@ -105,9 +105,11 @@ ggsave(plot = tmp.plot,
        filename = sprintf("APOTC.%s", save.dev), 
        path = path.to.02.output, dpi = 300, width = 14, height = 10)    
 
+
 #####----------------------------------------------------------------------#####
 ##### PLOTTING YFP CLONES FROM 2 MICE
 #####----------------------------------------------------------------------#####
+dir.create(file.path(path.to.02.output, "YFP_clones"), showWarnings = FALSE, recursive = TRUE)
 clonedf <- clonedf %>% rowwise() %>%
   mutate(clone.size = length(row.names(subset(s.obj@meta.data, s.obj@meta.data$VJcombi_CDR3_0.85 == clone)))) %>%
   mutate(YFP.clone = 
@@ -162,7 +164,7 @@ for (sample.set in list(c("Sample_132"),
                        default_color = "lightgray") 
   ggsave(plot = tmp.plot, 
          filename = sprintf("APOTC.%s.%s", paste(sample.set, collapse = "_"), save.dev), 
-         path = path.to.02.output, dpi = 300, width = 14, height = 10)    
+         path = file.path(path.to.02.output, "YFP_clones"), dpi = 300, width = 14, height = 10)    
   
 }
 

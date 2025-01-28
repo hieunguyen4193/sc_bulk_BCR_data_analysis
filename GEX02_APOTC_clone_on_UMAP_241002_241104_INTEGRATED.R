@@ -54,6 +54,7 @@ get.YFP.clone.only <- TRUE
 print(sprintf("Working on dataset %s", dataset.name))
 
 s.obj <- readRDS(path.to.all.s.obj[[dataset.name]])
+
 if (dataset.name %in% sc.projects.with.ht){
   meta.data <- s.obj@meta.data %>% 
     rownames_to_column("barcode") %>%
@@ -124,30 +125,36 @@ sample.list <- list(
   PP3 = c("PP3_HT1", "PP3_HT2", "PP3_HT3"),
   PP7 = c("PP7_HT1", "PP7_HT2", "PP7_HT3")
 )
+
 for (sample.list.name in names(sample.list)){
-  colors <- tableau_color_pal(palette = "Tableau 20")(20)
-  plot.clonedf <- data.frame()
-  for (sample.id in sample.list[[sample.list.name]]){
-    tmpdf <- clonedf[, c("clone", sample.id)]
-    colnames(tmpdf) <- c("clone", "SampleID")
-    tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% head(topN)
-    tmp.plot.clonedf <- data.frame(clone = tmpdf$clone)
-    tmp.plot.clonedf$SampleID <- sample.id
-    plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
+  if (file.exists(file.path(path.to.02.output, sprintf("APOTC_%s.%s", sample.list.name, save.dev))) == FALSE){
+    colors <- tableau_color_pal(palette = "Tableau 20")(20)
+    plot.clonedf <- data.frame()
+    for (sample.id in sample.list[[sample.list.name]]){
+      tmpdf <- clonedf[, c("clone", sample.id)]
+      colnames(tmpdf) <- c("clone", "SampleID")
+      tmpdf <- tmpdf %>% arrange(desc(SampleID)) %>% head(topN)
+      tmp.plot.clonedf <- data.frame(clone = tmpdf$clone)
+      tmp.plot.clonedf$SampleID <- sample.id
+      plot.clonedf <- rbind(plot.clonedf, tmp.plot.clonedf)
+    }
+    plot.clonedf$color <- head(colors, nrow(plot.clonedf))
+    
+    tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
+                         verbose = FALSE, 
+                         reduction_base = reduction.name, 
+                         show_labels = TRUE, 
+                         repulsion_strength = 5,
+                         legend_position = "top_right", 
+                         legend_sizes = 2) %>% 
+      showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
+                         fill_legend = TRUE,
+                         color_each = plot.clonedf$color, 
+                         default_color = "lightgray") 
+    ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)        
+  } else {
+    print(sprintf("File %s exists, not generating a new plot ...", 
+                  file.path(path.to.02.output, sprintf("APOTC_%s.%s", sample.list.name, save.dev))))
   }
-  plot.clonedf$color <- head(colors, nrow(plot.clonedf))
-  
-  tmp.plot <- vizAPOTC(s.obj, clonecall = clone.name, 
-                       verbose = FALSE, 
-                       reduction_base = reduction.name, 
-                       show_labels = TRUE, 
-                       repulsion_strength = 5,
-                       legend_position = "top_right", 
-                       legend_sizes = 2) %>% 
-    showCloneHighlight(clonotype =  as.character(plot.clonedf$clone), 
-                       fill_legend = TRUE,
-                       color_each = plot.clonedf$color, 
-                       default_color = "lightgray") 
-  ggsave(plot = tmp.plot, filename = sprintf("APOTC_%s.%s", sample.list.name, save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)    
 }
 
