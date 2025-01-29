@@ -250,7 +250,6 @@ meta.data.splitted.or.not <- list(
 
 ##### generate clone tables with 85% similarity criteria for both sequences 
 ##### from bulk data and from single cell data
-
 for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
   dir.create(file.path(path.to.05.output, sprintf("VJcombi_CDR3_%s", thres), meta.data.name), showWarnings = FALSE, recursive = TRUE)
@@ -313,7 +312,16 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
                                                                                 "bestJHit",
                                                                                 "seq")]
         colnames(tmpdf) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
-        write.table(tmpdf, 
+        
+        input.circos <- data.frame(table(tmpdf[["id"]]))
+        colnames(input.circos) <- c("id", "cloneCount")
+        input.circos <- input.circos %>% rowwise() %>%
+          mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
+          mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
+          mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
+          arrange(desc(cloneCount))
+        
+        write.table(input.circos, 
                     file.path(path.to.05.output, 
                               sprintf("VJcombi_CDR3_%s", thres), 
                               meta.data.name,
@@ -332,8 +340,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
 ##### GENERATE CIRCOS PLOT FOR THRES 0.85
 #####----------------------------------------------------------------------#####
 
-meta.data.name <- "without_hashtags"
-# for (meta.data.name in names(meta.data.splitted.or.not)){
+for (meta.data.name in names(meta.data.splitted.or.not)){
   tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
   all.input.files <- Sys.glob(file.path(path.to.05.output, 
                                         sprintf("VJcombi_CDR3_%s", thres), 
@@ -353,8 +360,7 @@ meta.data.name <- "without_hashtags"
   all.input.files <- input.metadata$path
   names(all.input.files) <- input.metadata$SampleID
   
-  mouse.id <- "m1"
-  # for (mouse.id in c("m1", "m2", "m3")){
+  for (mouse.id in c("m1", "m2", "m3")){
     selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
     
     p.sample <- selected.mids[grepl("P", selected.mids)]
@@ -411,8 +417,8 @@ meta.data.name <- "without_hashtags"
         ordered.samples = ordered.selected.mids
       )
     }
-#   }
-# }
+  }
+}
 
 
   

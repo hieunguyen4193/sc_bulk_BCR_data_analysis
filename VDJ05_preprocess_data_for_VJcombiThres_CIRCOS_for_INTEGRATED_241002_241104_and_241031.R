@@ -311,7 +311,16 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
                                                                                 "bestJHit",
                                                                                 "seq")]
         colnames(tmpdf) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
-        write.table(tmpdf, 
+        
+        input.circos <- data.frame(table(tmpdf[["id"]]))
+        colnames(input.circos) <- c("id", "cloneCount")
+        input.circos <- input.circos %>% rowwise() %>%
+          mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
+          mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
+          mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]]) %>%
+          arrange(desc(cloneCount))
+        
+        write.table(input.circos, 
                     file.path(path.to.05.output, 
                               sprintf("VJcombi_CDR3_%s", thres), 
                               meta.data.name,
@@ -319,6 +328,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
                     quote = FALSE, 
                     sep = "\t", 
                     row.names = FALSE) 
+        
         all.data.VJ.combi[[input.mid]] <- tmpdf
       }
     }
@@ -390,7 +400,7 @@ for (meta.data.name in names(meta.data.splitted.or.not)){
     
     if (file.exists(file.path(outputdir, saveFileName)) == FALSE){
       generate_circos(
-        input = input.files,
+        input.files = input.files,
         fileAliases = fileAliases,
         saveFileName = saveFileName,
         outputdir = outputdir,

@@ -17,53 +17,33 @@ source(file.path(scrna_pipeline_src, "s8_integration_and_clustering.R"))
 #####---------------------------------------------------------------------------#####
 path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
-outdir <- "/media/hieunguyen/HNSD_mini/outdir/sc_bulk_BCR_data_analysis_v0.1"
-path.to.04.output <- file.path(outdir, "VDJ_output", "04_output")
-dir.create(path.to.04.output, showWarnings = FALSE, recursive = TRUE)
+source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
-thres <- 0.85
+input.dataset <- "Dataset1_2"
+for (input.dataset in names(path.to.all.s.obj)){
+  path.to.10.output <- path.to.05.output <- file.path(outdir, "VDJ_output", "10_output", input.dataset)
+  dir.create(path.to.10.output, showWarnings = FALSE, recursive = TRUE)
+  
+  s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
+  
+  meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
+  
+  clonedf <- table(meta.data$VJcombi_CDR3_0.85) %>% data.frame()
+  colnames(clonedf) <- c("clone", "Freq")
+  clonedf <- clonedf %>% rowwise() %>%
+    mutate(V.gene = str_split(clone, "_")[[1]][[1]]) %>%
+    mutate(J.gene = str_split(clone, "_")[[1]][[2]]) %>%
+    mutate(CDR3_seqs = paste(
+      subset(meta.data, meta.data$VJcombi_CDR3_0.85 == clone)$aaSeqCDR3 %>% unique(), collapse = "_"
+    ))
+  
+  writexl::write_xlsx(clonedf, file.path(path.to.10.output, sprintf("%s.cloneInfo.xlsx", input.dataset)))
+  
+  count.celldf <- table(meta.data$seurat_clusters, meta.data$name) %>% data.frame() 
+  colnames(count.celldf) <- c("seurat_clusters", "SampleID", "Freq")
+  count.celldf <- count.celldf %>% pivot_wider(names_from = "seurat_clusters", values_from = "Freq")
+  writexl::write_xlsx(count.celldf, file.path(path.to.10.output, sprintf("count_celldf_%s.xlsx", input.dataset)))
+}
 
-#####---------------------------------------------------------------------------#####
-##### GENERATE A BIG DATAFRAME CONTAINING ALL CLONES FROM ALL DATASETS
-#####---------------------------------------------------------------------------#####
-all.clone.files <- Sys.glob(file.path(outdir, "VDJ_output", "*", sprintf("VDJ_output_%s", thres), "preprocessed_files", "clonesets*.split_clones.xlsx" ))
 
-dataset.origin <- list(
-  `1st_2nd_BSimons_Datasets` = "sc",
-  `220701_etc_biopsies` = "bulk",
-  `240805_BSimons` = "sc",
-  `240826_BSimons` = "bulk",
-  `241002_BSimons` = "sc",
-  `241031_BSimons` = "bulk",
-  `241104_BSimons` = "sc"
-)
-
-names(all.clone.files) <- to_vec(
-  for (item in all.clone.files) str_replace(str_replace(basename(item), "clonesets_", ""), ".split_clones.xlsx", "")
-)
-
-selected.cols <- c(
-  "id",
-  "VJseq.combi",
-  "V.gene",
-  "J.gene",
-  "D.gene",
-  "nSeqFR1",
-  "nSeqCDR1",
-  "nSeqFR2",
-  "nSeqCDR2",
-  "nSeqFR3",
-  "nSeqCDR3",
-  "nSeqFR4",
-  "aaSeqFR1",
-  "aaSeqCDR1",
-  "aaSeqFR2",
-  "aaSeqCDR2",
-  "aaSeqFR3",
-  "aaSeqCDR3",
-  "aaSeqFR4",
-  "VJ.len.combi",
-  "targetSequences",
-  "uniqueMoleculeCount")
-
-file.path(path.to.04.output, "full_clonedf_with_mutation_rate.csv")
+  

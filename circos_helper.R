@@ -98,16 +98,20 @@ generate_circos <- function(
   all.plotdf <- list()
   all.unique.clones <- c()
   for (sample.id in levels(cloneCountdf$SampleID)){
-    tmp.plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == levels(cloneCountdf$SampleID)[[1]]) %>%
+    tmp.plotdf <- subset(cloneCountdf, cloneCountdf$SampleID == sample.id) %>%
       subset(select = c(id, cloneCount, Freq, accum.Freq))
-    colnames(plotdf) <- c("id", 
+    colnames(tmp.plotdf) <- c("id", 
                           sprintf("%s_Count", sample.id),
                           sprintf("%s_Freq", sample.id),
                           sprintf("%s_accumFreq", sample.id))
     all.plotdf[[sample.id]] <- tmp.plotdf
-    all.unique.clones <- c(all.unique.clones, unique(plotdf$id)) %>% unique()
+    all.unique.clones <- c(all.unique.clones, unique(tmp.plotdf$id)) %>% unique()
   }
   plotdf <- data.frame(id = all.unique.clones)
+  for (sample.id in names(all.plotdf)){
+    plotdf <- merge(plotdf, all.plotdf[[sample.id]], by.x = "id", by.y = "id", all.x = TRUE)
+  }
+  plotdf[is.na(plotdf)] <- 0
   
   write.csv(plotdf, str_replace(path.to.save.svg, ".svg", ".csv"))
   ##### Define COUNT colors

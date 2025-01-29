@@ -54,7 +54,8 @@ bulk.metadata[["241002_241104_BSimons_241031_BSimons"]] <- tmp.metadata
 #                      "240805_BSimons_240826_BSimons",
 #                      "241002_BSimons_241104_BSimons_241031_BSimons")
 
-to.run.projects <- c("241002_241104_BSimons_241031_BSimons")
+to.run.projects <- c("241002_241104_BSimons_241031_BSimons",
+                     "240805_BSimons_filterHT_cluster_renamed_240826_BSimons")
 for (input.case in c("")){
   for (input.PROJECT in to.run.projects){
     print(sprintf("Working on project %s", input.PROJECT))
