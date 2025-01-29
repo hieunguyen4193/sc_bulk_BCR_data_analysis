@@ -26,8 +26,8 @@ verbose <- TRUE
 rerun <- FALSE
 define.clone.clusters <- FALSE
 
-circos.group.type <- "VJnt"
-# circos.group.type <- "VJaa"
+# circos.group.type <- "VJnt"
+circos.group.type <- "VJaa"
 
 source(file.path(path.to.main.src, "convert_sampleID_to_locationName.R"))
 #####----------------------------------------------------------------------#####

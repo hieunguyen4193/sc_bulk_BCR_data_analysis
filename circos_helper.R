@@ -54,6 +54,7 @@ generate_circos <- function(
     tmp.clonedf$accum.Freq <- unlist(all.accum.sum)
     tmp.clonedf <- subset(tmp.clonedf, select = c(id, cloneCount, Freq, accum.Freq))
     tmp.clonedf$SampleID <- input.mid
+    tmp.clonedf <- rbind(data.frame(cloneCount = 0, id = "START", SampleID = input.mid, Freq = 0, accum.Freq = 0), tmp.clonedf)
     cloneCountdf <- rbind(cloneCountdf, tmp.clonedf)
   }
   
@@ -69,7 +70,6 @@ generate_circos <- function(
     cloneCountdf <- cloneCountdf[order(cloneCountdf$SampleID), ]
   }
 
-  
   new.fileAliases <- to_vec(
     for (item in keep.samples){
       fileAliases[[item]]
@@ -141,7 +141,11 @@ generate_circos <- function(
   
   ##### initialize the structure of CIRCOS plot. 
   svg(path.to.save.svg)
-  circos.par(cell.padding = c(0, 0, 0, 0), gap.degree = 5, track.height = 0.1, start.degree = -2.5, points.overflow.warning = FALSE)
+  circos.par(cell.padding = c(0, 0, 0, 0), 
+             gap.degree = 5, 
+             track.height = 0.1, 
+             start.degree = -2.5, 
+             points.overflow.warning = FALSE)
   circos.initialize(factors = cloneCountdf$SampleID, x = cloneCountdf$accum.Freq)
   
   print("generating base structure of the circos plot ...")

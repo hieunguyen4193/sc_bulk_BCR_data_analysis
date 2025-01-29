@@ -110,8 +110,6 @@ meta.data.name <- "with_hashtags"
 for (mouse.id in c("m3", "m7")){
   yfp.samples <- yfp.sample.list[[mouse.id]]$`YFP+`
   nonyfp.samples <- yfp.sample.list[[mouse.id]]$`YFP-`
-  # for (mouse.id in c("m3", "m7")){
-  #   selected.mids <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID
   
   tmp.yfpdf <- read_tsv(all.input.files[yfp.samples])
   tmp.nonyfpdf <- read_tsv(all.input.files[nonyfp.samples])
@@ -194,6 +192,48 @@ for (mouse.id in c("m3", "m7")){
       group.to.highlight2 = NULL,
       linkColor1 = "#FF000080",
       linkColor2 = "#FF000080",
+      ordered.samples = NULL
+    )
+    
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".1.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("injected_PP"),
+      group.to.highlight2 = c("YFP_negative"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
+      ordered.samples = NULL
+    )
+    
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".2.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("YFP_positive"),
+      group.to.highlight2 = c("YFP_negative"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
+      ordered.samples = NULL
+    )
+    
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".3.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("injected_PP"),
+      group.to.highlight2 = c("YFP_positive"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
       ordered.samples = NULL
     )
   }
