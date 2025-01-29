@@ -193,4 +193,5 @@ if (get.YFP.clone.only == TRUE){
                        color_each = plot.clonedf$color, 
                        default_color = "lightgray") +
     ggtitle(sprintf("PP3: %s, PP7: %s", plot.colors[[1]], plot.colors[[2]]))
+  ggsave(plot = tmp.plot, filename = sprintf("APOTC_2_mice_YFP_clones_only.%s", save.dev), path = path.to.02.output, dpi = 300, width = 14, height = 10)        
 }
