@@ -19,7 +19,7 @@ path.to.storage <- "/media/hieunguyen/HNSD01/storage/all_BSimons_datasets"
 path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
-input.dataset <- "Dataset1_2"
+# input.dataset <- "Dataset1_2"
 for (input.dataset in names(path.to.all.s.obj)){
   path.to.10.output <- path.to.05.output <- file.path(outdir, "VDJ_output", "10_output", input.dataset)
   dir.create(path.to.10.output, showWarnings = FALSE, recursive = TRUE)
@@ -43,6 +43,21 @@ for (input.dataset in names(path.to.all.s.obj)){
   colnames(count.celldf) <- c("seurat_clusters", "SampleID", "Freq")
   count.celldf <- count.celldf %>% pivot_wider(names_from = "seurat_clusters", values_from = "Freq")
   writexl::write_xlsx(count.celldf, file.path(path.to.10.output, sprintf("count_celldf_%s.xlsx", input.dataset)))
+  
+  if (input.dataset %in% c("240805_BSimons",
+                           "241104_BSimons",
+                           "240805_BSimons_filterHT",
+                           "240805_BSimons_filterHT_cluster_renamed",
+                           "241002_BSimons",
+                           "240805_BSimons_filterHT_cluster",
+                           "241002_241104_BSimons")){
+    meta.data <- meta.data %>% rowwise() %>%
+      mutate(sample_ht = sprintf("%s_%s", name, HTO_classification))
+    count.ht.celldf <- table(meta.data$seurat_clusters, meta.data$sample_ht) %>% data.frame() 
+    colnames(count.ht.celldf) <- c("seurat_clusters", "SampleID", "Freq")
+    count.ht.celldf <- count.ht.celldf %>% pivot_wider(names_from = "seurat_clusters", values_from = "Freq")
+    writexl::write_xlsx(count.ht.celldf, file.path(path.to.10.output, sprintf("count_celldf_hashtags_%s.xlsx", input.dataset)))    
+  }
 }
 
 
