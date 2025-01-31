@@ -55,8 +55,8 @@ to.run.projects <- c("241002_241104_BSimons_241031_BSimons",
 for (input.case in c("")){
   for (input.PROJECT in to.run.projects){
     print(sprintf("Working on project %s", input.PROJECT))
-    # circos.group.type <- "VJcombi_CDR3_0.85"
-    for (circos.group.type in c("VJaa", "VJnt", "VJcombi_CDR3_0.85")){
+    # for (circos.group.type in c("VJaa", "VJnt", "VJcombi_CDR3_0.85")){
+    for (circos.group.type in c("VJcombi_CDR3_0.85")){
       print(sprintf("Working on circos group type: %s", circos.group.type))
       outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
       path.to.05.output <- file.path(outdir, "VDJ_output", 

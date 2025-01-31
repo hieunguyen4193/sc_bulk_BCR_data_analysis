@@ -20,11 +20,11 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
 countdf <- data.frame()
+path.to.12.output <- path.to.05.output <- file.path(outdir, "VDJ_output", "12_output")
+dir.create(path.to.12.output, showWarnings = FALSE, recursive = TRUE)
+
 for (input.dataset in names(path.to.all.s.obj)){
   path.to.03.output <- file.path(outdir, "VDJ_output", "03_output")
-  path.to.12.output <- path.to.05.output <- file.path(outdir, "VDJ_output", "12_output", input.dataset)
-  dir.create(path.to.12.output, showWarnings = FALSE, recursive = TRUE)
-  
   s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
   meta.data <- s.obj@meta.data %>% rownames_to_column("barcode")
   
