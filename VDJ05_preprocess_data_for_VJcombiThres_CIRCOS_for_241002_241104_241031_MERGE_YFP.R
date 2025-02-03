@@ -66,10 +66,16 @@ for (mouse.id in c("m3", "m7")){
   }  
 }
 
-injected.samples <- list(
+plot.hashtag.samples <- list(
   m3 = "PP3_HT2",
   m7 = "PP7_HT1"
 )
+
+if (mouse.id == "m3"){
+  p.sample <- c("PP3_HT1", "PP3_HT2", "PP3_HT3")
+} else if (mouse.id == "m7"){
+  p.sample <- c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+}
 
 #####----------------------------------------------------------------------#####
 ##### READ CLONE DATA -----> NEW DATA
@@ -156,7 +162,7 @@ for (mouse.id in c("m3", "m7")){
               row.names = FALSE) 
   
   new.input.files <- list(
-    injected_PP = all.input.files[[injected.samples[[mouse.id]]]],
+    injected_PP = all.input.files[[plot.hashtag.samples[[mouse.id]]]],
     YFP_positive = file.path(path.to.05.output, 
                              sprintf("VJcombi_CDR3_%s", thres), 
                              meta.data.name, 

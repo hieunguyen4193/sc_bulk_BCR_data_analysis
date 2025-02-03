@@ -13,7 +13,8 @@ library(ggthemes)
 library(Seurat)
 library("gridExtra")
 library(ggplot2)
-
+library(dplyr)
+library(tidyverse)
 path.to.s.obj <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1/240805_BSimons/data_analysis/07_output/quantile_0.85/all_samples/s8_output/240805_BSimons.renamedClusters.output.s8.rds"
 dataset.name <- "240805_BSimons_filterHT_cluster_renamed"
 save.dev <- "svg"
@@ -110,7 +111,15 @@ gene.list <- list(
 
 
 all.clusters <- sort(unique(s.obj$seurat_clusters))
-cluster.order <- all.clusters
+
+cluster.order <- c(9,8,7,6,5,1,2,3,4)
+
+meta.data <- s.obj@meta.data %>% 
+  rownames_to_column("barcode")
+meta.data$seurat_clusters <- factor(meta.data$seurat_clusters, levels = cluster.order)
+meta.data <- meta.data %>% column_to_rownames("barcode")
+meta.data <- meta.data[row.names(s.obj@meta.data), ]
+s.obj <- AddMetaData(object = s.obj, col.name = "seurat_clusters", metadata = meta.data$seurat_clusters)
 
 plot.clusters <- tableau_color_pal(palette = "Tableau 20")(length(all.clusters)) 
 names(plot.clusters) <- cluster.order
