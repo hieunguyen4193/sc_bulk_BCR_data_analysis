@@ -52,11 +52,14 @@ bulk.metadata[["241002_241104_BSimons_241031_BSimons"]] <- tmp.metadata
 
 to.run.projects <- c("241002_241104_BSimons_241031_BSimons",
                      "240805_BSimons_filterHT_cluster_renamed_240826_BSimons")
-for (input.case in c("")){
+
+input.case <- ""
+# for (input.case in c("")){
   for (input.PROJECT in to.run.projects){
     print(sprintf("Working on project %s", input.PROJECT))
     # for (circos.group.type in c("VJaa", "VJnt", "VJcombi_CDR3_0.85")){
-    for (circos.group.type in c("VJcombi_CDR3_0.85")){
+    circos.group.type <- "VJcombi_CDR3_0.85"
+    # for (circos.group.type in c("VJcombi_CDR3_0.85")){
       print(sprintf("Working on circos group type: %s", circos.group.type))
       outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
       path.to.05.output <- file.path(outdir, "VDJ_output", 
@@ -188,9 +191,9 @@ for (input.case in c("")){
         ggsave(plot = mhi.plot, filename = sprintf("%s.MHI.svg", filename),
                path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
       }
-    }
+    # }
   }
-}
+# }
 
 
 
