@@ -67,18 +67,15 @@ for (mouse.id in c("m3", "m7")){
 }
 
 plot.hashtag.samples <- list(
-  m3 = c("PP3_HT1", "PP3_HT2", "PP3_HT3"),
-  m7 = c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+  m3 = "PP3_HT2",
+  m7 = "PP7_HT1"
 )
 
-sample.location <- list(
-  PP3_HT1 = "prox",
-  PP3_HT2 = "injected_PP",
-  PP3_HT3 = "dist",
-  PP7_HT1 = "injected_PP",
-  PP7_HT2 = "dist",
-  PP7_HT3 = "prox"
-)
+if (mouse.id == "m3"){
+  p.sample <- c("PP3_HT1", "PP3_HT2", "PP3_HT3")
+} else if (mouse.id == "m7"){
+  p.sample <- c("PP7_HT3", "PP7_HT1", "PP7_HT2")
+}
 
 #####----------------------------------------------------------------------#####
 ##### READ CLONE DATA -----> NEW DATA
@@ -97,25 +94,25 @@ meta.data.splitted.or.not <- list(
 
 meta.data.name <- "with_hashtags"
 
-tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
-all.input.files <- Sys.glob(file.path(path.to.05.output, 
-                                      sprintf("VJcombi_CDR3_%s", thres), 
-                                      meta.data.name,
-                                      "*.simplified.csv"))
-
-input.metadata <- data.frame(
-  path = all.input.files,
-  SampleID = to_vec(for (item in all.input.files){
-    str_replace(basename(item), ".simplified.csv", "") 
-  }),
-  PROJECT = to_vec(for (item in all.input.files){
-    str_split(item, "/")[[1]][[8]]
-  })
-) 
-
-all.input.files <- input.metadata$path
-names(all.input.files) <- input.metadata$SampleID
-
+  tmp.metadata <- meta.data.splitted.or.not[[meta.data.name]]
+  all.input.files <- Sys.glob(file.path(path.to.05.output, 
+                                        sprintf("VJcombi_CDR3_%s", thres), 
+                                        meta.data.name,
+                                        "*.simplified.csv"))
+  
+  input.metadata <- data.frame(
+    path = all.input.files,
+    SampleID = to_vec(for (item in all.input.files){
+      str_replace(basename(item), ".simplified.csv", "") 
+    }),
+    PROJECT = to_vec(for (item in all.input.files){
+      str_split(item, "/")[[1]][[8]]
+    })
+  ) 
+  
+  all.input.files <- input.metadata$path
+  names(all.input.files) <- input.metadata$SampleID
+  
 for (mouse.id in c("m3", "m7")){
   yfp.samples <- yfp.sample.list[[mouse.id]]$`YFP+`
   nonyfp.samples <- yfp.sample.list[[mouse.id]]$`YFP-`
@@ -144,12 +141,12 @@ for (mouse.id in c("m3", "m7")){
   dir.create(file.path(path.to.05.output, 
                        sprintf("VJcombi_CDR3_%s", thres), 
                        meta.data.name, 
-                       "MERGE_YFP_SAMPLES_ALL_HASHTAGS"), showWarnings = FALSE, recursive = TRUE)
+                       "MERGE_YFP_SAMPLES"), showWarnings = FALSE, recursive = TRUE)
   write.table(yfpdf, 
               file.path(path.to.05.output, 
                         sprintf("VJcombi_CDR3_%s", thres), 
                         meta.data.name, 
-                        "MERGE_YFP_SAMPLES_ALL_HASHTAGS",
+                        "MERGE_YFP_SAMPLES",
                         sprintf("YFP_%s.simplified.csv", mouse.id)), 
               quote = FALSE, 
               sep = "\t", 
@@ -158,31 +155,30 @@ for (mouse.id in c("m3", "m7")){
               file.path(path.to.05.output, 
                         sprintf("VJcombi_CDR3_%s", thres), 
                         meta.data.name, 
-                        "MERGE_YFP_SAMPLES_ALL_HASHTAGS",
+                        "MERGE_YFP_SAMPLES",
                         sprintf("NONYFP_%s.simplified.csv", mouse.id)), 
               quote = FALSE, 
               sep = "\t", 
               row.names = FALSE) 
   
-  new.input.files <- c(
-    all.input.files[plot.hashtag.samples[[mouse.id]]],
-    file.path(path.to.05.output, 
+  new.input.files <- list(
+    injected_PP = all.input.files[[plot.hashtag.samples[[mouse.id]]]],
+    YFP_positive = file.path(path.to.05.output, 
                              sprintf("VJcombi_CDR3_%s", thres), 
                              meta.data.name, 
-                             "MERGE_YFP_SAMPLES_ALL_HASHTAGS",
+                             "MERGE_YFP_SAMPLES",
                              sprintf("YFP_%s.simplified.csv", mouse.id)),
-    file.path(path.to.05.output, 
+    YFP_negative = file.path(path.to.05.output, 
                              sprintf("VJcombi_CDR3_%s", thres), 
                              meta.data.name, 
-                             "MERGE_YFP_SAMPLES_ALL_HASHTAGS",
+                             "MERGE_YFP_SAMPLES",
                              sprintf("NONYFP_%s.simplified.csv", mouse.id))
   )
-  names(new.input.files) <- c(plot.hashtag.samples[[mouse.id]], "YFP_positive", "YFP_negative")
-  fileAliases <- c(
-    to_vec( for (item in plot.hashtag.samples[[mouse.id]]) sample.location[[item]]), "YFP+", "YFP-")
+  
+  fileAliases <- c("injected PP", "YFP+", "YFP-")
   
   names(fileAliases) <- names(new.input.files)
-  saveFileName <- sprintf("%s_circos_MERGE_YFP_ALL_HASHTAGS.svg", mouse.id)
+  saveFileName <- sprintf("%s_circos_MERGE_YFP_INJECTED_PP.svg", mouse.id)
   outputdir <- file.path(path.to.05.output,
                          sprintf("VJcombi_CDR3_%s", thres),
                          "circos_plot")
@@ -205,5 +201,46 @@ for (mouse.id in c("m3", "m7")){
       ordered.samples = NULL
     )
     
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".1.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("injected_PP"),
+      group.to.highlight2 = c("YFP_negative"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
+      ordered.samples = NULL
+    )
+    
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".2.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("YFP_positive"),
+      group.to.highlight2 = c("YFP_negative"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
+      ordered.samples = NULL
+    )
+    
+    generate_circos(
+      input.files = new.input.files,
+      fileAliases = fileAliases,
+      saveFileName = str_replace(saveFileName, ".svg", ".3.svg"),
+      outputdir = outputdir,
+      filter.clone = filter.clone,
+      filter.clone.cutoff = NULL,
+      group.to.highlight1 = c("injected_PP"),
+      group.to.highlight2 = c("YFP_positive"),
+      linkColor1 = "#FF000080",
+      linkColor2 = "lightgray",
+      ordered.samples = NULL
+    )
   }
 }
