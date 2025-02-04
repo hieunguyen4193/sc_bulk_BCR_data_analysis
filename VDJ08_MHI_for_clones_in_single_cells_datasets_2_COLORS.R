@@ -218,7 +218,7 @@ for (input.PROJECT in to.run.projects){
            path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
     
     
-    palette_red_blue <- colorRampPalette(colors = c("lightblue", "#f7fafd", "red"))
+    palette_red_blue <- colorRampPalette(colors = c("#f7fafd", "lightblue", "red"))
     
     mhidf.pivot$z_categorised <- cut(mhidf.pivot$MHI, c(seq(-0.01, 0.1, length.out = 100), 
                                                         seq(0.101, 1, length.out = 100)) )
@@ -254,15 +254,16 @@ for (input.PROJECT in to.run.projects){
     ggsave(plot = mhi.plot, filename = sprintf("%s.MHI_countShare.svg", filename),
            path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
     
-    palette_red_blue <- colorRampPalette(colors = c("lightblue", "#f7fafd", "red"))
-    mhidf.count.pivot$z_categorised <- cut(mhidf.count.pivot$MHI, c(seq(-0.01, 0.1, length.out = 100), 
-                                                        seq(0.101, 1, length.out = 100)) )
+    palette_red_blue <- colorRampPalette(colors = c("#f7fafd", "lightblue", "red"))
+    mhidf.count.pivot$z_categorised <- cut(mhidf.count.pivot$MHI, c(seq(-0.01, 20, length.out = 100), 
+                                                        seq(20.01, max(mhidf.count.pivot$MHI), 
+                                                            length.out = max(mhidf.count.pivot$MHI) - 20)) )
     mhi.plot <- mhidf.count.pivot  %>%
       ggplot(aes(x = MID, y = SampleID, fill = z_categorised)) + 
       geom_tile(color = "white") + 
       theme(axis.text.x = element_text(angle = 90),
             legend.position = "none") + 
-      scale_fill_manual(values = palette_red_blue(length(unique(mhidf.pivot$z_categorised)))) + 
+      scale_fill_manual(values = palette_red_blue(length(unique(mhidf.count.pivot$z_categorised)))) + 
       geom_text(aes(label = MHI.round), color = "black", size = 4) 
     ggsave(plot = mhi.plot, filename = sprintf("%s.MHI_2COLOR_countShare.svg", filename),
            path = path.to.08.output, device = "svg", dpi = 300, width = 14, height = 10)
