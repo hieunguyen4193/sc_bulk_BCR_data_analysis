@@ -87,9 +87,9 @@ for (mid in unique(mid.metadata$X)){
   }
 }
 
-all.mid.files <- Sys.glob(file.path(path.to.05.output, "single_MID_clone_df", "*.simplified.csv"))
-names(all.mid.files) <- to_vec(
-  for (item in all.mid.files){
+all.input.files <- Sys.glob(file.path(path.to.05.output, "single_MID_clone_df", "*.simplified.csv"))
+names(all.input.files) <- to_vec(
+  for (item in all.input.files){
     str_replace(basename(item), ".simplified.csv", "")
   }
 )
@@ -105,12 +105,49 @@ count.mice <- table(mid.metadata$mouse)
 #####----------------------------------------------------------------------#####
 plot.mice <- count.mice[count.mice >= 2] %>% names()
 
-mouse.id <- "m11"
-input.case <- "all_w_biopsy"
-filter.clone <- FALSE
-filter.clone.cutoff <- 1
-selected.mids <- yfp.mids[[mouse.id]][[input.case]]
-input.files <- all.mid.files[selected.mids]
+count.clonedf <- data.frame()
+for (mouse.id in plot.mice){
+  print(sprintf("Working on mouse ID: %s", mouse.id))
+  selected.mids <- subset(mid.metadata, mid.metadata$mouse == mouse.id)$X
+  input.files <- all.input.files[selected.mids]
+  
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  thres.dis <- 0.15
+  thres <- 0.85
+  
+  clonesets <- read_tsv(input.files, id = "fileName") %>%
+    rowwise() %>%
+    mutate(fileName = basename(fileName) %>% str_replace(".simplified.csv", "")) %>%
+    mutate(bestVHit = str_split(bestVHit, "[*]")[[1]][[1]]) %>%
+    mutate(bestJHit = str_split(bestJHit, "[*]")[[1]][[1]]) %>%
+    mutate(len = nchar(nSeqCDR3)) %>%
+    mutate(VJ.len.combi = sprintf("%s_%s_%s", bestVHit, bestJHit, len ))
+  
+  colnames(clonesets) <- c("fileName", "id", "cloneCount", "bestVHit", "bestJHit", "seq", "len", "VJ.len.combi")
+  ##### Group sequences + Gene usages to clones
+  new.clonesets <- data.frame()
+  for (input.VJ.combi in unique(clonesets$VJ.len.combi)){
+    tmpdf <- subset(clonesets, clonesets$VJ.len.combi == input.VJ.combi)
+    seqs <- unique(tmpdf$seq)
+    print(sprintf("VJ.len.combi: %s, num seqs: %s", input.VJ.combi, length(seqs)))
+    if (length(seqs) >= 2){
+      cluster.output <- assign_clusters_to_sequences(seqs = seqs, threshold = thres.dis)$res
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- unlist(lapply(
+        tmpdf$seq, function(x){
+          return(sprintf("%s_%s", input.VJ.combi, subset(cluster.output, cluster.output$seq == x)$cluster))
+        }
+      ))    
+    } else {
+      tmpdf[[sprintf("VJcombi_CDR3_%s", thres)]] <- sprintf("%s_1", input.VJ.combi)
+    }
+    new.clonesets <- rbind(new.clonesets, tmpdf)
+  }
+  
+  tmp.count.clonedf <- data.frame(mouse = c(mouse.id), 
+                                  numClone = c(length(unique(new.clonesets$VJcombi_CDR3_0.85))),
+                                  totalAbundance = c(sum(new.clonesets$cloneCount)))
+  count.clonedf <- rbind(count.clonedf, tmp.count.clonedf)
+}
 
-
-read.csv(input.files[["MID58"]], sep = "\t")
