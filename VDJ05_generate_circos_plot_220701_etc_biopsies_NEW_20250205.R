@@ -47,50 +47,81 @@ path.to.05.output <- file.path(outdir, "VDJ_output", "05_output_NEW_20250205", P
 dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(path.to.05.output, "circos_plot"), showWarnings = FALSE, recursive = TRUE)
 
-mouse.id <- "m11"
+mid.metadata <- mid.metadata %>% rowwise() %>%
+  mutate(sample_type = str_replace(str_replace(population, "Ly6c[+]", ""), "Ly6c[-]", ""))
 
-path.to.input <- file.path(path.to.05.output, "input", mouse.id)
-dir.create(path.to.input, showWarnings = FALSE, recursive = TRUE)
-
-path.to.clonesets <- file.path(outdir, 
-                               "VDJ_output/03_output/FASTA_output/220701_etc_biopsies/VDJ_output_0.85", 
-                               mouse.id, 
-                               "all_samples_including_biopsy",
-                               "clonesets.csv")
-
-clonedf <- read.csv(path.to.clonesets) %>% 
-  rowwise() %>%
-  mutate(tmp.V.gene = str_split(str_split(VJcombi_CDR3_0.85, "_")[[1]][[1]], "[*]")[[1]][[1]] ) %>%
-  mutate(tmp.J.gene = str_split(str_split(VJcombi_CDR3_0.85, "_")[[1]][[2]], "[*]")[[1]][[1]]) %>%
-  mutate(tmp.len = str_split(VJcombi_CDR3_0.85, "_")[[1]][[3]]) %>%
-  mutate(tmp.i = str_split(VJcombi_CDR3_0.85, "_")[[1]][[4]]) %>%
-  mutate(VJcombi_CDR3_0.85 = sprintf("%s_%s_%s_%s", tmp.V.gene, tmp.J.gene, tmp.len, tmp.i))
-
-all.samples <- unique(clonedf$id)
-
-for (input.MID in all.samples){
-  clonedf <- subset(clonedf, clonedf$id == input.MID) 
-  clonedf <- subset(clonedf, select = c(VJcombi_CDR3_0.85, 
-                                        uniqueMoleculeCount, 
-                                        tmp.V.gene, 
-                                        tmp.J.gene, 
-                                        tmp.len)) 
-  new.clonedf <- clonedf  %>%
-    group_by(VJcombi_CDR3_0.85) %>%
-    summarise(cloneCount = sum(uniqueMoleculeCount)) 
-  colnames(new.clonedf) <- c("id", "cloneCount")
-  new.clonedf <- new.clonedf %>% 
-    rowwise() %>%
-    mutate(bestVHit = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == id)$tmp.V.gene)[[1]]) %>%
-    mutate(bestJHit = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == id)$tmp.J.gene)[[1]]) %>%
-    mutate(nSeqCDR3 = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == id)$tmp.len)[[1]])
+count.mice <- table(mid.metadata$mouse)
+plot.mice <- count.mice[count.mice >= 2] %>% names()
+for (mouse.id in plot.mice){
+  path.to.input <- file.path(path.to.05.output, "input", mouse.id)
+  dir.create(path.to.input, showWarnings = FALSE, recursive = TRUE)
   
-  write.table(new.clonedf, 
-              file.path(path.to.input, 
-                        sprintf("%s.simplified.csv", input.MID)), 
-              quote = FALSE, 
-              sep = "\t", 
-              row.names = FALSE) 
+  path.to.clonesets <- file.path(outdir, 
+                                 "VDJ_output/03_output/FASTA_output/220701_etc_biopsies/VDJ_output_0.85", 
+                                 mouse.id, 
+                                 "all_samples_including_biopsy",
+                                 "clonesets.csv")
+  
+  clonedf <- read.csv(path.to.clonesets) %>% 
+    rowwise() %>%
+    mutate(tmp.V.gene = str_split(str_split(VJcombi_CDR3_0.85, "_")[[1]][[1]], "[*]")[[1]][[1]] ) %>%
+    mutate(tmp.J.gene = str_split(str_split(VJcombi_CDR3_0.85, "_")[[1]][[2]], "[*]")[[1]][[1]]) %>%
+    mutate(tmp.len = str_split(VJcombi_CDR3_0.85, "_")[[1]][[3]]) %>%
+    mutate(tmp.i = str_split(VJcombi_CDR3_0.85, "_")[[1]][[4]]) %>%
+    mutate(VJcombi_CDR3_0.85 = sprintf("%s_%s_%s_%s", tmp.V.gene, tmp.J.gene, tmp.len, tmp.i))
+  
+  all.samples <- unique(clonedf$id)
+  
+  for (input.MID in all.samples){
+    if (file.exists(file.path(path.to.input, 
+                              sprintf("%s.simplified.csv", input.MID))) == FALSE){
+      new.clonedf <- clonedf  %>% 
+        subset(id == input.MID) %>%
+        group_by(VJcombi_CDR3_0.85) %>%
+        summarise(cloneCount = sum(uniqueMoleculeCount)) 
+      colnames(new.clonedf) <- c("clone", "cloneCount")
+      new.clonedf <- new.clonedf %>% 
+        rowwise() %>%
+        mutate(bestVHit = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone)$tmp.V.gene)[[1]]) %>%
+        mutate(bestJHit = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone)$tmp.J.gene)[[1]]) %>%
+        mutate(nSeqCDR3 = unique(subset(clonedf, clonedf$VJcombi_CDR3_0.85 == clone)$tmp.len)[[1]])
+      colnames(new.clonedf) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
+      
+      write.table(new.clonedf, 
+                  file.path(path.to.input, 
+                            sprintf("%s.simplified.csv", input.MID)), 
+                  quote = FALSE, 
+                  sep = "\t", 
+                  row.names = FALSE) 
+    } else {
+      print(sprintf("File %s exists, reading in ...", file.path(path.to.input, 
+                                                                sprintf("%s.simplified.csv", input.MID))))
+    }
+  }
 }
 
+#####----------------------------------------------------------------------------#####
+##### RUN CIRCOS PLOT
+#####----------------------------------------------------------------------------#####
+all.input.files <- Sys.glob(file.path(path.to.input,
+                                      "*.simplified.csv"))
 
+input.metadata <- data.frame(
+  path = all.input.files,
+  SampleID = to_vec(for (item in all.input.files){
+    str_replace(basename(item), ".simplified.csv", "") 
+  }))
+
+all.input.files <- input.metadata$path
+names(all.input.files) <- input.metadata$SampleID
+
+fileAliases <- to_vec(
+  for (item in names(input.files)){
+    sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
+s  }
+)
+names(fileAliases) <- names(input.files)
+saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
+outputdir <- file.path(path.to.05.output,
+                       circos.group.type,
+                       "circos_plot")
