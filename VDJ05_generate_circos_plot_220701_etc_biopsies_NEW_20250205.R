@@ -104,3 +104,13 @@ count.mice <- table(mid.metadata$mouse)
 ##### GENERATE CIRCOS PLOT WITH HIEU SCRIPT
 #####----------------------------------------------------------------------#####
 plot.mice <- count.mice[count.mice >= 2] %>% names()
+
+mouse.id <- "m11"
+input.case <- "all_w_biopsy"
+filter.clone <- FALSE
+filter.clone.cutoff <- 1
+selected.mids <- yfp.mids[[mouse.id]][[input.case]]
+input.files <- all.mid.files[selected.mids]
+
+
+read.csv(input.files[["MID58"]], sep = "\t")
