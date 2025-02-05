@@ -52,7 +52,10 @@ mid.metadata <- mid.metadata %>% rowwise() %>%
 
 count.mice <- table(mid.metadata$mouse)
 plot.mice <- count.mice[count.mice >= 2] %>% names()
+
+path.to.files <- list()
 for (mouse.id in plot.mice){
+  path.to.files[[mouse.id]] <- list()
   path.to.input <- file.path(path.to.05.output, "input", mouse.id)
   dir.create(path.to.input, showWarnings = FALSE, recursive = TRUE)
   
@@ -131,6 +134,8 @@ for (mouse.id in plot.mice){
                   quote = FALSE, 
                   sep = "\t", 
                   row.names = FALSE) 
+      path.to.files[[mouse.id]][[input.sample.type]] <- file.path(path.to.pool.samplelist, 
+                                                                  sprintf("%s_%s.csv", mouse.id, input.sample.type))
     }
   }
 }
@@ -138,6 +143,30 @@ for (mouse.id in plot.mice){
 #####----------------------------------------------------------------------------#####
 ##### RUN CIRCOS PLOT
 #####----------------------------------------------------------------------------#####
-
+for (mouse.id in plot.mice){
+  new.input.files <- path.to.files[[mouse.id]]
+  fileAliases <- names(new.input.files)
+  names(fileAliases) <- names(new.input.files)
+  saveFileName <- sprintf("%s_circos_pooled.svg", mouse.id)
+  outputdir <- file.path(path.to.05.output, "circos_plot")
+  dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+  filter.clone <- FALSE
+  filter.clone.cutoff <- NA
+  source(file.path(path.to.main.src, "circos_helper.R"))
+  
+  generate_circos(
+    input.files = new.input.files,
+    fileAliases = fileAliases,
+    saveFileName = saveFileName,
+    outputdir = outputdir,
+    filter.clone = filter.clone,
+    filter.clone.cutoff = NULL,
+    group.to.highlight1 = c("biopsy"),
+    group.to.highlight2 = c("YFP+"),
+    linkColor1 = "#FF000080",
+    linkColor2 = "lightgray",
+    ordered.samples = NULL
+  )
+}
 
 
