@@ -56,6 +56,9 @@ for (mouse.id in plot.mice){
   path.to.input <- file.path(path.to.05.output, "input", mouse.id)
   dir.create(path.to.input, showWarnings = FALSE, recursive = TRUE)
   
+  path.to.pool.samplelist <- file.path(path.to.05.output, "pooled_sample_list", mouse.id)
+  dir.create(path.to.pool.samplelist, showWarnings = FALSE, recursive = TRUE)
+  
   path.to.clonesets <- file.path(outdir, 
                                  "VDJ_output/03_output/FASTA_output/220701_etc_biopsies/VDJ_output_0.85", 
                                  mouse.id, 
@@ -97,31 +100,44 @@ for (mouse.id in plot.mice){
       print(sprintf("File %s exists, reading in ...", file.path(path.to.input, 
                                                                 sprintf("%s.simplified.csv", input.MID))))
     }
+    all.input.files <- Sys.glob(file.path(path.to.input, "*.simplified.csv"))
+    
+    input.metadata <- data.frame(
+      path = all.input.files,
+      SampleID = to_vec(for (item in all.input.files){
+        str_replace(basename(item), ".simplified.csv", "") 
+      }))
+    
+    input.metadata <- input.metadata %>% rowwise() %>%
+      mutate(sample.type = subset(mid.metadata, mid.metadata$X == SampleID)$sample_type)
+    
+    all.input.files <- input.metadata$path
+    names(all.input.files) <- input.metadata$SampleID
+    
+    sample.list <- list()
+    for (input.sample.type in unique(input.metadata$sample.type)){
+      sample.list[[input.sample.type]] <- subset(input.metadata, input.metadata$sample.type == input.sample.type)$SampleID
+      tmpdf <- read_tsv(all.input.files[sample.list[[input.sample.type]] ])
+      df <- tmpdf %>%
+        group_by(id) %>%
+        summarise(new.cloneCount = sum(cloneCount))
+      df <- df %>% rowwise() %>%
+        mutate(bestVHit = str_split(id, "_")[[1]][[1]]) %>%
+        mutate(bestJHit = str_split(id, "_")[[1]][[2]]) %>%
+        mutate(nSeqCDR3 = str_split(id, "_")[[1]][[3]])
+      colnames(df) <- c("id", "cloneCount", "bestVHit", "bestJHit", "nSeqCDR3")
+      write.table(df, 
+                  file.path(path.to.pool.samplelist, sprintf("%s_%s.csv", mouse.id, input.sample.type)), 
+                  quote = FALSE, 
+                  sep = "\t", 
+                  row.names = FALSE) 
+    }
   }
 }
 
 #####----------------------------------------------------------------------------#####
 ##### RUN CIRCOS PLOT
 #####----------------------------------------------------------------------------#####
-all.input.files <- Sys.glob(file.path(path.to.input,
-                                      "*.simplified.csv"))
 
-input.metadata <- data.frame(
-  path = all.input.files,
-  SampleID = to_vec(for (item in all.input.files){
-    str_replace(basename(item), ".simplified.csv", "") 
-  }))
 
-all.input.files <- input.metadata$path
-names(all.input.files) <- input.metadata$SampleID
 
-fileAliases <- to_vec(
-  for (item in names(input.files)){
-    sprintf("%s (%s)", item, subset(meta.data.splitted, meta.data.splitted$SampleID == item)$organ)
-s  }
-)
-names(fileAliases) <- names(input.files)
-saveFileName <- sprintf("%s_hashtags_circos.svg", mouse.id)
-outputdir <- file.path(path.to.05.output,
-                       circos.group.type,
-                       "circos_plot")
