@@ -48,7 +48,9 @@ dir.create(path.to.05.output, showWarnings = FALSE, recursive = TRUE)
 dir.create(file.path(path.to.05.output, "circos_plot"), showWarnings = FALSE, recursive = TRUE)
 
 mid.metadata <- mid.metadata %>% rowwise() %>%
-  mutate(sample_type = str_replace(str_replace(population, "Ly6c[+]", ""), "Ly6c[-]", ""))
+  mutate(sample_type = str_replace(str_replace(population, "Ly6c[+]", ""), "Ly6c[-]", "")) %>%
+  mutate(sample_type = str_replace(sample_type, "YFP[+]", "YFP_positive")) %>%
+  mutate(sample_type = str_replace(sample_type, "YFP[-]", "YFP_negative"))
 
 count.mice <- table(mid.metadata$mouse)
 plot.mice <- count.mice[count.mice >= 2] %>% names()
@@ -143,17 +145,25 @@ for (mouse.id in plot.mice){
 #####----------------------------------------------------------------------------#####
 ##### RUN CIRCOS PLOT
 #####----------------------------------------------------------------------------#####
-for (mouse.id in plot.mice){
-  new.input.files <- path.to.files[[mouse.id]]
-  fileAliases <- names(new.input.files)
-  names(fileAliases) <- names(new.input.files)
-  saveFileName <- sprintf("%s_circos_pooled.svg", mouse.id)
+convert.filename <- list(
+  "biopsy" = "biopsy",
+  "YFP_positive" = "YFP+",
+  "YFP_negative" = "YFP-"
+)
+
   outputdir <- file.path(path.to.05.output, "circos_plot")
   dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+  
+  # mouse.id <- "m13"
+for (mouse.id in plot.mice){
+  new.input.files <- path.to.files[[mouse.id]]
+  fileAliases <- to_vec( for(item in names(new.input.files))  convert.filename[[item]])
+  names(fileAliases) <- names(new.input.files)
+  saveFileName <- sprintf("%s_circos_pooled.svg", mouse.id)
   filter.clone <- FALSE
   filter.clone.cutoff <- NA
   source(file.path(path.to.main.src, "circos_helper.R"))
-  
+
   generate_circos(
     input.files = new.input.files,
     fileAliases = fileAliases,
@@ -162,11 +172,43 @@ for (mouse.id in plot.mice){
     filter.clone = filter.clone,
     filter.clone.cutoff = NULL,
     group.to.highlight1 = c("biopsy"),
-    group.to.highlight2 = c("YFP+"),
+    group.to.highlight2 = c("YFP_positive"),
     linkColor1 = "#FF000080",
     linkColor2 = "lightgray",
     ordered.samples = NULL
   )
+  circos.clear()
 }
 
+for (mouse.id in plot.mice){
+  countdf <- read.csv(file.path(outputdir, "filter_clone_FALSE", sprintf("%s_circos_pooled.csv", mouse.id))) %>%
+    subset(select = -c(X)) %>%
+    subset(select = c(id, biopsy_Count, YFP_positive_Count, YFP_negative_Count))
+  colnames(countdf) <- c("clone", "biopsy", "YFP_positive", "YFP_negative")
+  dir.create(file.path(path.to.05.output, "rank_plot", mouse.id), showWarnings = FALSE, recursive = TRUE)
+  
+  plot.rank <- function(sample1, sample2){
+    tmpdf <- countdf[, c("clone", sample1, sample2)] 
+    tmpdf$check.prod <- rowProds(tmpdf %>% subset(select = -c(clone)) %>% as.matrix())
+    tmpdf <- subset(tmpdf, tmpdf$check.prod != 0) %>% subset(select = -c(check.prod))
+    
+    rank.sample1 <- tmpdf[order(tmpdf[[sample1]], decreasing = TRUE),]
+    rank.sample1$rank_sample1 <- seq(1, nrow(rank.sample1))
+    
+    rank.sample2 <- tmpdf[order(tmpdf[[sample2]], decreasing = TRUE),]
+    rank.sample2$rank_sample2 <- seq(1, nrow(rank.sample2))
+    
+    rankdf <- data.frame(clone = tmpdf$clone %>% unique())
+    rankdf <- merge(rankdf, rank.sample1[, c("clone", "rank_sample1")], by.x = "clone", by.y = "clone")
+    rankdf <- merge(rankdf, rank.sample2[, c("clone", "rank_sample2")], by.x = "clone", by.y = "clone")
+    colnames(rankdf) <- c("clone", sample1, sample2)
+    p <- rankdf %>% ggplot(aes_string(x = sample1, y = sample2)) + geom_point()
+    ggsave(plot = p, filename = sprintf("%s_%s_%s_rankClone.svg", mouse.id, sample1, sample2), 
+           path = file.path(path.to.05.output, "rank_plot", mouse.id), device = "svg", dpi = 300, width = 14, height = 10)  
+  }
+  
+  plot.rank("biopsy", "YFP_positive")
+  plot.rank("biopsy", "YFP_negative")
+  plot.rank("YFP_positive", "YFP_negative")
+}
 

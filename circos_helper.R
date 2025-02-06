@@ -183,7 +183,9 @@ generate_circos <- function(
   all.combidf <- data.frame(all.combi %>% t)
   colnames(all.combidf) <- c("Sample1", "Sample2")
   all.combidf <- all.combidf %>% rowwise() %>%
-    mutate(check = ifelse(Sample1 %in% group.to.highlight1 & Sample2 %in% group.to.highlight2, "yes", "no")) %>%
+    mutate(check = ifelse((Sample1 %in% group.to.highlight1 & Sample2 %in% group.to.highlight2) | 
+                            (Sample2 %in% group.to.highlight1 & Sample1 %in% group.to.highlight2), 
+                          "yes", "no")) %>%
     arrange(check)
   for (j in seq(1, nrow(all.combidf))){
     sample1 <- all.combidf[j, ][["Sample1"]]
@@ -200,7 +202,8 @@ generate_circos <- function(
       maxLinkSize <- max(tmp.plotdf$sample1_Freq + tmp.plotdf$sample2_Freq)
       
       for (index in seq(1, nrow(tmp.plotdf))){
-        if (sample1 %in% group.to.highlight1 & sample2 %in% group.to.highlight2){
+        if ( (sample1 %in% group.to.highlight1 & sample2 %in% group.to.highlight2) | 
+             (sample2 %in% group.to.highlight1 & sample1 %in% group.to.highlight2) ){
           circos.link(sample1, 
                       c(tmp.plotdf$sample1_accumFreq[index] - tmp.plotdf$sample1_Freq[index], 
                         tmp.plotdf$sample1_accumFreq[index]),
