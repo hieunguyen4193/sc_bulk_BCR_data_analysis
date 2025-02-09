@@ -58,26 +58,31 @@ for (input.dataset in names(path.to.all.s.obj)){
   }
 } 
 
-summarydf <- data.frame()
-
-for (input.dataset in names(clonedf)){
-  df <- clonedf[[input.dataset]]
-  countdf <- data.frame(clone = unique(df$VJcombi_CDR3_0.85))
-  countdf <- countdf %>% rowwise() %>%
-    mutate(num.CTstrict = subset(df, df$VJcombi_CDR3_0.85 == clone)$CTstrict %>% unique() %>% length()) %>%
-    mutate(CTstrict_list = paste(subset(df, df$VJcombi_CDR3_0.85 == clone)$CTstrict %>% unique(), collapse = ";")) %>%
-    arrange(desc(num.CTstrict))
+if (file.exists(file.path(path.to.11.output, "check_SPEC_IGH_clone_definition.xlsx")) == FALSE){
+  summarydf <- data.frame()
   
-  num1 <- subset(countdf, countdf$num.CTstrict == 1) %>% nrow()
-  pct1 <- num1/nrow(countdf)
-  
-  tmp.summarydf <- data.frame(dataset = input.dataset,
-                              numClone = nrow(countdf),
-                              numCTstrict = length(unique(df$CTstrict)),
-                              numSPEC = num1, 
-                              pctSPEC = pct1)
-  summarydf <- rbind(summarydf, tmp.summarydf)
+  for (input.dataset in names(clonedf)){
+    df <- clonedf[[input.dataset]]
+    countdf <- data.frame(clone = unique(df$VJcombi_CDR3_0.85))
+    countdf <- countdf %>% rowwise() %>%
+      mutate(num.CTstrict = subset(df, df$VJcombi_CDR3_0.85 == clone)$CTstrict %>% unique() %>% length()) %>%
+      mutate(CTstrict_list = paste(subset(df, df$VJcombi_CDR3_0.85 == clone)$CTstrict %>% unique(), collapse = ";")) %>%
+      arrange(desc(num.CTstrict))
+    
+    num1 <- subset(countdf, countdf$num.CTstrict == 1) %>% nrow()
+    pct1 <- num1/nrow(countdf)
+    
+    tmp.summarydf <- data.frame(dataset = input.dataset,
+                                numClone = nrow(countdf),
+                                numCTstrict = length(unique(df$CTstrict)),
+                                numSPEC = num1, 
+                                pctSPEC = pct1)
+    summarydf <- rbind(summarydf, tmp.summarydf)
+  }
+  writexl::write_xlsx(summarydf, file.path(path.to.11.output, "check_SPEC_IGH_clone_definition.xlsx"))  
+} else {
+  print("File exists, reading in ...")
+  summarydf <- readxl::read_excel(file.path(path.to.11.output, "check_SPEC_IGH_clone_definition.xlsx"))
 }
 
-writexl::write_xlsx(summarydf, file.path(path.to.11.output, "check_SPEC_IGH_clone_definition.xlsx"))
 
