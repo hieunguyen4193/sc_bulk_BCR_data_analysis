@@ -204,6 +204,7 @@ for (mouse.id in plot.mice){
     rankdf <- merge(rankdf, rank.sample2[, c("clone", "rank_sample2")], by.x = "clone", by.y = "clone")
     colnames(rankdf) <- c("clone", sample1, sample2)
     p <- rankdf %>% ggplot(aes_string(x = sample1, y = sample2)) + geom_point()
+    writexl::write_xlsx(rankdf, file.path(path.to.05.output, "rank_plot", mouse.id, sprintf("%s_%s_%s_rankClone.xlsx", mouse.id, sample1, sample2)))
     ggsave(plot = p, filename = sprintf("%s_%s_%s_rankClone.svg", mouse.id, sample1, sample2), 
            path = file.path(path.to.05.output, "rank_plot", mouse.id), device = "svg", dpi = 300, width = 14, height = 10)  
   }
