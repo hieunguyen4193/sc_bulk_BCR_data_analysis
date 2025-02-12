@@ -49,3 +49,10 @@ input.metadata <- data.frame(
   })
 ) 
 
+public.clonedf <- read.csv(file.path(path.to.main.src, "public_clones.csv")) %>%
+  rowwise() %>% 
+  mutate(VJ = sprintf("%s_%s", V_gene, J_gene))
+
+df <- read.csv(all.input.files[[1]], sep = "\t") %>%
+  rowwise() %>%
+  mutate(VJ.gene = sprintf("%s_%s", bestVHit, bestJHit))

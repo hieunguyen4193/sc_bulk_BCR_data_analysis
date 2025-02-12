@@ -86,3 +86,21 @@ if (file.exists(file.path(path.to.11.output, "check_SPEC_IGH_clone_definition.xl
 }
 
 
+input.dataset <- "1st_dataset"
+df <- clonedf[[input.dataset]]
+dfcount <- table(df$VJcombi_CDR3_0.85) %>% sort(decreasing = TRUE)
+df.unique <- data.frame()
+for (x in names(dfcount)){
+  tmp.ctstrict <- subset(df, df$VJcombi_CDR3_0.85 == x)$CTstrict %>% unique()
+  tmpdf <- data.frame(clone = rep(x, length(tmp.ctstrict)))
+  tmpdf$clone.CTStrict <- tmp.ctstrict 
+  tmpdf <- tmpdf %>% rowwise() %>%
+    mutate(num.cell = subset(df, df$CTstrict == clone.CTStrict & df$VJcombi_CDR3_0.85 == x)$barcode %>% length()) 
+  tmpdf <- tmpdf %>% rowwise() %>% mutate(pct.cell = num.cell/sum(tmpdf$num.cell))
+  df.unique <- rbind(df.unique, tmpdf)
+}
+
+top100.clones <- head(dfcount, 20) %>% names()
+df.unique %>% subset(clone %in% top100.clones) %>% ggplot(aes(x = clone, y = pct.cell, color = "black")) + 
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90) ) 

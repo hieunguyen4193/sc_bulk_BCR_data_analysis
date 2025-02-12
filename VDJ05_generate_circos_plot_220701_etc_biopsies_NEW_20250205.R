@@ -142,6 +142,7 @@ for (mouse.id in plot.mice){
   }
 }
 
+saveRDS(path.to.files, file.path(path.to.05.output, "path_to_inputCircos_files.rds"))
 #####----------------------------------------------------------------------------#####
 ##### RUN CIRCOS PLOT
 #####----------------------------------------------------------------------------#####
