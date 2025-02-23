@@ -29,11 +29,14 @@ path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.
 path.to.14.output <- file.path(outdir, "VDJ_output", "14_output", paste(list.of.PROJECT, collapse = "_"))
 dir.create(path.to.14.output, showWarnings = FALSE, recursive = TRUE)
 
-path.to.tree.05.output <- file.path(outdir, "GEX_output", "05_output", sc.projects[[1]])
-path.to.tree.01.output <- file.path(outdir, "tree_analysis", bulk.projects[[1]], "01_output")
-
-match.bulkdf <- read.csv(file.path(path.to.tree.01.output, "match_public_clonedf.csv"))
-match.scdf <- readxl::read_excel(file.path(path.to.tree.05.output, "240805_BSimons_filterHT_cluster_renamed_public_clone_full.xlsx")) %>%
-  subset(select = -c(`...1`)) %>% 
-  subset(select = c(barcode, VJcombi_CDR3_0.85, dist_to_public_clone))
+path.to.tree.05.output <- file.path(outdir, 
+                                    "GEX_output", 
+                                    "05_output", 
+                                    sc.projects[[1]], 
+                                    "input_circos_public_clones")
+path.to.tree.01.output <- file.path(outdir, 
+                                    "tree_analysis",
+                                    bulk.projects[[1]], 
+                                    "01_output", 
+                                    "input_circos_public_clones")
 
