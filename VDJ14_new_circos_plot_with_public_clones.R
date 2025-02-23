@@ -29,30 +29,11 @@ path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.
 path.to.14.output <- file.path(outdir, "VDJ_output", "14_output", paste(list.of.PROJECT, collapse = "_"))
 dir.create(path.to.14.output, showWarnings = FALSE, recursive = TRUE)
 
-path.to.input.circos.plots <- file.path(path.to.14.output, "input")
-dir.create(path.to.input.circos.plots, showWarnings = FALSE, recursive = TRUE)
+path.to.tree.05.output <- file.path(outdir, "GEX_output", "05_output", sc.projects[[1]])
+path.to.tree.01.output <- file.path(outdir, "tree_analysis", bulk.projects[[1]], "01_output")
 
-meta.data.name <- "without_hashtags"
+match.bulkdf <- read.csv(file.path(path.to.tree.01.output, "match_public_clonedf.csv"))
+match.scdf <- readxl::read_excel(file.path(path.to.tree.05.output, "240805_BSimons_filterHT_cluster_renamed_public_clone_full.xlsx")) %>%
+  subset(select = -c(`...1`)) %>% 
+  subset(select = c(barcode, VJcombi_CDR3_0.85, dist_to_public_clone))
 
-all.input.files <- Sys.glob(file.path(path.to.05.output, 
-                                      sprintf("VJcombi_CDR3_%s", thres), 
-                                      meta.data.name,
-                                      "*.simplified.csv"))
-
-input.metadata <- data.frame(
-  path = all.input.files,
-  SampleID = to_vec(for (item in all.input.files){
-    str_replace(basename(item), ".simplified.csv", "") 
-  }),
-  PROJECT = to_vec(for (item in all.input.files){
-    str_split(item, "/")[[1]][[8]]
-  })
-) 
-
-public.clonedf <- read.csv(file.path(path.to.main.src, "public_clones.csv")) %>%
-  rowwise() %>% 
-  mutate(VJ = sprintf("%s_%s", V_gene, J_gene))
-
-df <- read.csv(all.input.files[[1]], sep = "\t") %>%
-  rowwise() %>%
-  mutate(VJ.gene = sprintf("%s_%s", bestVHit, bestJHit))
