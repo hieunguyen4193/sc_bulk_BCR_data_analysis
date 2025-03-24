@@ -176,10 +176,10 @@ circos.par(cell.padding = c(0, 0, 0, 0),
 
 # the public clone (10th component) gets half of the circle, 
 # while the other components get the other half.
-# custom.sector.width <- c(rep(0.5/9, 9), 0.5)
+custom.sector.width <- c(rep(0.5/9, 9), 0.5)
 
 # or 1/3.
-custom.sector.width <- c(rep(0.7/9, 9), 0.3)
+# custom.sector.width <- c(rep(0.7/9, 9), 0.3)
 
 circos.initialize(factors = cloneCountdf$SampleID, x = cloneCountdf$accum.Freq, sector.width = custom.sector.width)
 
