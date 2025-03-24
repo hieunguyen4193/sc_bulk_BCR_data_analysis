@@ -214,13 +214,14 @@ circos.track(
   }
 )
 
+check.matchdf <- list()
 for (sample.name in names(all.files)){
   if(length(match.public.clones[[sample.name]]) != 0){
     tmp.plotdf <- all.cloneCountdf[[sample.name]] %>% 
       subset(id %in% match.public.clones[[sample.name]]) %>%
       rowwise() %>%
       mutate(VJ = paste0(str_split(id, "_")[[1]][1:2], collapse = "_"))
-    
+    check.matchdf[[sample.name]] <- tmp.plotdf    
     for (index in seq(1, nrow(tmp.plotdf))){
       tmp.cloneID <- tmp.plotdf[index,]$VJ
       tmp.public.clonedf <- subset(public.clonedf, public.clonedf$id == tmp.cloneID)
