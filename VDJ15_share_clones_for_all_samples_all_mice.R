@@ -41,6 +41,7 @@ list.of.PROJECT <- c(sc.projects, bulk.projects)
 path.to.05.output <- file.path(outdir, "VDJ_output", "05_output", paste(list.of.PROJECT, collapse = "_"))
 
 path.to.15.output <- file.path(outdir, "VDJ_output", "15_output", paste(list.of.PROJECT, collapse = "_"))
+
 #####----------------------------------------------------------------------#####
 #### read the Seurat object of single cell dataset
 ######----------------------------------------------------------------------#####
@@ -56,13 +57,22 @@ for (PROJECT in sc.projects){
   }
 }
 
-##### metadata
+#####----------------------------------------------------------------------#####
+##### metadata  preprocessing
+#####----------------------------------------------------------------------#####
+excluded.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 meta.data <- readxl::read_excel(file.path(path.to.05.output, "all_data_metadata.xlsx"))
 meta.data.splitted.or.not <- list(
-  with_hashtags = subset(meta.data, meta.data$SampleID %in% exclude.samples == FALSE),
+  with_hashtags = subset(meta.data, meta.data$SampleID %in% excluded.samples == FALSE),
   without_hashtags = subset(meta.data, grepl("_", meta.data$SampleID) == FALSE)
 )
 
+tmp.metadata <- meta.data.splitted.or.not$with_hashtags
+
+mouse.sample.list <- list()
+for (mouse.id in unique(tmp.metadata$mouse)){
+  mouse.sample.list[[mouse.id]] <- subset(tmp.metadata, tmp.metadata$mouse == mouse.id)$SampleID %>% sort()
+}
 #####----------------------------------------------------------------------#####
 ##### PREPROCESS FILE: ASSIGN CLONES TO CLUSTERS 0.85 SIMILARITY
 #####----------------------------------------------------------------------#####
@@ -81,7 +91,6 @@ names(all.input.files) <- input.metadata$SampleID
 
 ##### MAIN RUN
 all.samples <- names(all.input.files)
-excluded.samples <- c("M1", "M2", "M3", "P1", "P2", "P3")
 keep.samples <- setdiff(all.samples, excluded.samples)
 
 input.files <- all.input.files[keep.samples] # run for all samples, not for each mouse only.
@@ -129,3 +138,17 @@ for (sample.id in countdf$SampleID){
     }
   ))
 }
+
+countdf$SampleID <- factor(countdf$SampleID, 
+                           levels = c(mouse.sample.list$m1, mouse.sample.list$m2, mouse.sample.list$m3))
+pivot.countdf <- countdf %>% pivot_longer(!SampleID, names_to = "SampleID2", values_to = "count")
+pivot.countdf$SampleID <- factor(pivot.countdf$SampleID, 
+                                 levels = c(mouse.sample.list$m1, mouse.sample.list$m2, mouse.sample.list$m3))
+pivot.countdf$SampleID2 <- factor(pivot.countdf$SampleID2, 
+                                 levels = c(mouse.sample.list$m1, mouse.sample.list$m2, mouse.sample.list$m3))
+
+pivot.countdf %>% ggplot(aes(x = SampleID, y = SampleID2, fill = count)) + 
+  geom_tile(color = "white") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  scale_fill_gradient(high = "red", low = "#f7fafd") +
+  geom_text(aes(label = MHI.round), color = "black", size = 4) 
