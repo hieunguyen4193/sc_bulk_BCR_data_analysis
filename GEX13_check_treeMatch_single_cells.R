@@ -26,9 +26,12 @@ path.to.project.src <- "/media/hieunguyen/HNSD01/src/sc_bulk_BCR_data_analysis"
 source(file.path(path.to.main.src, "VDJ_path_to_output.R"))
 source(file.path(path.to.main.src, "GEX_path_to_seurat_obj.addedClone.R"))
 
+# input.dataset <- "240805_BSimons_filterHT_cluster_renamed"
+input.dataset <- "241002_241104_BSimons"
+
 outdir <- "/media/hieunguyen/GSHD_HN01/outdir/sc_bulk_BCR_data_analysis_v0.1"
 
-path.to.13.output <- file.path(outdir, "GEX_output", "13_output")
+path.to.13.output <- file.path(outdir, "GEX_output", "13_output", input.dataset)
 dir.create(path.to.13.output, showWarnings = FALSE, recursive = TRUE)
 
 sc.dataset.with.hto <- c("240805_BSimons",
@@ -39,8 +42,7 @@ sc.dataset.with.hto <- c("240805_BSimons",
                          "240805_BSimons_filterHT_cluster",
                          "241002_241104_BSimons")
 
-# input.dataset <- "240805_BSimons_filterHT_cluster_renamed"
-input.dataset <- "241002_241104_BSimons"
+
 
 s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
 
@@ -81,5 +83,5 @@ colnames(countdf) <- to_vec(for (i in colnames(countdf)){
 })
 writexl::write_xlsx(countdf, file.path(path.to.13.output, "count_match_cells_in_clusters.xlsx"))
   
-  
-  
+countdf <- countdf %>% column_to_rownames("Group")
+writexl::write_xlsx(countdf/rowSums(countdf), file.path(path.to.13.output, "pct_match_cells_in_clusters.xlsx"))

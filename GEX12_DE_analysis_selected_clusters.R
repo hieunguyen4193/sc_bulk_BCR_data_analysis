@@ -48,49 +48,63 @@ s.obj <- readRDS(path.to.all.s.obj[[input.dataset]])
 cluster.id1 <- 6
 to.test.clusters <- setdiff(unique(s.obj$seurat_clusters), c(cluster.id1))
 
-de.markers <- list()
-raw.de.markers <- list()
-
-for (cluster.id2 in to.test.clusters){
-  tmp <- FindMarkers(object = s.obj, 
-                     ident.1 = cluster.id1, 
-                     ident.2 = cluster.id2,
-                     group.by = "seurat_clusters", 
-                     assay = "RNA", 
-                     test.use = "wilcox", 
-                     min.pct = 0.5)
-  tmp.raw <- tmp %>% rownames_to_column("Gene")
-  tmp <- tmp %>% rownames_to_column("Gene") %>% subset(p_val_adj <= 0.05) %>%
-    rowwise() %>%
-    mutate(abs.avg_log2FC = abs(avg_log2FC)) %>%
-    arrange(desc(avg_log2FC))
+if (file.exists(file.path(path.to.12.output, "de_markers.rds")) == FALSE){
+  de.markers <- list()
+  raw.de.markers <- list()
   
-  de.markers[[sprintf("%s_vs_%s", cluster.id1, cluster.id2)]] <- tmp
-  raw.de.markers[[sprintf("%s_vs_%s", cluster.id1, cluster.id2)]] <- tmp.raw
+  for (cluster.id2 in to.test.clusters){
+    tmp <- FindMarkers(object = s.obj, 
+                       ident.1 = cluster.id1, 
+                       ident.2 = cluster.id2,
+                       group.by = "seurat_clusters", 
+                       assay = "RNA", 
+                       test.use = "wilcox", 
+                       min.pct = 0.5)
+    tmp.raw <- tmp %>% rownames_to_column("Gene")
+    tmp <- tmp %>% rownames_to_column("Gene") %>% subset(p_val_adj <= 0.05) %>%
+      rowwise() %>%
+      mutate(abs.avg_log2FC = abs(avg_log2FC)) %>%
+      arrange(desc(abs.avg_log2FC))
+    
+    de.markers[[sprintf("%s_vs_%s", cluster.id1, cluster.id2)]] <- tmp
+    raw.de.markers[[sprintf("%s_vs_%s", cluster.id1, cluster.id2)]] <- tmp.raw
+  }
+  saveRDS(de.markers, file.path(path.to.12.output, "de_markers.rds"))
+  saveRDS(raw.de.markers, file.path(path.to.12.output, "raw_de_markers.rds"))
+} else {
+  print("reading in existing data ...")
+  de.markers <- readRDS(file.path(path.to.12.output, "de_markers.rds"))
+  raw.de.markers <- readRDS(file.path(path.to.12.output, "raw_de_markers.rds"))
 }
 
-input.df <- raw.de.markers$`6_vs_5` 
+for (cluster.id2 in to.test.clusters){
+  if (file.exists(file.path(path.to.12.output, sprintf("DE_analysis_%s_vs_%s.xlsx", cluster.id1, cluster.id2))) == FALSE){
+    writexl::write_xlsx(de.markers[[sprintf("%s_vs_%s", cluster.id1, cluster.id2)]],
+                        file.path(path.to.12.output, sprintf("DE_analysis_%s_vs_%s.xlsx", cluster.id1, cluster.id2)))    
+  } else {
+    print(sprintf("File %s exists", file.path(path.to.12.output, sprintf("DE_analysis_%s_vs_%s.xlsx", cluster.id1, cluster.id2))))
+  }
 
-input.df <- input.df %>% rowwise() %>%
-  mutate(p_val_adj = ifelse(p_val_adj == 0, 1e-300, p_val_adj))
-top10up.genes <- input.df %>% subset(p_val_adj <= 0.05) %>% arrange(desc(avg_log2FC)) %>% head(10)
-top10down.genes <- input.df %>% subset(p_val_adj <= 0.05) %>% arrange(desc(avg_log2FC)) %>% tail(10)
-input.df <- input.df %>%
-  rowwise() %>%
-  mutate(sig = ifelse(p_val_adj <= 0.05, "Sig.", "not Sig.")) %>%
-  mutate(show.gene.name = ifelse(Gene %in% c(top10up.genes$Gene, top10down.genes$Gene), Gene, NA))
+}
+# input.df <- raw.de.markers$`6_vs_5` 
+# 
+# top10up.genes <- input.df %>% subset(p_val_adj <= 0.05) %>% arrange(desc(avg_log2FC)) %>% head(10)
+# top10down.genes <- input.df %>% subset(p_val_adj <= 0.05) %>% arrange(desc(avg_log2FC)) %>% tail(10)
+# input.df <- input.df %>%
+#   rowwise() %>%
+#   mutate(sig = ifelse(p_val_adj <= 0.05, "Sig.", "not Sig.")) %>%
+#   mutate(show.gene.name = ifelse(Gene %in% c(top10up.genes$Gene, top10down.genes$Gene), Gene, NA))
 
-
-cutoff.adjp <- 0.05
-volcano.plot <- ggplot(data=input.df, 
-                       aes(x=avg_log2FC, 
-                           y=-log10(p_val_adj), 
-                           col = sig, label=Gene)) + 
-  geom_point(size = 3) + geom_label_repel(label = input.df$show.gene.name, size = 8) + 
-  scale_color_manual(values=c("#c0d2f0", "#f28095")) +
-  geom_vline(xintercept=c(-1, 1), col="#9a9fa6") +
-  geom_hline(yintercept=-log10(cutoff.adjp), col="#9a9fa6") +
-  theme(plot.title = element_text(hjust=0.5, face="bold", size = 12), axis.text=element_text(size=12)) + 
-  theme_bw()
-volcano.plot
-
+# cutoff.adjp <- 0.05
+# volcano.plot <- ggplot(data=input.df, 
+#                        aes(x=avg_log2FC, 
+#                            y=-log10(p_val_adj), 
+#                            col = sig, label=Gene)) + 
+#   geom_point(size = 3) + geom_label_repel(label = input.df$show.gene.name, size = 8) + 
+#   scale_color_manual(values=c("#c0d2f0", "#f28095")) +
+#   geom_vline(xintercept=c(-1, 1), col="#9a9fa6") +
+#   geom_hline(yintercept=-log10(cutoff.adjp), col="#9a9fa6") +
+#   theme(plot.title = element_text(hjust=0.5, face="bold", size = 12), axis.text=element_text(size=12)) + 
+#   theme_bw()
+# volcano.plot
+# 
